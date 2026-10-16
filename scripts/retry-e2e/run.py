@@ -8,6 +8,8 @@ REPO = os.path.dirname(os.path.dirname(HERE))
 APP = os.path.join(REPO, "build/DerivedData/Build/Products/Debug/Takku.app/Contents/MacOS/Takku")
 REAL = os.path.expanduser("~/Library/Application Support/Takku/Recordings")
 REAL_VAULT = subprocess.run(["defaults", "read", "app.takku.takku", "vaultPath"], capture_output=True, text=True).stdout.strip()
+if not REAL_VAULT or not os.path.isdir(REAL_VAULT):
+    raise SystemExit(f"ABORT: the real Vault is not a folder ({REAL_VAULT!r}): cannot check it stays untouched")
 PORT = 8765
 SERVER_LOG = os.path.join(HERE, "llm-requests.jsonl")
 R37 = os.environ["TAKKU_E2E_SHORT"]  # a transcribed Meeting with its audio
@@ -129,7 +131,8 @@ def analyse(label, start, end, result, log, requests, rewritten, caches):
             lines.append((t, m.group(2), m.group(3)))
     retry_at = next((t for t, _, msg in lines if msg.startswith(("Retry ", "Processing ", "Regeneration "))), start)
     def first(prefix):
-        return next((round(t - retry_at, 1) for t, _, msg in lines if msg.startswith(prefix) or prefix in msg), None)
+        return next((round(t - retry_at, 1) for t, _, msg in lines if prefix in msg), None)
+    speakers = first("told apart")  # Also "Speakers not told apart".
     return {
         "launch": label, "outcome": result, "wall_s": round(end - start, 1),
         "app_start_to_retry_s": round(retry_at - start, 1),
@@ -139,8 +142,8 @@ def analyse(label, start, end, result, log, requests, rewritten, caches):
         "caches_rewritten": f"{len(rewritten)}/{caches}",
         "whisper_loaded": any("loaded in" in m and "Diarization" not in m for _, _, m in lines),
         "t_segments_ready": first("Segments ready"),
-        "t_me_levels": first("Me levels measured"),
-        "t_speakers": first("Speakers told apart") or first("Speakers not told apart"),
+        "t_echo_removed": first("Echo removed"),
+        "t_speakers": speakers,
         "t_transcript_ready": first("Transcript ready"),
         "t_first_llm_request_app": first("LLM request"),
         "t_first_llm_arrival_server": round(requests[0]["arrived"] - retry_at, 1) if requests else None,
@@ -175,10 +178,13 @@ def scenario(name):
 
     @s
     def cold_37m():
-        """No caches: everything transcribed; the second Retry must then hit the cache."""
+        """No caches: everything transcribed and diarized; the second Retry must then hit the cache."""
         r = Run("cold_37m", R37)
         for p in r.caches():
             os.remove(p)
+        speakers = os.path.join(r.folder, "speakers.json")
+        if os.path.exists(speakers):
+            os.remove(speakers)
         r.launch("retry_cold")
         r.launch("retry_after")
         return r
