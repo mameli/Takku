@@ -3,6 +3,9 @@ import Foundation
 import NaturalLanguage
 import TakkuCore
 @preconcurrency import WhisperKit
+import os
+
+private let logger = Logger(subsystem: "app.takku.takku", category: "transcription")
 
 /// Local speech recognition: Whisper through WhisperKit or Parakeet through FluidAudio. One model
 /// loaded at a time for the whole app (the one the request asks for), one request at a time.
@@ -120,6 +123,8 @@ actor LocalTranscriber {
         if let engine, loadedModel == model { return engine }
         engine = nil
         loadedModel = nil
+        let started = ContinuousClock.now
+        logger.notice("Loading \(model.id, privacy: .public)")
         do {
             let (folder, downloadedNow) = try await models.ensureDownloaded(model)
             onPhase(.loading(model, firstTime: downloadedNow))
@@ -141,6 +146,7 @@ actor LocalTranscriber {
             }
             engine = loaded
             loadedModel = model
+            logger.notice("\(model.id, privacy: .public) loaded in \(secondsSince(started), privacy: .public)")
             onPhase(.ready)
             return loaded
         } catch {

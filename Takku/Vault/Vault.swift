@@ -51,7 +51,8 @@ struct Vault {
     /// The Meeting note: at the known path or, if the user renamed or moved it, by looking
     /// for its `takku_id` in the Meetings folder (Transcripts excluded).
     func findMeetingNote(takkuID: UUID, expected: URL?) -> URL? {
-        if let expected, Self.belongs(expected, to: takkuID) { return expected }
+        // Only inside this Vault: a note left in another Vault (or a test's copy of a real Meeting) is not touched.
+        if let expected, contains(expected), Self.belongs(expected, to: takkuID) { return expected }
         return Self.firstFile(in: meetingsFolder, excluding: transcriptsFolder) { Self.belongs($0, to: takkuID) }
     }
 
@@ -88,6 +89,11 @@ struct Vault {
     }
 
     /// The note is still in the Meetings folder, where Takku created it (it was not moved).
+    func contains(_ url: URL) -> Bool {
+        let rootComponents = root.resolvingSymlinksInPath().standardizedFileURL.pathComponents
+        return url.resolvingSymlinksInPath().standardizedFileURL.pathComponents.starts(with: rootComponents)
+    }
+
     func isInMeetingsFolder(_ noteURL: URL) -> Bool {
         noteURL.deletingLastPathComponent().resolvingSymlinksInPath().standardizedFileURL
             == meetingsFolder.resolvingSymlinksInPath().standardizedFileURL

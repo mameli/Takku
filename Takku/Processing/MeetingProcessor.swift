@@ -32,6 +32,8 @@ final class MeetingProcessor {
     private(set) var lastNoteURL: URL?
     /// The Transcript in the Vault or, without a Vault, the copy in the Recording folder.
     private(set) var lastTranscriptURL: URL?
+    /// When the Processing running now started, for the timing logs.
+    private var processingStartedAt = ContinuousClock.now
 
     init(transcriber: LocalTranscriber, diarizer: SpeakerDiarizer) {
         self.transcriber = transcriber
@@ -124,7 +126,13 @@ final class MeetingProcessor {
         guard var record = record(takkuID) else { return }
         record.templateName = templateName
         record.summaryProfile = profile
-        if RecordingStorage.hasAudio(Self.directory(for: takkuID)) {
+        let hasAudio = RecordingStorage.hasAudio(Self.directory(for: takkuID))
+        logger.notice("""
+            Retry \(takkuID, privacy: .public): \(hasAudio ? "full Processing" : "Regeneration", privacy: .public), \
+            Template \(templateName, privacy: .public), model \(profile?.model ?? "none", privacy: .public), \
+            \(self.pendingCount) ahead in the queue
+            """)
+        if hasAudio {
             guard (try? record.queueForRetry()) != nil else { return }
             save(record)
             enqueueProcessing(record)
@@ -185,6 +193,8 @@ final class MeetingProcessor {
         var record = record(queued.takkuID) ?? queued
         record.status = .processing
         save(record)
+        processingStartedAt = .now
+        logger.notice("Processing \(record.takkuID, privacy: .public) started")
         let directory = Self.directory(for: record.takkuID)
         let transcription = liveTranscriptions.removeValue(forKey: record.takkuID)
             ?? MeetingTranscription(
@@ -215,6 +225,7 @@ final class MeetingProcessor {
                 warnings.append(String(localized: "Speakers not told apart: \(speakersProblem)"))
             }
             lastTranscriptURL = finished?.url
+            logger.notice("Transcript ready after \(secondsSince(self.processingStartedAt), privacy: .public)")
         } catch {
             finished = nil
             problems.append(String(localized: "Transcription failed: \(error.localizedDescription)"))
@@ -240,6 +251,8 @@ final class MeetingProcessor {
     private func runRegeneration(_ queued: ProcessingRecord) async {
         var record = queued
         let takkuID = record.takkuID
+        processingStartedAt = .now
+        logger.notice("Regeneration \(takkuID, privacy: .public) started")
         guard let vault = Vault.configured,
               var noteURL = vault.findMeetingNote(takkuID: takkuID, expected: record.noteURL),
               let transcriptURL = vault.findTranscript(takkuID: takkuID),
@@ -277,6 +290,11 @@ final class MeetingProcessor {
 
     private func finish(_ record: inout ProcessingRecord, problems: [String], warnings: [String]) {
         let noteName = record.noteURL?.deletingPathExtension().lastPathComponent ?? String(localized: "Meeting")
+        let takkuID = record.takkuID
+        logger.notice("""
+            Processing \(takkuID, privacy: .public) \(problems.isEmpty ? "completed" : "failed", privacy: .public) \
+            in \(secondsSince(self.processingStartedAt), privacy: .public)
+            """)
         if problems.isEmpty {
             record.status = .completed
             lastError = warnings.isEmpty ? nil : warnings.joined(separator: " ")
@@ -417,6 +435,8 @@ final class MeetingProcessor {
         guard !transcript.paragraphs.isEmpty else {
             return (.failed(reason: String(localized: "there is no speech in the Recording.")), nil)
         }
+        let started = ContinuousClock.now
+        logger.notice("Summary started: \(transcript.paragraphs.count) paragraphs, model \(profile.model, privacy: .public)")
         do {
             let client = try ChatClient(profile: profile)
             let prompt = SummaryPrompt(
@@ -424,12 +444,13 @@ final class MeetingProcessor {
                 vocabulary: vocabulary, userName: NSFullUserName(), participants: participants
             )
             let text = try await Summarizer(client: client, maxContextTokens: profile.maxContextTokens).summarize(prompt)
+            logger.notice("Summary written in \(secondsSince(started), privacy: .public)")
             let reply = wantsTitle
                 ? try? await client.complete(MeetingTitle.request(summary: text, language: prompt.summaryLanguage, vocabulary: vocabulary))
                 : nil
             return (.written(text: text, template: template.name, provider: profile.displayName), reply.flatMap(MeetingTitle.clean))
         } catch {
-            logger.error("Summary not generated: \(error, privacy: .public)")
+            logger.error("Summary not generated after \(secondsSince(started), privacy: .public): \(error, privacy: .public)")
             return (.failed(reason: error.localizedDescription), nil)
         }
     }
