@@ -27,6 +27,18 @@ actor MeetingTranscription {
         /// False when the language was detected on too little speech to trust it.
         let isLanguageReliable: Bool
         let utterances: [Utterance]
+        /// Me Segments only: the peak level of each Utterance, for echo removal. `nil` in caches
+        /// written before levels were kept: measured once on the audio and added.
+        var levels: [Double?]?
+    }
+
+    /// The Speaker turns of the Others Track, kept in the Recording folder: a Retry does not
+    /// diarize again unless the Others Segments changed.
+    private struct CachedSpeakers: Codable {
+        static let fileName = "speakers.json"
+        /// Name, start and size of every Others Segment diarized.
+        let segments: [String]
+        let turns: [SpeakerTurn]
     }
 
     private static let languageDetectionSeconds = 30.0
@@ -101,7 +113,8 @@ actor MeetingTranscription {
         }
 
         // The echo removal, the Speakers, the Vocabulary variants and the Marks are applied here and not to
-        // the cache: Retry on an old Recording benefits too.
+        // the cache: Retry on an old Recording benefits too. Only what they are computed from is cached
+        // (Me levels, Speaker turns), so a Retry does not decode and diarize the audio again.
         var stage = ContinuousClock.now
         var utterances = removingEcho(removingEchoResidue(measuringMe(recording, bySegment, in: directory)))
         logger.notice("Me levels measured and echo removed in \(secondsSince(stage), privacy: .public)")
@@ -129,21 +142,38 @@ actor MeetingTranscription {
         )
     }
 
-    /// The Utterances of every Segment with the peak level of the Me ones, measured on their audio
-    /// one Segment at a time. A Segment that cannot be read leaves its Utterances unmeasured.
+    /// The Utterances of every Segment with the peak level of the Me ones: from the Segment's cache,
+    /// otherwise measured on its audio one Segment at a time and added to the cache. A Segment that
+    /// cannot be read leaves its Utterances unmeasured.
     private func measuringMe(
         _ recording: Recording, _ bySegment: [String: [Utterance]], in directory: URL
     ) -> [(utterance: Utterance, level: Double?)] {
         recording.segments.flatMap { segment -> [(utterance: Utterance, level: Double?)] in
             let utterances = bySegment[segment.fileName] ?? []
-            guard segment.track == .me, !utterances.isEmpty,
-                  let samples = try? Self.loadSamples(directory.appending(path: segment.fileName))
-            else { return utterances.map { ($0, nil) } }
-            return utterances.map { utterance in
-                let from = max(0, Int((utterance.start - segment.start) * Recording.sampleRate))
-                let to = min(samples.count, Int((utterance.end - segment.start) * Recording.sampleRate))
-                return (utterance, from < to ? peakLevel(of: samples[from..<to], sampleRate: Recording.sampleRate) : nil)
+            guard segment.track == .me, !utterances.isEmpty else { return utterances.map { ($0, nil) } }
+            let cacheURL = directory.appending(path: segment.transcriptionCacheFileName)
+            var cached = try? JSONDecoder().decode(CachedSegment.self, from: Data(contentsOf: cacheURL))
+            if let cached, cached.utterances == utterances, let levels = cached.levels, levels.count == utterances.count {
+                return Array(zip(utterances, levels))
             }
+            guard let samples = try? Self.loadSamples(directory.appending(path: segment.fileName)) else {
+                return utterances.map { ($0, nil) }
+            }
+            let levels = Self.levels(of: utterances, in: samples, startingAt: segment.start)
+            if cached?.utterances == utterances {
+                cached?.levels = levels
+                try? JSONEncoder().encode(cached).write(to: cacheURL)
+            }
+            return Array(zip(utterances, levels))
+        }
+    }
+
+    /// The peak level of each Utterance in the audio of the Segment starting at `start`.
+    private static func levels(of utterances: [Utterance], in samples: [Float], startingAt start: TimeInterval) -> [Double?] {
+        utterances.map { utterance in
+            let from = max(0, Int((utterance.start - start) * Recording.sampleRate))
+            let to = min(samples.count, Int((utterance.end - start) * Recording.sampleRate))
+            return from < to ? peakLevel(of: samples[from..<to], sampleRate: Recording.sampleRate) : nil
         }
     }
 
@@ -151,12 +181,27 @@ actor MeetingTranscription {
     /// across Segments. The Segments are joined in a temporary file, each at its start with
     /// silence before it, so turn times are Meeting times and a long Meeting is not held in memory.
     private func othersTurns(_ recording: Recording, in directory: URL) async throws -> [SpeakerTurn] {
+        let cacheURL = directory.appending(path: CachedSpeakers.fileName)
+        let othersSegments = recording.segments.filter { $0.track == .others }.sorted { $0.start < $1.start }
+        let key = othersSegments.map { segment in
+            let size = (try? directory.appending(path: segment.fileName).resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? -1
+            return "\(segment.fileName) \(segment.start) \(size)"
+        }
+        if let cached = try? JSONDecoder().decode(CachedSpeakers.self, from: Data(contentsOf: cacheURL)), cached.segments == key {
+            logger.notice("Speakers from the cache")
+            return cached.turns
+        }
+        let turns = try await diarizing(othersSegments, in: directory)
+        try? JSONEncoder().encode(CachedSpeakers(segments: key, turns: turns)).write(to: cacheURL, options: .atomic)
+        return turns
+    }
+
+    private func diarizing(_ othersSegments: [Segment], in directory: URL) async throws -> [SpeakerTurn] {
         let timeline = FileManager.default.temporaryDirectory.appending(path: "takku-others-\(UUID().uuidString).caf")
         defer { try? FileManager.default.removeItem(at: timeline) }
         do { // The file is closed at the end of this block, before diarization reads it.
             let format = AVAudioFormat(standardFormatWithSampleRate: Recording.sampleRate, channels: 1)!
             let file = try AVAudioFile(forWriting: timeline, settings: format.settings)
-            let othersSegments = recording.segments.filter { $0.track == .others }.sorted { $0.start < $1.start }
             for segment in othersSegments {
                 // An unreadable Segment (the one open during a crash) has no Utterances to label either.
                 guard let samples = try? Self.loadSamples(directory.appending(path: segment.fileName)) else { continue }
@@ -216,7 +261,7 @@ actor MeetingTranscription {
         // distant voices) it makes up sentences such as "Grazie.".
         let ranges = speechRanges(in: samples, sampleRate: sampleRate)
         guard !ranges.isEmpty else {
-            try JSONEncoder().encode(CachedSegment(model: model.id, language: nil, isLanguageReliable: true, utterances: []))
+            try JSONEncoder().encode(CachedSegment(model: model.id, language: nil, isLanguageReliable: true, utterances: [], levels: []))
                 .write(to: cacheURL)
             return []
         }
@@ -242,7 +287,10 @@ actor MeetingTranscription {
                 Utterance(track: segment.track, start: offset + $0.start, end: offset + $0.end, text: $0.text)
             }
         }
-        try JSONEncoder().encode(CachedSegment(model: model.id, language: language, isLanguageReliable: isReliable, utterances: utterances))
+        let levels = segment.track == .me ? Self.levels(of: utterances, in: samples, startingAt: segment.start) : nil
+        try JSONEncoder().encode(CachedSegment(
+            model: model.id, language: language, isLanguageReliable: isReliable, utterances: utterances, levels: levels
+        ))
             .write(to: cacheURL)
         return utterances
     }

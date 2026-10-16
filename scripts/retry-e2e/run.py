@@ -105,6 +105,9 @@ class Run:
                 if start <= r["arrived"] <= end + 1:
                     requests.append(r)
         rewritten = [os.path.basename(p) for p in self.caches() if before.get(p) != os.path.getmtime(p)]
+        transcript = os.path.join(self.folder, "transcript.md")
+        if os.path.exists(transcript):
+            shutil.copy(transcript, os.path.join(self.base, f"{label}-transcript.md"))
         self.launches.append(analyse(label, start, end, result, log, requests, rewritten, len(self.caches())))
         return self.launches[-1]
 

@@ -2,7 +2,7 @@ import Foundation
 
 /// A stretch in which one voice of the Others Track speaks, as diarization heard it. `voice` is
 /// the diarizer's own id; times in seconds from the start of the Meeting.
-public struct SpeakerTurn: Equatable, Sendable {
+public struct SpeakerTurn: Equatable, Codable, Sendable {
     public let voice: String
     public let start: TimeInterval
     public let end: TimeInterval
