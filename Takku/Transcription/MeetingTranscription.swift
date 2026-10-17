@@ -1,5 +1,8 @@
 import AVFoundation
 import TakkuCore
+import os
+
+private let logger = Logger(subsystem: "app.takku.takku", category: "transcription")
 
 /// Transcribes the Segments of a Meeting as they close and, at the stop, writes
 /// `transcript.md` in the Recording folder.
@@ -15,7 +18,7 @@ actor MeetingTranscription {
     }
 
     /// Result of a Segment saved next to the audio: a new Processing does not redo it.
-    private struct CachedSegment: Codable {
+    private struct CachedSegment: CacheFile {
         /// The model that transcribed it; `nil` in caches written before models could be chosen,
         /// all made with the default one.
         let model: String?
@@ -24,6 +27,36 @@ actor MeetingTranscription {
         /// False when the language was detected on too little speech to trust it.
         let isLanguageReliable: Bool
         let utterances: [Utterance]
+        /// Me Segments only: the peak level of each Utterance, for echo removal. `nil` in caches
+        /// written before levels were kept: measured once on the audio and added.
+        var levels: [Double?]?
+        /// How `levels` were measured; `nil` in caches written before it was kept.
+        var levelsVersion: Int? = CachedSegment.currentLevelsVersion
+        /// Bump when `peakLevel` or the Utterance windowing changes: the levels are measured again.
+        static let currentLevelsVersion = 1
+
+        /// The levels if measured on these Utterances the current way, `nil` otherwise.
+        var currentLevels: [Double?]? {
+            levelsVersion == Self.currentLevelsVersion && levels?.count == utterances.count ? levels : nil
+        }
+    }
+
+    /// The Speaker turns of the Others Track, kept in the Recording folder: a Retry does not
+    /// diarize again unless the Others Segments changed.
+    private struct CachedSpeakers: CacheFile {
+        static let fileName = "speakers.json"
+        /// Name, start and size of every Others Segment diarized.
+        struct Source: Codable, Equatable {
+            let fileName: String
+            let start: TimeInterval
+            let size: Int?
+        }
+        let segments: [Source]
+        let turns: [SpeakerTurn]
+        /// How the turns were found.
+        var version = CachedSpeakers.currentVersion
+        /// Bump when the diarizer or its model changes: the Others Track is diarized again.
+        static let currentVersion = 1
     }
 
     private static let languageDetectionSeconds = 30.0
@@ -44,7 +77,7 @@ actor MeetingTranscription {
     /// Segments transcribed with a language detected on too little speech, and that language:
     /// at the end they are transcribed again if the Meeting language turns out different.
     private var provisionalSegments: [String: (segment: Segment, language: String)] = [:]
-    private var pending: [String: Task<[Utterance], Error>] = [:]
+    private var pending: [String: Task<CachedSegment, Error>] = [:]
 
     /// `languages`: the Meeting languages; with only one it is forced, otherwise detected among them.
     init(transcriber: LocalTranscriber, diarizer: SpeakerDiarizer, model: TranscriptionModel, languages: [String]) {
@@ -62,10 +95,16 @@ actor MeetingTranscription {
     /// Transcribes the missing Segments, waits for those in progress and writes the Transcript.
     /// A failing Segment does not block the others: the Transcript comes out with a gap.
     func finish(_ recording: Recording, in directory: URL, vocabulary: Vocabulary) async throws -> Finished {
+        let started = ContinuousClock.now
+        let alreadyStarted = recording.segments.filter { pending[$0.fileName] != nil }.count
         for segment in recording.segments {
             startIfNeeded(segment, in: directory)
         }
-        var bySegment: [String: [Utterance]] = [:]
+        logger.notice("""
+            Finishing the Transcript: \(recording.segments.count) Segments, \(alreadyStarted) started while recording, \
+            model \(self.model.id, privacy: .public), languages \(self.languages, privacy: .public)
+            """)
+        var bySegment: [String: CachedSegment] = [:]
         var failed: [String] = []
         for segment in recording.segments {
             do {
@@ -75,6 +114,7 @@ actor MeetingTranscription {
                 pending[segment.fileName] = nil
             }
         }
+        logger.notice("Segments ready after \(secondsSince(started), privacy: .public), \(failed.count) failed")
 
         // A short first utterance may have been transcribed (or translated) in the wrong
         // language: once the Meeting language is known, those Segments are done again.
@@ -89,17 +129,25 @@ actor MeetingTranscription {
                 }
             }
         }
+        bySegment = await Self.measuringMissingLevels(recording, bySegment, in: directory)
 
         // The echo removal, the Speakers, the Vocabulary variants and the Marks are applied here and not to
-        // the cache: Retry on an old Recording benefits too.
-        var utterances = removingEcho(removingEchoResidue(measuringMe(recording, bySegment, in: directory)))
+        // the cache: Retry on an old Recording benefits too. Only what they are computed from is cached
+        // (Me levels, Speaker turns), so a Retry does not decode and diarize the audio again.
+        var stage = ContinuousClock.now
+        var utterances = removingEcho(removingEchoResidue(withMeLevels(recording, bySegment)))
+        logger.notice("Echo removed in \(secondsSince(stage), privacy: .public)")
         // Without the Speakers the Transcript keeps "Others": it is a warning, not a failure.
         var speakersProblem: String?
         if utterances.contains(where: { $0.track == .others }) {
+            stage = .now
             do {
-                utterances = assigningSpeakers(to: utterances, turns: try await othersTurns(recording, in: directory))
+                let turns = try await othersTurns(recording, in: directory)
+                utterances = assigningSpeakers(to: utterances, turns: turns)
+                logger.notice("Speakers told apart in \(secondsSince(stage), privacy: .public): \(turns.count) turns")
             } catch {
                 speakersProblem = error.localizedDescription
+                logger.error("Speakers not told apart after \(secondsSince(stage), privacy: .public): \(error, privacy: .public)")
             }
         }
         let url = directory.appending(path: Transcript.recordingCopyFileName)
@@ -107,26 +155,30 @@ actor MeetingTranscription {
             .marking(Marks.load(fromFolder: directory))
         try transcript.markdown.write(to: url, atomically: true, encoding: .utf8)
         let language = locked ?? provisionalSegments.values.first?.language
+        logger.notice("Transcript written in \(secondsSince(started), privacy: .public), language \(language ?? "none", privacy: .public)")
         return Finished(
             url: url, transcript: transcript, language: language, failedSegments: failed, speakersProblem: speakersProblem
         )
     }
 
-    /// The Utterances of every Segment with the peak level of the Me ones, measured on their audio
-    /// one Segment at a time. A Segment that cannot be read leaves its Utterances unmeasured.
-    private func measuringMe(
-        _ recording: Recording, _ bySegment: [String: [Utterance]], in directory: URL
+    /// The Utterances of every Segment with the cached peak level of the Me ones; `nil` where the
+    /// levels could not be measured.
+    private func withMeLevels(
+        _ recording: Recording, _ bySegment: [String: CachedSegment]
     ) -> [(utterance: Utterance, level: Double?)] {
         recording.segments.flatMap { segment -> [(utterance: Utterance, level: Double?)] in
-            let utterances = bySegment[segment.fileName] ?? []
-            guard segment.track == .me, !utterances.isEmpty,
-                  let samples = try? Self.loadSamples(directory.appending(path: segment.fileName))
-            else { return utterances.map { ($0, nil) } }
-            return utterances.map { utterance in
-                let from = max(0, Int((utterance.start - segment.start) * Recording.sampleRate))
-                let to = min(samples.count, Int((utterance.end - segment.start) * Recording.sampleRate))
-                return (utterance, from < to ? peakLevel(of: samples[from..<to], sampleRate: Recording.sampleRate) : nil)
-            }
+            guard let cached = bySegment[segment.fileName] else { return [] }
+            let levels = cached.currentLevels ?? Array(repeating: nil, count: cached.utterances.count)
+            return Array(zip(cached.utterances, levels))
+        }
+    }
+
+    /// The peak level of each Utterance in the audio of the Segment starting at `start`.
+    private static func levels(of utterances: [Utterance], in samples: [Float], startingAt start: TimeInterval) -> [Double?] {
+        utterances.map { utterance in
+            let from = max(0, Int((utterance.start - start) * Recording.sampleRate))
+            let to = min(samples.count, Int((utterance.end - start) * Recording.sampleRate))
+            return from < to ? peakLevel(of: samples[from..<to], sampleRate: Recording.sampleRate) : nil
         }
     }
 
@@ -134,15 +186,35 @@ actor MeetingTranscription {
     /// across Segments. The Segments are joined in a temporary file, each at its start with
     /// silence before it, so turn times are Meeting times and a long Meeting is not held in memory.
     private func othersTurns(_ recording: Recording, in directory: URL) async throws -> [SpeakerTurn] {
+        let cacheURL = directory.appending(path: CachedSpeakers.fileName)
+        let othersSegments = recording.segments.filter { $0.track == .others }.sorted { $0.start < $1.start }
+        let key = othersSegments.map { segment in
+            CachedSpeakers.Source(
+                fileName: segment.fileName, start: segment.start,
+                size: try? directory.appending(path: segment.fileName).resourceValues(forKeys: [.fileSizeKey]).fileSize
+            )
+        }
+        if let cached = CachedSpeakers.load(at: cacheURL),
+           cached.version == CachedSpeakers.currentVersion, cached.segments == key {
+            logger.notice("Speakers from the cache")
+            return cached.turns
+        }
+        let turns = try await diarizing(othersSegments, in: directory)
+        // Turns missing an unreadable Segment are cached too: the key changes if that file does.
+        try? CachedSpeakers(segments: key, turns: turns).save(to: cacheURL)
+        return turns
+    }
+
+    /// The turns of the Segments that could be read.
+    private func diarizing(_ othersSegments: [Segment], in directory: URL) async throws -> [SpeakerTurn] {
         let timeline = FileManager.default.temporaryDirectory.appending(path: "takku-others-\(UUID().uuidString).caf")
         defer { try? FileManager.default.removeItem(at: timeline) }
         do { // The file is closed at the end of this block, before diarization reads it.
             let format = AVAudioFormat(standardFormatWithSampleRate: Recording.sampleRate, channels: 1)!
             let file = try AVAudioFile(forWriting: timeline, settings: format.settings)
-            let othersSegments = recording.segments.filter { $0.track == .others }.sorted { $0.start < $1.start }
             for segment in othersSegments {
                 // An unreadable Segment (the one open during a crash) has no Utterances to label either.
-                guard let samples = try? Self.loadSamples(directory.appending(path: segment.fileName)) else { continue }
+                guard let samples = try? await Self.loadSamples(directory.appending(path: segment.fileName)) else { continue }
                 let silence = max(0, Int(segment.start * Recording.sampleRate) - Int(file.length))
                 try Self.write([Float](repeating: 0, count: silence), to: file, format: format)
                 try Self.write(samples, to: file, format: format)
@@ -167,34 +239,32 @@ actor MeetingTranscription {
     }
 
     /// `language` forces the language and ignores the cache; `nil` uses the cache or detects it.
-    private func transcribe(_ segment: Segment, in directory: URL, language forced: String?) async throws -> [Utterance] {
+    private func transcribe(_ segment: Segment, in directory: URL, language forced: String?) async throws -> CachedSegment {
         let cacheURL = directory.appending(path: segment.transcriptionCacheFileName)
-        if forced == nil,
-           let cached = try? JSONDecoder().decode(CachedSegment.self, from: Data(contentsOf: cacheURL)),
-           // Without speech the model does not matter; otherwise model and language must be this Meeting's.
-           (cached.language.map {
-               (cached.model ?? TranscriptionModel.default.id) == model.id && languages.contains($0)
-           } ?? true) {
-            if let language = cached.language, forcedLanguage == nil {
-                if cached.isLanguageReliable {
-                    // Same language for the whole Meeting, even if some Segments come from the cache.
-                    if languageDetection == nil { languageDetection = Task { language } }
-                } else {
-                    provisionalSegments[segment.fileName] = (segment, language)
-                }
+        if let forced {
+            logger.notice("\(segment.fileName, privacy: .public): transcribing again in \(forced, privacy: .public)")
+        } else {
+            let miss: String
+            if let cached = CachedSegment.load(at: cacheURL) {
+                guard let reason = cacheMiss(cached) else { return fromCache(cached, segment) }
+                miss = reason
+            } else {
+                miss = FileManager.default.fileExists(atPath: cacheURL.path(percentEncoded: false)) ? "cache unreadable" : "no cache"
             }
-            return cached.utterances
+            logger.notice("\(segment.fileName, privacy: .public): transcribing, \(miss, privacy: .public)")
         }
+        let started = ContinuousClock.now
+        defer { logger.notice("\(segment.fileName, privacy: .public): done in \(secondsSince(started), privacy: .public)") }
 
         let sampleRate = Recording.sampleRate
-        let samples = try Self.loadSamples(directory.appending(path: segment.fileName))
+        let samples = try await Self.loadSamples(directory.appending(path: segment.fileName))
         // Whisper only gets the speech ranges: on silence and faint audio (echo residue,
         // distant voices) it makes up sentences such as "Grazie.".
         let ranges = speechRanges(in: samples, sampleRate: sampleRate)
         guard !ranges.isEmpty else {
-            try JSONEncoder().encode(CachedSegment(model: model.id, language: nil, isLanguageReliable: true, utterances: []))
-                .write(to: cacheURL)
-            return []
+            let silent = CachedSegment(model: model.id, language: nil, isLanguageReliable: true, utterances: [], levels: [])
+            try silent.save(to: cacheURL)
+            return silent
         }
 
         let (language, isReliable) = if let forced {
@@ -218,9 +288,54 @@ actor MeetingTranscription {
                 Utterance(track: segment.track, start: offset + $0.start, end: offset + $0.end, text: $0.text)
             }
         }
-        try JSONEncoder().encode(CachedSegment(model: model.id, language: language, isLanguageReliable: isReliable, utterances: utterances))
-            .write(to: cacheURL)
-        return utterances
+        let levels = segment.track == .me ? Self.levels(of: utterances, in: samples, startingAt: segment.start) : nil
+        let result = CachedSegment(
+            model: model.id, language: language, isLanguageReliable: isReliable, utterances: utterances, levels: levels
+        )
+        try result.save(to: cacheURL)
+        return result
+    }
+
+    /// A usable cached Segment: its language joins the Meeting's. Missing levels are measured in
+    /// `finish`, once a provisional Segment is known to be kept.
+    private func fromCache(_ cached: CachedSegment, _ segment: Segment) -> CachedSegment {
+        logger.notice("\(segment.fileName, privacy: .public): from the cache")
+        if let language = cached.language, forcedLanguage == nil {
+            if cached.isLanguageReliable {
+                // Same language for the whole Meeting, even if some Segments come from the cache.
+                if languageDetection == nil { languageDetection = Task { language } }
+            } else {
+                provisionalSegments[segment.fileName] = (segment, language)
+            }
+        }
+        return cached
+    }
+
+    /// Every Me Segment cached without current levels, measured on its audio (in parallel) and saved.
+    private nonisolated static func measuringMissingLevels(
+        _ recording: Recording, _ bySegment: [String: CachedSegment], in directory: URL
+    ) async -> [String: CachedSegment] {
+        await withTaskGroup(of: (String, CachedSegment).self) { group in
+            for segment in recording.segments where segment.track == .me {
+                guard let cached = bySegment[segment.fileName], !cached.utterances.isEmpty, cached.currentLevels == nil
+                else { continue }
+                group.addTask { (segment.fileName, await withLevels(cached, segment, in: directory)) }
+            }
+            var measured = bySegment
+            for await (fileName, cached) in group { measured[fileName] = cached }
+            return measured
+        }
+    }
+
+    /// The Segment's cache with the peak level of each Utterance measured on the audio, and saved.
+    /// It decodes the audio, so it runs off the actor.
+    private nonisolated static func withLevels(_ cached: CachedSegment, _ segment: Segment, in directory: URL) async -> CachedSegment {
+        guard let samples = try? await loadSamples(directory.appending(path: segment.fileName)) else { return cached }
+        var measured = cached
+        measured.levels = levels(of: cached.utterances, in: samples, startingAt: segment.start)
+        measured.levelsVersion = CachedSegment.currentLevelsVersion
+        try? measured.save(to: directory.appending(path: segment.transcriptionCacheFileName))
+        return measured
     }
 
     /// One language per Meeting, detected once on up to 30 seconds of speech (silence
@@ -255,9 +370,19 @@ actor MeetingTranscription {
         }
     }
 
+    /// Why a Segment's cache cannot be used, for the log; `nil` if it can. Without speech the model
+    /// does not matter; otherwise model and language must be this Meeting's.
+    private func cacheMiss(_ cached: CachedSegment) -> String? {
+        guard let language = cached.language else { return nil }
+        let cachedModel = cached.model ?? TranscriptionModel.default.id
+        if cachedModel != model.id { return "cache made with \(cachedModel)" }
+        return languages.contains(language) ? nil : "cached language \(language) is not among the Meeting languages"
+    }
+
     /// Reads the Segment in 10-second blocks: a single read of minutes of AAC, with voice
-    /// processing active in the same process, makes the macOS decoder spin forever.
-    private static func loadSamples(_ url: URL) throws -> [Float] {
+    /// processing active in the same process, makes the macOS decoder spin forever. Async so that
+    /// the decode runs off the actor, which other Segments wait for.
+    private nonisolated static func loadSamples(_ url: URL) async throws -> [Float] {
         let file = try AVAudioFile(forReading: url)
         let blockFrames = AVAudioFrameCount(10 * Recording.sampleRate)
         guard let buffer = AVAudioPCMBuffer(pcmFormat: file.processingFormat, frameCapacity: blockFrames) else {
@@ -271,6 +396,19 @@ actor MeetingTranscription {
             samples.append(contentsOf: UnsafeBufferPointer(start: channel, count: Int(buffer.frameLength)))
         }
         return samples
+    }
+}
+
+/// A cache kept next to the audio as JSON; an unreadable file counts as missing.
+private protocol CacheFile: Codable {}
+
+extension CacheFile {
+    static func load(at url: URL) -> Self? {
+        try? JSONDecoder().decode(Self.self, from: Data(contentsOf: url))
+    }
+
+    func save(to url: URL) throws {
+        try JSONEncoder().encode(self).write(to: url, options: .atomic)
     }
 }
 

@@ -51,15 +51,16 @@ struct Vault {
     /// The Meeting note: at the known path or, if the user renamed or moved it, by looking
     /// for its `takku_id` in the Meetings folder (Transcripts excluded).
     func findMeetingNote(takkuID: UUID, expected: URL?) -> URL? {
-        if let expected, Self.belongs(expected, to: takkuID) { return expected }
-        return Self.firstFile(in: meetingsFolder, excluding: transcriptsFolder) { Self.belongs($0, to: takkuID) }
+        // Only inside this Vault: a note left in another Vault (or a test's copy of a real Meeting) is not touched.
+        if let expected, contains(expected), Self.belongs(expected, to: takkuID) { return expected }
+        return firstFile(in: meetingsFolder, excluding: transcriptsFolder) { Self.belongs($0, to: takkuID) }
     }
 
     /// The Meeting notes in the Meetings folder (Transcripts excluded) by `takku_id`, in one pass:
     /// for looking up many Meetings at once.
     func meetingNotesByTakkuID() -> [UUID: URL] {
         var notes: [UUID: URL] = [:]
-        _ = Self.firstFile(in: meetingsFolder, excluding: transcriptsFolder) { url in
+        _ = firstFile(in: meetingsFolder, excluding: transcriptsFolder) { url in
             if let takkuID = (try? String(contentsOf: url, encoding: .utf8)).flatMap({ MeetingNote(content: $0).takkuID }),
                notes[takkuID] == nil {
                 notes[takkuID] = url
@@ -71,7 +72,7 @@ struct Vault {
 
     /// The Transcript file of a Meeting, found by its `takku_id`.
     func findTranscript(takkuID: UUID) -> URL? {
-        Self.firstFile(in: transcriptsFolder) { Self.belongs($0, to: takkuID) }
+        firstFile(in: transcriptsFolder) { Self.belongs($0, to: takkuID) }
     }
 
     /// Writes the Transcript in the Vault. If a file of the same Meeting already exists it is
@@ -87,10 +88,28 @@ struct Vault {
         return url
     }
 
+    /// The file is inside this Vault, symlinks resolved.
+    func contains(_ url: URL) -> Bool {
+        let normalized = normalizer()
+        return normalized(url).starts(with: normalized(root))
+    }
+
     /// The note is still in the Meetings folder, where Takku created it (it was not moved).
     func isInMeetingsFolder(_ noteURL: URL) -> Bool {
-        noteURL.deletingLastPathComponent().resolvingSymlinksInPath().standardizedFileURL
-            == meetingsFolder.resolvingSymlinksInPath().standardizedFileURL
+        let normalized = normalizer()
+        return normalized(noteURL.deletingLastPathComponent()) == normalized(meetingsFolder)
+    }
+
+    /// Path components with symlinks resolved, lowercased unless the Vault's volume tells names apart
+    /// by case (APFS and HFS+ do not by default; unknown, volume not mounted, counts as not). It reads
+    /// the volume once: keep it for many paths.
+    private func normalizer() -> (URL) -> [String] {
+        let caseSensitive = (try? root.resolvingSymlinksInPath().resourceValues(forKeys: [.volumeSupportsCaseSensitiveNamesKey]))?
+            .volumeSupportsCaseSensitiveNames ?? false
+        return { url in
+            let components = url.resolvingSymlinksInPath().standardizedFileURL.pathComponents
+            return caseSensitive ? components : components.map { $0.lowercased() }
+        }
     }
 
     /// Renames the note (with a " (2)" suffix if the name is taken) and returns the new path.
@@ -173,13 +192,13 @@ struct Vault {
         (try? String(contentsOf: url, encoding: .utf8)).map { MeetingNote(content: $0).takkuID == takkuID } ?? false
     }
 
-    private static func firstFile(in folder: URL, excluding excluded: URL? = nil, where matches: (URL) -> Bool) -> URL? {
-        let excludedComponents = excluded.map { $0.resolvingSymlinksInPath().standardizedFileURL.pathComponents }
+    private func firstFile(in folder: URL, excluding excluded: URL? = nil, where matches: (URL) -> Bool) -> URL? {
+        let normalized = normalizer()
+        let excludedComponents = excluded.map(normalized)
         let files = FileManager.default.enumerator(at: folder, includingPropertiesForKeys: nil)
         while let url = files?.nextObject() as? URL {
             guard url.pathExtension == "md" else { continue }
-            let components = url.resolvingSymlinksInPath().standardizedFileURL.pathComponents
-            if let excludedComponents, components.starts(with: excludedComponents) { continue }
+            if let excludedComponents, normalized(url).starts(with: excludedComponents) { continue }
             if matches(url) { return url }
         }
         return nil
