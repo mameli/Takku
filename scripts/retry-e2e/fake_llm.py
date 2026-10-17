@@ -26,33 +26,20 @@ class Handler(BaseHTTPRequestHandler):
         if delay:
             time.sleep(int(delay.group(1)))
         fail = "/fail/" in self.path
-        content = ("Fake title" if kind == "title"
-                   else "## Topic\n- A point [00:01]\n\n## Next steps\n- [ ] Something (Me)")
-        status, content_type = 200, "application/json"
-        if fail:
-            status = 500
-            data = json.dumps({"error": {"message": "fake failure"}}).encode()
-        elif not body.get("stream"):
-            data = json.dumps({"choices": [{"message": {"content": content}, "finish_reason": "stop"}]}).encode()
-        else:
-            # Streamed like an OpenAI-compatible server: a comment, reasoning, then the text in two chunks.
-            half = len(content) // 2
-            deltas = [({"reasoning_content": "Thinking."}, None),
-                      ({"content": content[:half]}, None), ({"content": content[half:]}, "stop")]
-            events = [": processing"] + [
-                "data: " + json.dumps({"choices": [{"delta": d, "finish_reason": f}]}) for d, f in deltas
-            ] + ["data: [DONE]"]
-            data = "".join(e + "\n\n" for e in events).encode()
-            content_type = "text/event-stream"
-        self.send_response(status)
-        self.send_header("Content-Type", content_type)
+        reply = {"error": {"message": "fake failure"}} if fail else {"choices": [{
+            "message": {"content": "Fake title" if kind == "title"
+                        else "## Topic\n- A point [00:01]\n\n## Next steps\n- [ ] Something (Me)"},
+            "finish_reason": "stop"}]}
+        data = json.dumps(reply).encode()
+        self.send_response(500 if fail else 200)
+        self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(data)))
         self.end_headers()
         self.wfile.write(data)
         with open(LOG, "a") as f:
             f.write(json.dumps({"arrived": arrived, "replied": time.time(), "path": self.path, "kind": kind,
                                 "chars": sum(len(m["content"]) for m in messages),
-                                "status": status}) + "\n")
+                                "status": 500 if fail else 200}) + "\n")
 
 
 ThreadingHTTPServer(("127.0.0.1", int(sys.argv[1])), Handler).serve_forever()

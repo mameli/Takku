@@ -1085,28 +1085,6 @@
         }
       }
     },
-    "The provider reported an error: %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Il provider ha segnalato un errore: %@"
-          }
-        }
-      }
-    },
-    "The provider's reply stopped before the end.": {
-      "extractionState": "manual",
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La risposta del provider si è interrotta prima della fine."
-          }
-        }
-      }
-    },
     "The provider returned no text.": {
       "extractionState": "manual",
       "localizations": {
