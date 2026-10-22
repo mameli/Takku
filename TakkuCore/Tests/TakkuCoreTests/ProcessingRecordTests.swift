@@ -88,4 +88,15 @@ struct ProcessingRecordTests {
             #expect(retried.status == status)
         }
     }
+
+    @Test("Retry keeps a failed Meeting's Template and takes the menu's for a completed one", arguments: [
+        (ProcessingRecord.Status.failed(reason: "Timeout"), "Standup"),
+        (.completed, "Notes"),
+    ])
+    func retryTemplate(status: ProcessingRecord.Status, expected: String) {
+        var meeting = record(status)
+        meeting.templateName = "Standup"
+
+        #expect(meeting.retryTemplate(chosen: "Notes") == expected)
+    }
 }

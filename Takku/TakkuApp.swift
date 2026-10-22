@@ -221,7 +221,8 @@ private struct RecentMeetingsMenu: View {
                 Menu(label(meeting)) {
                     Button("Open note") { controller.processor.openNote(meeting.id) }
                     // Only for a concluded Meeting: one being recorded or queued is left alone.
-                    // It uses the Template and Summary Profile chosen in this menu.
+                    // It uses the Summary Profile chosen in this menu, and its Template too unless the
+                    // Meeting failed: then it keeps its own.
                     if meeting.status.canRetry {
                         Button("Retry") {
                             controller.processor.retry(

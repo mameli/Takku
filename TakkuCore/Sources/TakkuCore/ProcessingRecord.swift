@@ -86,6 +86,13 @@ public struct ProcessingRecord: Codable, Equatable, Sendable {
         status = .regenerating
     }
 
+    /// The Template a Retry uses. A failed Meeting keeps its own: the Retry redoes the Summary that
+    /// did not come out, while the menu has gone back to the default Template at the stop.
+    /// A completed one takes the Template chosen in the menu, since it is retried to change it.
+    public func retryTemplate(chosen: String) -> String {
+        if case .failed = status { templateName } else { chosen }
+    }
+
     public static let fileName = "processing.json"
 
     public static func load(fromFolder folder: URL) throws -> ProcessingRecord {

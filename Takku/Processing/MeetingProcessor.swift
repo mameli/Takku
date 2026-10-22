@@ -130,14 +130,14 @@ final class MeetingProcessor {
     /// or already queued is left alone.
     func retry(_ takkuID: UUID, templateName: String, profile: ProviderProfile?) {
         guard var record = record(takkuID) else { return }
-        record.templateName = templateName
+        record.templateName = record.retryTemplate(chosen: templateName)
         record.summaryProfile = profile
         let hasAudio = RecordingStorage.hasAudio(Self.directory(for: takkuID))
         guard (try? hasAudio ? record.queueForRetry() : record.beginRegeneration()) != nil else { return }
         // Once accepted and before enqueueing, so the count leaves this Retry out.
         logger.notice("""
             Retry \(takkuID, privacy: .public): \(hasAudio ? "full Processing" : "Regeneration", privacy: .public), \
-            Template \(templateName, privacy: .public), model \(profile?.model ?? "none", privacy: .public), \
+            Template \(record.templateName, privacy: .public), model \(profile?.model ?? "none", privacy: .public), \
             \(self.pendingCount) ahead in the queue
             """)
         save(record)

@@ -426,7 +426,8 @@ final class MeetingController {
     ///   `-simulateMicrophoneChangeAfter 5` the microphone restarts after 5 seconds, 2 of them silent);
     /// - `open Takku.app --args -transcribeRecording <folder>` reprocesses a Recording of the data folder;
     /// - `open Takku.app --args -regenerateMeeting <takku_id> -regenerateTemplate <name>` retries a Meeting
-    ///   (only the Summary if its audio is deleted) with that Template and the active Profile;
+    ///   (only the Summary if its audio is deleted) with that Template (a failed one keeps its own)
+    ///   and the active Profile;
     /// - always together with `-vaultPath <folder>`, `-testSummaryBaseURL <url>` and `-dataDirectory <folder>`,
     ///   otherwise the test refuses to start; `-opensNotes NO` does not open the Editor.
     func runSmokeTestIfRequested() async {
