@@ -4,11 +4,11 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
-## Unreleased
-
-- **Ready-made Summary Profiles**: a new install finds four in *Settings → Summary Profiles*: Ollama (Gemma 4 E4B on your Mac), Mistral, TensorX and OpenRouter. The remote ones only need your API key; then press *Use for Summaries*. If you already have Profiles, nothing changes.
+## 1.8.1
 
 - **Disk image**: Takku now comes as a `.dmg` instead of a zip. Open it and drag Takku into Applications. With Homebrew nothing changes.
+- **Ready-made Summary Profiles**: a new install finds four in *Settings → Summary Profiles*: Ollama (Gemma 4 E4B on your Mac), Mistral, TensorX and OpenRouter. The remote ones only need your API key; then press *Use for Summaries*. If you already have Profiles, nothing changes.
+- **Retry** of a failed Meeting keeps the Template it had, instead of the one shown in the menu (which goes back to the default at every stop): after a Provider error you get the same Summary you were waiting for.
 
 ## 1.8.0 (2026-10-21)
 
