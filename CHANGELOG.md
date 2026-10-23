@@ -4,7 +4,7 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
-## 1.8.1
+## 1.8.1 (2026-10-23)
 
 - **Disk image**: Takku now comes as a `.dmg` instead of a zip. Open it and drag Takku into Applications. With Homebrew nothing changes.
 - **Ready-made Summary Profiles**: a new install finds four in *Settings → Summary Profiles*: Ollama (Gemma 4 E4B on your Mac), Mistral, TensorX and OpenRouter. The remote ones only need your API key; then press *Use for Summaries*. If you already have Profiles, nothing changes.
