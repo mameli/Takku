@@ -3,7 +3,7 @@ import TakkuCore
 import SwiftUI
 
 /// Where the Settings window goes when it opens or comes to the front: the welcome window's
-/// *Add a Profile in Settings…* sends it to the Summary Profiles.
+/// *Choose a Profile in Settings…* sends it to the Summary Profiles.
 @MainActor @Observable
 final class SettingsRequest {
     static let shared = SettingsRequest()

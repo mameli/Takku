@@ -20,6 +20,7 @@ enum AppSettings {
     static let editorKey = "editor"
     /// Also used by `@AppStorage` in the menu: it must follow Profiles added or deleted in Settings.
     static let summaryProfilesKey = "summaryProfiles"
+    private static let readyMadeProfilesAddedKey = "readyMadeProfilesAdded"
     private static let defaultTemplateKey = "defaultTemplate"
     private static let retentionDaysKey = "retentionDays"
     /// Also used by `@AppStorage` in Settings.
@@ -116,6 +117,14 @@ enum AppSettings {
             decodeProfiles(UserDefaults.standard.data(forKey: summaryProfilesKey))
         }
         set { UserDefaults.standard.set(try? JSONEncoder().encode(newValue), forKey: summaryProfilesKey) }
+    }
+
+    /// Once, at the first launch without Profiles: the ready-made ones, none active (Ollama may not
+    /// be running, and the others have no key yet). Deleted, they do not come back.
+    static func addReadyMadeProfilesIfNeeded() {
+        guard !UserDefaults.standard.bool(forKey: readyMadeProfilesAddedKey) else { return }
+        UserDefaults.standard.set(true, forKey: readyMadeProfilesAddedKey)
+        if summaryProfiles.isEmpty { summaryProfiles = ProviderProfile.readyMade() }
     }
 
     static func decodeProfiles(_ data: Data?) -> [ProviderProfile] {

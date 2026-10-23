@@ -2087,22 +2087,22 @@
         }
       }
     },
-    "Until you add a Summary Profile, Takku writes only the Transcript. A Profile is a model on this Mac (llama.cpp, Ollama, LM Studio) or an OpenAI-compatible provider you trust.": {
+    "Until you choose a Summary Profile, Takku writes only the Transcript. Settings has four ready: Ollama, a model on this Mac, then Mistral, TensorX and OpenRouter, which only need your API key. Any other OpenAI-compatible provider you trust works too.": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Finché non aggiungi un Profilo per il Riepilogo, Takku scrive solo la Trascrizione. Un Profilo è un modello su questo Mac (llama.cpp, Ollama, LM Studio) o un provider compatibile OpenAI di cui ti fidi."
+            "value": "Finché non scegli un Profilo per il Riepilogo, Takku scrive solo la Trascrizione. Nelle Impostazioni ce ne sono quattro pronti: Ollama, un modello su questo Mac, poi Mistral, TensorX e OpenRouter, a cui serve solo la tua chiave API. Va bene anche qualsiasi altro provider compatibile OpenAI di cui ti fidi."
           }
         }
       }
     },
-    "Add a Profile in Settings…": {
+    "Choose a Profile in Settings…": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aggiungi un Profilo nelle Impostazioni…"
+            "value": "Scegli un Profilo nelle Impostazioni…"
           }
         }
       }

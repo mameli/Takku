@@ -123,11 +123,11 @@ struct WelcomeView: View {
             }
 
             Section {
-                Text("Until you add a Summary Profile, Takku writes only the Transcript. A Profile is a model on this Mac (llama.cpp, Ollama, LM Studio) or an OpenAI-compatible provider you trust.")
+                Text("Until you choose a Summary Profile, Takku writes only the Transcript. Settings has four ready: Ollama, a model on this Mac, then Mistral, TensorX and OpenRouter, which only need your API key. Any other OpenAI-compatible provider you trust works too.")
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
                 HStack {
-                    Button("Add a Profile in Settings…") {
+                    Button("Choose a Profile in Settings…") {
                         SettingsRequest.shared.showsProfiles = true
                         NSApplication.shared.activate()
                         openSettings()

@@ -55,4 +55,17 @@ struct ProviderProfileTests {
     func invalidExtraParameters(text: String, problem: ExtraParameters.Problem) {
         #expect(throws: problem) { try ExtraParameters.parse(text) }
     }
+
+    @Test("the ready-made Profiles: Ollama on this Mac first, then Mistral, TensorX and OpenRouter over https")
+    func readyMade() throws {
+        let profiles = ProviderProfile.readyMade()
+        #expect(profiles.map(\.name) == ["Ollama", "Mistral", "TensorX", "OpenRouter"])
+        #expect(profiles.map(\.runsOnThisMac) == [true, false, false, false])
+        for profile in profiles {
+            #expect(try profile.validatedBaseURL().scheme == (profile.runsOnThisMac ? "http" : "https"))
+            #expect(!profile.model.isEmpty)
+            #expect(profile.maxContextTokens >= ProviderProfile.defaultMaxContextTokens)
+        }
+        #expect(Set(profiles.map(\.id)).isDisjoint(with: ProviderProfile.readyMade().map(\.id)))
+    }
 }

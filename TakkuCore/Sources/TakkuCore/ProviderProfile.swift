@@ -30,6 +30,28 @@ public struct ProviderProfile: Codable, Identifiable, Equatable, Hashable, Senda
         self.extraParameters = extraParameters
     }
 
+    /// The Profiles a new user finds in Settings, ready once the API key is in (Ollama needs none):
+    /// a model on this Mac first, then three remote providers. New identifiers at every call.
+    public static func readyMade() -> [ProviderProfile] {
+        [
+            ProviderProfile(
+                name: "Ollama", baseURL: "http://localhost:11434/v1", model: "hf.co/ggml-org/gemma-4-E4B-it-GGUF:Q4_0",
+                maxContextTokens: defaultMaxContextTokens
+            ),
+            ProviderProfile(
+                name: "Mistral", baseURL: "https://api.mistral.ai/v1", model: "zai-glm-5-3-flash", maxContextTokens: 128_000
+            ),
+            ProviderProfile(
+                name: "TensorX", baseURL: "https://api.tensorx.ai/v1", model: "deepseek/deepseek-v4.1-flash-1017",
+                maxContextTokens: 128_000, reasoning: .low
+            ),
+            ProviderProfile(
+                name: "OpenRouter", baseURL: "https://openrouter.ai/api/v1", model: "anthropic/claude-haiku-5.5",
+                maxContextTokens: 128_000
+            ),
+        ]
+    }
+
     /// Sent as `reasoning.effort` to OpenRouter and as `reasoning_effort` to every other provider.
     /// Not every model accepts every level, and some cannot turn reasoning off.
     public enum ReasoningEffort: String, Codable, CaseIterable, Hashable, Sendable {
