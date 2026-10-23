@@ -4,6 +4,10 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
+## Unreleased
+
+- **Disk image**: Takku now comes as a `.dmg` instead of a zip. Open it and drag Takku into Applications. With Homebrew nothing changes.
+
 ## 1.8.0 (2026-10-21)
 
 - **Screenshots** ([#4](https://github.com/mameli/Takku/issues/4)): while recording, ⌃⌥⌘S (or *Take a screenshot* in the menu) takes a picture of the screen you are looking at and marks the moment, like ⌃⌥⌘M. The pictures go into `Meetings/Screenshots/` in your vault and show up in the Transcript, under what was being said, and in the Summary, under the point they belong to (those that belong to no point are listed after it). They never leave your Mac: the model writing the Summary does not see them.

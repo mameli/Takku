@@ -42,7 +42,7 @@ Meetings can be in Italian, English or 23 other European languages (*Settings â†
    ```sh
    brew install --cask mameli/takku/takku
    ```
-   Or without Homebrew: download `Takku-<version>.zip` from the [latest release](https://github.com/mameli/Takku/releases/latest) (Safari unzips it on its own) and move **Takku** to **Applications**.
+   Or without Homebrew: download `Takku-<version>.dmg` from the [latest release](https://github.com/mameli/Takku/releases/latest), open it and drag **Takku** into **Applications**.
 2. Open Takku. It is notarized by Apple, so it opens like any other app.
 
 Takku appears in the menu bar, not in the Dock. Continue with [First setup](#first-setup).
@@ -210,7 +210,7 @@ cd TakkuCore && swift test   # domain logic tests
 - `Takku/` is the app (capture, transcription, Vault, Settings, menu); `TakkuCore/` is a Swift package with the domain logic and its tests, without AppKit or AVFoundation.
 - [docs/SPEC.md](docs/SPEC.md) describes how everything works, [CONTEXT.md](CONTEXT.md) is the glossary, [docs/adr](docs/adr/) records the main decisions, and [docs/TESTING.md](docs/TESTING.md) lists the checks to run by hand.
 - User-facing strings are written in English in the code and translated in `Takku/Localizable.xcstrings` (Italian). Error messages raised in `TakkuCore` are looked up in the app's catalog too and must be added to it by hand. To try the Italian interface: `defaults write app.takku.takku AppleLanguages -array it`.
-- `scripts/release.sh` builds a Release signed with the `Takku` certificate, zips it, publishes it as a GitHub Release tagged with `MARKETING_VERSION` from `Config/Base.xcconfig` and updates the cask in the Homebrew tap ([mameli/homebrew-takku](https://github.com/mameli/homebrew-takku), cloned next to this repository). Every release needs a new version: a published one is never replaced, because Homebrew checks the zip's SHA-256. `--dry-run` stops after the zip.
+- `scripts/release.sh` builds a Release signed with the Developer ID and notarized, packs it into a disk image (`scripts/dmg/`, background drawn by `scripts/dmg/background.py`), publishes it as a GitHub Release tagged with `MARKETING_VERSION` from `Config/Base.xcconfig` and updates the cask in the Homebrew tap ([mameli/homebrew-takku](https://github.com/mameli/homebrew-takku), cloned next to this repository). Every release needs a new version: a published one is never replaced, because Homebrew checks the disk image's SHA-256. `--dry-run` stops after the disk image.
 - Processing logs every step with its timing (Retry, cache hits and misses per Segment, echo removal, Speakers, each LLM request): `log stream --predicate 'subsystem == "app.takku.takku"'` live, or `log show --last 1h --predicate 'subsystem == "app.takku.takku"'` afterwards.
 - Debug builds accept launch arguments for automated tests (`-smokeTestSeconds`, `-transcribeRecording`, â€¦): see `runSmokeTestIfRequested()` in `Takku/MeetingController.swift`. They refuse to run unless pointed at a test vault, a test data folder and a test Summary server.
 
