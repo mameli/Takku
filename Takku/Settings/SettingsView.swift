@@ -19,6 +19,7 @@ struct SettingsView: View {
     @AppStorage(AppSettings.activeProviderProfileKey) private var activeProfileID = ""
     @State private var selectedProfileID = AppSettings.activeProviderProfile?.id ?? AppSettings.summaryProfiles.first?.id
     @State private var defaultTemplate = AppSettings.defaultTemplate
+    @State private var confirmsCreditDeletion = false
     private let request = SettingsRequest.shared
 
     var body: some View {
@@ -74,9 +75,18 @@ struct SettingsView: View {
                     }
                     HStack {
                         Button("Add Profile", action: addProfile)
+                        // For those who had Profiles before it existed, or deleted it: ready-made ones come only once.
+                        if !profiles.contains(where: \.isTakkuCredit) {
+                            Button("Add Takku Credit", action: addTakkuCredit)
+                        }
                         Spacer()
-                        Button("Delete", role: .destructive, action: deleteSelectedProfile)
+                        Button("Delete", role: .destructive, action: askToDeleteSelectedProfile)
                             .disabled(selectedProfileID == nil)
+                    }
+                    .confirmationDialog("Delete the Takku Credit Profile?", isPresented: $confirmsCreditDeletion) {
+                        Button("Delete", role: .destructive, action: deleteSelectedProfile)
+                    } message: {
+                        Text("The key leaves this Mac, the credit stays with it: keep the email with the key to paste it again.")
                     }
                 } header: {
                     Text("Summary Profiles").id(Self.profilesID)
@@ -146,6 +156,21 @@ struct SettingsView: View {
         // The user activates it with "Use for Summaries" once it works.
         profiles.append(profile)
         selectedProfileID = profile.id
+    }
+
+    private func addTakkuCredit() {
+        let profile = ProviderProfile.takkuCredit()
+        profiles.insert(profile, at: 0)
+        selectedProfileID = profile.id
+    }
+
+    /// The Takku Credit key is money: deleting it asks first.
+    private func askToDeleteSelectedProfile() {
+        if profiles.first(where: { $0.id == selectedProfileID })?.isTakkuCredit == true {
+            confirmsCreditDeletion = true
+        } else {
+            deleteSelectedProfile()
+        }
     }
 
     private func deleteSelectedProfile() {

@@ -13,7 +13,7 @@ struct ProfileRow: View {
                 .foregroundStyle(isSelected ? Color.accentColor : .secondary)
             VStack(alignment: .leading) {
                 Text(profile.displayName)
-                Text(profile.model.isEmpty ? String(localized: "To be configured") : profile.model)
+                Text(caption)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -22,6 +22,11 @@ struct ProfileRow: View {
                 Text("In use").font(.caption).foregroundStyle(.green)
             }
         }
+    }
+
+    private var caption: String {
+        if profile.isTakkuCredit { return String(localized: "Prepaid credit") }
+        return profile.model.isEmpty ? String(localized: "To be configured") : profile.model
     }
 }
 
@@ -37,38 +42,17 @@ struct ProfileEditor: View {
     /// The Extra parameters as typed: they reach the Profile only when valid.
     @State private var extraParameters = ""
     @State private var extraParametersProblem: String?
+    /// Takku Credit only: the balance read from the gateway, and why it could not be read.
+    @State private var credit: TakkuCredit.Balance?
+    @State private var creditProblem: String?
+    @State private var isReadingCredit = false
 
     var body: some View {
         Section {
-            LabeledContent("Name") {
-                PasteableTextField(placeholder: String(localized: "e.g. Mistral EU"), text: $profile.name)
-            }
-            LabeledContent("Base URL") {
-                PasteableTextField(placeholder: String(localized: "e.g. https://api.mistral.ai/v1"), text: $profile.baseURL)
-            }
-            LabeledContent("Model") {
-                PasteableTextField(placeholder: String(localized: "e.g. mistral-medium-latest"), text: $profile.model)
-            }
-            TextField("Max context (tokens)", value: $profile.maxContextTokens, format: .number)
-            Picker("Reasoning", selection: $profile.reasoning) {
-                Text("Model default").tag(ProviderProfile.ReasoningEffort?.none)
-                ForEach(ProviderProfile.ReasoningEffort.allCases, id: \.self) { effort in
-                    Text(effort.displayName).tag(ProviderProfile.ReasoningEffort?.some(effort))
-                }
-            }
-            LabeledContent("Extra parameters") {
-                PasteableTextField(
-                    placeholder: String(localized: "JSON, e.g. {\"reasoning_effort\": \"xhigh\"}"),
-                    text: $extraParameters, isCode: true
-                )
-            }
-            .onChange(of: extraParameters) { saveExtraParameters() }
-            if let extraParametersProblem {
-                Text(extraParametersProblem).foregroundStyle(.red)
+            if profile.isTakkuCredit {
+                creditRows
             } else {
-                Text("Added to every request as written; each key replaces what Takku sends for it. For what a model needs beyond the Reasoning menu: see the provider's documentation.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                providerRows
             }
 
             // The only place where the key is entered. It is saved only on Return or with the
@@ -88,6 +72,7 @@ struct ProfileEditor: View {
                         Button("Remove", role: .destructive) {
                             Keychain.deleteAPIKey(for: profile.id)
                             storedKeySuffix = nil
+                            credit = nil
                             status = String(localized: "Key removed.")
                         }
                     }
@@ -117,6 +102,87 @@ struct ProfileEditor: View {
         .onAppear {
             refreshStoredKey()
             extraParameters = profile.extraParameters ?? ""
+            Task { await readCredit() }
+        }
+        // Back from the browser after paying: the new balance without pressing anything.
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            Task { await readCredit() }
+        }
+    }
+
+    /// Takku Credit has nothing to configure but the key: address, model and context are the gateway's.
+    @ViewBuilder private var creditRows: some View {
+        Text("Prepaid credit for Summaries, sold by Takku's author: no account to create, only the key that arrives by email. The Transcript and your notes go to api.takku.app and on to a model hosted in the EU; nothing of the Meeting is kept.")
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
+        LabeledContent("Credit") {
+            HStack {
+                if let credit {
+                    creditAmount(credit)
+                } else if storedKeySuffix == nil {
+                    Text("Buy a pack, then paste the key from the email below.").foregroundStyle(.secondary)
+                }
+                if isReadingCredit { ProgressView().controlSize(.small) }
+                Spacer()
+                if storedKeySuffix == nil {
+                    Button("Buy credit…") { NSWorkspace.shared.open(TakkuCredit.buyURL) }
+                } else {
+                    Button("Refresh") { Task { await readCredit() } }
+                        .disabled(isReadingCredit)
+                    if let url = credit?.topUpURL {
+                        Button("Add credit…") { NSWorkspace.shared.open(url) }
+                    }
+                }
+            }
+        }
+        if let creditProblem {
+            Text(creditProblem).foregroundStyle(.red).textSelection(.enabled)
+        }
+    }
+
+    /// Never a negative amount: the last Summary may take the balance a little below zero, which
+    /// means the same as zero. Under a cent it says so instead of showing "0,00 €".
+    @ViewBuilder private func creditAmount(_ credit: TakkuCredit.Balance) -> some View {
+        if credit.micros <= 0 {
+            Text("Used up").foregroundStyle(.red)
+        } else if credit.micros < 10_000 {
+            Text("< \(Decimal(string: "0.01")!, format: .currency(code: "EUR"))").foregroundStyle(.red)
+        } else {
+            Text(credit.euros, format: .currency(code: "EUR"))
+        }
+    }
+
+    @ViewBuilder private var providerRows: some View {
+        LabeledContent("Name") {
+            PasteableTextField(placeholder: String(localized: "e.g. Mistral EU"), text: $profile.name)
+        }
+        LabeledContent("Base URL") {
+            PasteableTextField(placeholder: String(localized: "e.g. https://api.mistral.ai/v1"), text: $profile.baseURL)
+        }
+        LabeledContent("Model") {
+            PasteableTextField(placeholder: String(localized: "e.g. mistral-medium-latest"), text: $profile.model)
+        }
+        TextField("Max context (tokens)", value: $profile.maxContextTokens, format: .number)
+        Picker("Reasoning", selection: $profile.reasoning) {
+            Text("Model default").tag(ProviderProfile.ReasoningEffort?.none)
+            ForEach(ProviderProfile.ReasoningEffort.allCases, id: \.self) { effort in
+                Text(effort.displayName).tag(ProviderProfile.ReasoningEffort?.some(effort))
+            }
+        }
+        LabeledContent("Extra parameters") {
+            PasteableTextField(
+                placeholder: String(localized: "JSON, e.g. {\"reasoning_effort\": \"xhigh\"}"),
+                text: $extraParameters, isCode: true
+            )
+        }
+        .onChange(of: extraParameters) { saveExtraParameters() }
+        if let extraParametersProblem {
+            Text(extraParametersProblem).foregroundStyle(.red)
+        } else {
+            Text("Added to every request as written; each key replaces what Takku sends for it. For what a model needs beyond the Reasoning menu: see the provider's documentation.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
     }
 
@@ -138,6 +204,7 @@ struct ProfileEditor: View {
             apiKey = ""
             refreshStoredKey()
             status = String(localized: "Key saved in the Keychain.")
+            Task { await readCredit() }
         } catch {
             status = error.localizedDescription
         }
@@ -145,6 +212,24 @@ struct ProfileEditor: View {
 
     private func refreshStoredKey() {
         storedKeySuffix = Keychain.apiKey(for: profile.id).map { String($0.suffix(4)) }
+    }
+
+    /// The balance of the key in the Keychain, for Takku Credit; nothing for other Profiles or without a key.
+    private func readCredit() async {
+        guard profile.isTakkuCredit, let key = Keychain.apiKey(for: profile.id), !isReadingCredit else { return }
+        isReadingCredit = true
+        defer { isReadingCredit = false }
+        do {
+            credit = try await TakkuCredit.balance(apiKey: key) { request in
+                let (data, response) = try await URLSession.shared.data(for: request)
+                guard let http = response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+                return (data, http)
+            }
+            creditProblem = nil
+        } catch {
+            credit = nil
+            creditProblem = String(localized: "Could not read the credit: \(error.localizedDescription)")
+        }
     }
 
     private func test() async {

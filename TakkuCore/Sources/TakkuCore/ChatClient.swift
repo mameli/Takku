@@ -28,6 +28,8 @@ public struct ChatClient: Sendable {
         case emptyReply
         /// The model stopped at the length limit: the reply is cut in half.
         case truncated
+        /// Takku Credit answered 402: the balance is used up.
+        case noCredit
 
         public var errorDescription: String? {
             switch self {
@@ -40,6 +42,8 @@ public struct ChatClient: Sendable {
                 String(localized: "The provider returned no text.")
             case .truncated:
                 String(localized: "The model's reply was cut off by the length limit.")
+            case .noCredit:
+                String(localized: "Your Takku Credit is used up. Add credit in Settings → Summary Profiles, then Retry the Meeting.")
             }
         }
 
@@ -124,6 +128,7 @@ public struct ChatClient: Sendable {
 
         let (data, response) = try await transport(request)
         guard (200..<300).contains(response.statusCode) else {
+            if response.statusCode == 402, baseURL.host()?.lowercased() == TakkuCredit.host { throw Failure.noCredit }
             let refused = [400, 422].contains(response.statusCode)
             // The menu's level is not named when the Extra parameters replaced it: it was not sent.
             let sentReasoning = extra[body.reasoningKey.stringValue] == nil ? reasoning : nil
@@ -160,7 +165,7 @@ public struct ChatClient: Sendable {
     /// The error message in the OpenAI format (`{"error":{"message":…}}`), otherwise the raw text,
     /// cut at 300 characters: some providers put whole JSON bodies in it, and what the Profile
     /// sets, added after it, must stay readable in a notification or in the note.
-    private static func errorMessage(in data: Data) -> String {
+    static func errorMessage(in data: Data) -> String {
         struct ErrorBody: Decodable {
             struct Detail: Decodable { let message: String }
             let error: Detail

@@ -56,11 +56,12 @@ struct ProviderProfileTests {
         #expect(throws: problem) { try ExtraParameters.parse(text) }
     }
 
-    @Test("the ready-made Profiles: Ollama on this Mac first, then Mistral, TensorX and OpenRouter over https")
+    @Test("the ready-made Profiles: Takku Credit first, Ollama on this Mac, then Mistral, TensorX and OpenRouter over https")
     func readyMade() throws {
         let profiles = ProviderProfile.readyMade()
-        #expect(profiles.map(\.name) == ["Ollama", "Mistral", "TensorX", "OpenRouter"])
-        #expect(profiles.map(\.runsOnThisMac) == [true, false, false, false])
+        #expect(profiles.map(\.name) == ["Takku Credit", "Ollama", "Mistral", "TensorX", "OpenRouter"])
+        #expect(profiles.map(\.runsOnThisMac) == [false, true, false, false, false])
+        #expect(profiles.map(\.isTakkuCredit) == [true, false, false, false, false])
         for profile in profiles {
             #expect(try profile.validatedBaseURL().scheme == (profile.runsOnThisMac ? "http" : "https"))
             #expect(!profile.model.isEmpty)

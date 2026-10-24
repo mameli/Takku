@@ -123,7 +123,7 @@ struct WelcomeView: View {
             }
 
             Section {
-                Text("Until you choose a Summary Profile, Takku writes only the Transcript. Settings has four ready: Ollama, a model on this Mac, then Mistral, TensorX and OpenRouter, which only need your API key. Any other OpenAI-compatible provider you trust works too.")
+                Text("Until you choose a Summary Profile, Takku writes only the Transcript. The simplest is Takku Credit: prepaid credit, with nothing to set up but the key that arrives by email. Settings also has Ollama, a model on this Mac, and Mistral, TensorX and OpenRouter, which only need your API key. Any other OpenAI-compatible provider you trust works too.")
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
                 HStack {

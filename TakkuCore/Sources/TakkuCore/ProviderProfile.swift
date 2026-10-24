@@ -31,9 +31,11 @@ public struct ProviderProfile: Codable, Identifiable, Equatable, Hashable, Senda
     }
 
     /// The Profiles a new user finds in Settings, ready once the API key is in (Ollama needs none):
-    /// a model on this Mac first, then three remote providers. New identifiers at every call.
+    /// Takku Credit first, which needs nothing but the key from its email, then a model on this Mac,
+    /// then three remote providers. New identifiers at every call.
     public static func readyMade() -> [ProviderProfile] {
         [
+            takkuCredit(),
             ProviderProfile(
                 name: "Ollama", baseURL: "http://localhost:11434/v1", model: "hf.co/ggml-org/gemma-4-E4B-it-GGUF:Q4_0",
                 maxContextTokens: defaultMaxContextTokens

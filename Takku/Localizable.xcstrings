@@ -41,12 +41,42 @@
         }
       }
     },
+    "< %@": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "< %@"
+          }
+        }
+      }
+    },
     "A new Template starts from Notes: change instructions and sections with Edit With. They live in ~/.takku/templates/.": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
             "value": "Un Template nuovo parte da Notes: istruzioni e sezioni le cambi con Modifica con. Sono in ~/.takku/templates/."
+          }
+        }
+      }
+    },
+    "Add credit…": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aggiungi credito…"
+          }
+        }
+      }
+    },
+    "Add Takku Credit": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aggiungi Takku Credit"
           }
         }
       }
@@ -131,6 +161,26 @@
         }
       }
     },
+    "Buy a pack, then paste the key from the email below.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compra un pacchetto, poi incolla qui sotto la chiave che arriva per email."
+          }
+        }
+      }
+    },
+    "Buy credit…": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compra credito…"
+          }
+        }
+      }
+    },
     "Cannot read the audio of %@.": {
       "localizations": {
         "it": {
@@ -171,6 +221,16 @@
         }
       }
     },
+    "Could not read the credit: %@": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossibile leggere il credito: %@"
+          }
+        }
+      }
+    },
     "Create": {
       "localizations": {
         "it": {
@@ -197,6 +257,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ (predefinito)"
+          }
+        }
+      }
+    },
+    "Credit": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Credito"
           }
         }
       }
@@ -277,6 +347,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Cancellare il log dei Riepiloghi?"
+          }
+        }
+      }
+    },
+    "Delete the Takku Credit Profile?": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminare il Profilo Takku Credit?"
           }
         }
       }
@@ -910,6 +990,26 @@
         }
       }
     },
+    "Prepaid credit": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Credito prepagato"
+          }
+        }
+      }
+    },
+    "Prepaid credit for Summaries, sold by Takku's author: no account to create, only the key that arrives by email. The Transcript and your notes go to api.takku.app and on to a model hosted in the EU; nothing of the Meeting is kept.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Credito prepagato per i Riepiloghi, venduto dall'autore di Takku: nessun account da creare, solo la chiave che arriva per email. La Trascrizione e le tue note vanno ad api.takku.app e da lì a un modello ospitato nell'UE; nulla della riunione viene conservato."
+          }
+        }
+      }
+    },
     "Preparing transcription model, first time only: a few minutes…": {
       "localizations": {
         "it": {
@@ -1046,6 +1146,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Registrazioni"
+          }
+        }
+      }
+    },
+    "Refresh": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aggiorna"
           }
         }
       }
@@ -1300,6 +1410,16 @@
         }
       }
     },
+    "The key leaves this Mac, the credit stays with it: keep the email with the key to paste it again.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La chiave viene tolta da questo Mac, il credito resta legato alla chiave: conserva l'email che la contiene per incollarla di nuovo."
+          }
+        }
+      }
+    },
     "The microphone does not start (%@): %@": {
       "localizations": {
         "it": {
@@ -1456,6 +1576,16 @@
         }
       }
     },
+    "Until you choose a Summary Profile, Takku writes only the Transcript. The simplest is Takku Credit: prepaid credit, with nothing to set up but the key that arrives by email. Settings also has Ollama, a model on this Mac, and Mistral, TensorX and OpenRouter, which only need your API key. Any other OpenAI-compatible provider you trust works too.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finché non scegli un Profilo per il Riepilogo, Takku scrive solo la Trascrizione. Il più semplice è Takku Credit: credito prepagato, senza niente da configurare oltre alla chiave che arriva per email. Nelle Impostazioni ci sono anche Ollama, un modello su questo Mac, e Mistral, TensorX e OpenRouter, a cui serve solo la tua chiave API. Va bene anche qualsiasi altro provider compatibile OpenAI di cui ti fidi."
+          }
+        }
+      }
+    },
     "Untitled": {
       "extractionState": "manual",
       "localizations": {
@@ -1503,6 +1633,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "In uso per i Riepiloghi"
+          }
+        }
+      }
+    },
+    "Used up": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esaurito"
           }
         }
       }
@@ -1623,6 +1763,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "nella Registrazione non c'è parlato."
+          }
+        }
+      }
+    },
+    "Your Takku Credit is used up. Add credit in Settings → Summary Profiles, then Retry the Meeting.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il credito Takku Credit è finito. Aggiungi credito in Impostazioni → Profili per il Riepilogo, poi usa Riprova sulla riunione."
           }
         }
       }
@@ -2083,16 +2233,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Riepilogo (facoltativo)"
-          }
-        }
-      }
-    },
-    "Until you choose a Summary Profile, Takku writes only the Transcript. Settings has four ready: Ollama, a model on this Mac, then Mistral, TensorX and OpenRouter, which only need your API key. Any other OpenAI-compatible provider you trust works too.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Finché non scegli un Profilo per il Riepilogo, Takku scrive solo la Trascrizione. Nelle Impostazioni ce ne sono quattro pronti: Ollama, un modello su questo Mac, poi Mistral, TensorX e OpenRouter, a cui serve solo la tua chiave API. Va bene anche qualsiasi altro provider compatibile OpenAI di cui ti fidi."
           }
         }
       }
