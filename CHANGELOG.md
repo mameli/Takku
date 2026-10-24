@@ -4,6 +4,10 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
+## 1.9.0 (2026-10-24)
+
+- **Takku Credit**: summaries with nothing to set up. Buy a pack at [takku.app/credit](https://takku.app/credit), paste the key from the email into the *Takku Credit* profile in *Settings → Summary Profiles*, then press *Use for Summaries*. The profile shows how much credit is left, and *Add credit…* buys another pack for the same key. It's optional and prepaid, with a model hosted in the EU: Takku stays free and works with any provider you choose. A new install finds it first among the ready-made profiles; if you already have profiles, press *Add Takku Credit*.
+
 ## 1.8.1 (2026-10-23)
 
 - **Disk image**: Takku now comes as a `.dmg` instead of a zip. Open it and drag Takku into Applications. With Homebrew nothing changes.
