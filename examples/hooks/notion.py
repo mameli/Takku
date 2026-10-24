@@ -8,7 +8,8 @@ the paths of the meeting note and of the Transcript; you can also run it yoursel
 
 The first run for a meeting creates the page; later runs (after a Retry) replace its content,
 so a meeting is never copied twice. Which page belongs to which meeting is remembered in
-~/.takku/hooks/notion-pages.json, by the note's takku_id.
+~/.takku/hooks/notion-pages.json, by the note's takku_id. Screenshots are not copied: they
+stay in the vault.
 
 Needs Python 3 (from Homebrew or the Xcode Command Line Tools) and nothing else.
 """
@@ -44,6 +45,9 @@ def read_note(path):
 
     body = re.sub(r"%%.*?%%", "", body, flags=re.DOTALL)  # Obsidian comments (Takku's markers)
     body = re.sub(r"^Full transcript: \[\[.*\]\]\s*$", "", body, flags=re.MULTILINE)  # a link only Obsidian can follow
+    # Screenshots stay in the vault: their line goes, with the time before an unplaced one
+    body = re.sub(r"^[ \t]*(\*\*\[[^\]]*\]\*\*[ \t]*)?!\[\[[^\]]+\]\][ \t]*$\n?", "", body, flags=re.MULTILINE)
+    body = re.sub(r"!\[\[[^\]]+\]\]", "", body)  # any other embed
     body = re.sub(r"\[\[([^\]|]+)\|([^\]]+)\]\]", r"\2", body)  # [[note|text]] -> text
     body = re.sub(r"\[\[([^\]]+)\]\]", r"\1", body)  # [[note]] -> note
     body = re.sub(r"\n{3,}", "\n\n", body).strip() + "\n"
