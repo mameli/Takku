@@ -12,30 +12,57 @@ public enum TakkuCredit {
     /// Where someone without a key buys a pack.
     public static let buyURL = URL(string: "https://takku.app/credit")!
 
+    /// A pack to add credit: its price and the Payment Link with this key's public id, so that
+    /// whatever email is typed at checkout, the payment tops up this key.
+    public struct Pack: Equatable, Sendable {
+        public let priceEuros: Decimal
+        public let url: URL
+        public let isRecommended: Bool
+
+        public init(priceEuros: Decimal, url: URL, isRecommended: Bool = false) {
+            self.priceEuros = priceEuros
+            self.url = url
+            self.isRecommended = isRecommended
+        }
+    }
+
     /// What `GET /v1/balance` answers. Money is in micro-euros (1 € = 1,000,000), as the gateway keeps it.
     public struct Balance: Decodable, Equatable, Sendable {
         public let micros: Int
-        /// The Payment Link with this key's public id: whatever email is typed at checkout, the
-        /// payment tops up this key. `nil` when the gateway has no link yet.
-        public let topUpURL: URL?
+        /// By price; none when the gateway has no links yet.
+        public let packs: [Pack]
 
-        public init(micros: Int, topUpURL: URL?) {
+        /// The pack the single button buys: the recommended one, or the first.
+        public var recommendedPack: Pack? { packs.first(where: \.isRecommended) ?? packs.first }
+
+        public init(micros: Int, packs: [Pack]) {
             self.micros = micros
-            self.topUpURL = topUpURL
+            self.packs = packs
         }
 
         public var euros: Decimal { Decimal(micros) / 1_000_000 }
 
         enum CodingKeys: String, CodingKey {
             case micros = "balance_micros"
-            case topUpURL = "top_up_url"
+            case packs
+        }
+
+        private struct RawPack: Decodable {
+            let price_eur: Decimal
+            let url: String
+            let recommended: Bool?
         }
 
         public init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             micros = try container.decode(Int.self, forKey: .micros)
-            // A link that is not a URL is no link: the balance is still worth showing.
-            topUpURL = (try? container.decodeIfPresent(String.self, forKey: .topUpURL)).flatMap { $0.flatMap(URL.init(string:)) }
+            // A pack that cannot be read is left out: the balance is still worth showing.
+            let raw = (try? container.decodeIfPresent([RawPack].self, forKey: .packs)) ?? nil
+            packs = (raw ?? [])
+                .compactMap { pack in
+                    URL(string: pack.url).map { Pack(priceEuros: pack.price_eur, url: $0, isRecommended: pack.recommended == true) }
+                }
+                .sorted { $0.priceEuros < $1.priceEuros }
         }
     }
 

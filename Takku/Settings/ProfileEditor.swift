@@ -130,8 +130,16 @@ struct ProfileEditor: View {
                 } else {
                     Button("Refresh") { Task { await readCredit() } }
                         .disabled(isReadingCredit)
-                    if let url = credit?.topUpURL {
-                        Button("Add credit…") { NSWorkspace.shared.open(url) }
+                    if let credit, let recommended = credit.recommendedPack {
+                        // The button buys the recommended pack; its menu has them all.
+                        Menu("Add credit…") {
+                            ForEach(credit.packs, id: \.url) { pack in
+                                Button(packTitle(pack)) { NSWorkspace.shared.open(pack.url) }
+                            }
+                        } primaryAction: {
+                            NSWorkspace.shared.open(recommended.url)
+                        }
+                        .fixedSize()
                     }
                 }
             }
@@ -151,6 +159,11 @@ struct ProfileEditor: View {
         } else {
             Text(credit.euros, format: .currency(code: "EUR"))
         }
+    }
+
+    private func packTitle(_ pack: TakkuCredit.Pack) -> String {
+        let price = pack.priceEuros.formatted(.currency(code: "EUR").precision(.fractionLength(0)))
+        return pack.isRecommended ? String(localized: "\(price) pack · Recommended") : String(localized: "\(price) pack")
     }
 
     @ViewBuilder private var providerRows: some View {

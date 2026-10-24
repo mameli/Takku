@@ -44,23 +44,28 @@ struct TakkuCreditTests {
         }
     }
 
-    @Test("the balance is read with the key, in euros, with the top-up link")
+    @Test("the balance is read with the key, in euros, with the packs by price and the recommended one")
     func balance() async throws {
-        let gateway = Gateway(status: 200, body: #"{"balance_micros":8190004,"balance_eur":8.190004,"account_id":"ta_x","top_up_url":"https://buy.stripe.com/abc?client_reference_id=ta_x"}"#)
+        let body = #"{"balance_micros":8190004,"balance_eur":8.190004,"account_id":"ta_x","packs":[{"price_eur":5,"url":"https://buy.stripe.com/five?client_reference_id=ta_x","recommended":false},{"price_eur":10,"url":"https://buy.stripe.com/ten?client_reference_id=ta_x","recommended":true},{"price_eur":20,"url":"https://buy.stripe.com/twenty?client_reference_id=ta_x","recommended":false}],"top_up_url":"https://buy.stripe.com/ten?client_reference_id=ta_x"}"#
+        let gateway = Gateway(status: 200, body: body)
         let balance = try await TakkuCredit.balance(apiKey: "tk_secret", transport: gateway.transport)
         #expect(balance.micros == 8_190_004)
         #expect(balance.euros == Decimal(string: "8.190004"))
-        #expect(balance.topUpURL == URL(string: "https://buy.stripe.com/abc?client_reference_id=ta_x"))
+        #expect(balance.packs.map(\.priceEuros) == [5, 10, 20])
+        #expect(balance.recommendedPack?.url == URL(string: "https://buy.stripe.com/ten?client_reference_id=ta_x"))
         #expect(gateway.request?.url == URL(string: "https://api.takku.app/v1/balance"))
         #expect(gateway.request?.value(forHTTPHeaderField: "Authorization") == "Bearer tk_secret")
         #expect(gateway.request?.httpMethod == "GET")
     }
 
-    @Test("without a top-up link the balance is still read")
-    func noLink() async throws {
-        let gateway = Gateway(status: 200, body: #"{"balance_micros":-1200,"account_id":"ta_x","top_up_url":null}"#)
-        let balance = try await TakkuCredit.balance(apiKey: "tk_secret", transport: gateway.transport)
-        #expect(balance == TakkuCredit.Balance(micros: -1200, topUpURL: nil))
+    @Test("without packs the balance is still read, and without a recommended one the first is used")
+    func noPacks() async throws {
+        let none = Gateway(status: 200, body: #"{"balance_micros":-1200,"account_id":"ta_x","packs":[],"top_up_url":null}"#)
+        let balance = try await TakkuCredit.balance(apiKey: "tk_secret", transport: none.transport)
+        #expect(balance == TakkuCredit.Balance(micros: -1200, packs: []))
+        #expect(balance.recommendedPack == nil)
+        let five = TakkuCredit.Pack(priceEuros: 5, url: URL(string: "https://buy.stripe.com/five")!)
+        #expect(TakkuCredit.Balance(micros: 1, packs: [five]).recommendedPack == five)
     }
 
     @Test("credit used up says what to do; a 402 from another provider is its own message")

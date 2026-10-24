@@ -11,6 +11,26 @@
         }
       }
     },
+    "%@ pack": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pacchetto da %@"
+          }
+        }
+      }
+    },
+    "%@ pack · Recommended": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pacchetto da %@ · Consigliato"
+          }
+        }
+      }
+    },
     "%@ The note will be created at the end of Processing.": {
       "localizations": {
         "it": {
