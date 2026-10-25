@@ -51,8 +51,8 @@ struct SettingsView: View {
                 .tabItem { Label("Recordings", systemImage: "internaldrive") }
                 .tag(SettingsTab.recordings)
         }
-        .onAppear(perform: showProfilesIfRequested)
-        .onChange(of: request.showsProfiles, showProfilesIfRequested)
+        .onAppear { showProfilesIfRequested() }
+        .onChange(of: request.showsProfiles) { showProfilesIfRequested() }
     }
 
     static let width: CGFloat = 560
@@ -178,8 +178,8 @@ private struct SummaryTab: View {
             }
         }
         .formStyle(.grouped)
-        .onAppear(perform: addProfileIfRequested)
-        .onChange(of: request.opensNewProfile, addProfileIfRequested)
+        .onAppear { addProfileIfRequested() }
+        .onChange(of: request.opensNewProfile) { addProfileIfRequested() }
         .onChange(of: profiles) { AppSettings.summaryProfiles = profiles }
         .confirmationDialog("Delete the Takku Credit Profile?", isPresented: $confirmsCreditDeletion) {
             Button("Delete", role: .destructive, action: deleteSelectedProfile)
