@@ -13,31 +13,39 @@ struct RecordingsSection: View {
 
     var body: some View {
         Section {
-            Stepper(value: $days, in: 1...90) {
-                Text("Keep audio for \(days) days")
+            Picker("Keep audio for", selection: $days) {
+                ForEach(Self.dayChoices(including: days), id: \.self) { count in
+                    if count == 1 { Text("1 day").tag(Int?.some(count)) } else { Text("\(count) days").tag(Int?.some(count)) }
+                }
+                Divider()
+                Text("Forever").tag(Int?.none)
             }
-            // Applied by the cleanup at launch and once a day: a click too many on the Stepper
-            // must not delete audio on the spot.
+            // Applied by the cleanup at launch and once a day: a choice made by mistake must not
+            // delete audio on the spot.
             .onChange(of: days) { AppSettings.retentionDays = days }
             LabeledContent("Audio on this Mac") {
                 HStack {
                     Text(size.formatted(.byteCount(style: .file)))
-                    Button("Show in Finder", action: showInFinder)
-                    Button("Delete audio", role: .destructive) { isConfirmingDeletion = true }
-                        .disabled(size == 0)
+                    MoreMenu {
+                        Button("Show in Finder", action: showInFinder)
+                        Divider()
+                        Button("Delete audio…", role: .destructive) { isConfirmingDeletion = true }
+                            .disabled(size == 0)
+                    }
                 }
             }
             Toggle("Keep a Summary log", isOn: $keepSummaryLog)
             LabeledContent("Summary log") {
                 HStack {
                     Text(summaryLogSize.formatted(.byteCount(style: .file)))
-                    Button("Show in Finder", action: showSummaryLogInFinder)
-                    Button("Delete log", role: .destructive) { isConfirmingSummaryLogDeletion = true }
-                        .disabled(summaryLogSize == 0)
+                    MoreMenu {
+                        Button("Show in Finder", action: showSummaryLogInFinder)
+                        Divider()
+                        Button("Delete log…", role: .destructive) { isConfirmingSummaryLogDeletion = true }
+                            .disabled(summaryLogSize == 0)
+                    }
                 }
             }
-        } header: {
-            Text("Recordings")
         } footer: {
             Text("About 20 MB per hour of Meeting. Notes and Transcripts stay in the Vault: without the audio, Retry makes only the Summary again. The Summary log keeps what was sent to the model and its replies, in ~/.takku/summary-log, to improve the Templates: up to 5 MB, the oldest go first.")
                 .foregroundStyle(.secondary)
@@ -68,6 +76,11 @@ struct RecordingsSection: View {
         } message: {
             Text("It cannot be undone. Notes and Transcripts in the Vault are not touched.")
         }
+    }
+
+    /// The usual choices, and the current one if it was set to another number before.
+    private static func dayChoices(including current: Int?) -> [Int] {
+        Set([1, 3, 7, 14, 30, 60, 90] + [current].compactMap { $0 }).sorted()
     }
 
     private func showInFinder() {

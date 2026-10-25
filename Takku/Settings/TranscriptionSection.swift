@@ -31,8 +31,6 @@ struct TranscriptionSection: View {
             if let error {
                 Text(error).foregroundStyle(.secondary).textSelection(.enabled)
             }
-        } header: {
-            Text("Transcription")
         } footer: {
             Text("Models run on this Mac. Each is downloaded once from Hugging Face: only the model is downloaded, no audio or text is sent. The model in use applies to new Meetings and to Retry.")
                 .foregroundStyle(.secondary)
@@ -87,13 +85,16 @@ struct TranscriptionSection: View {
                     Text("Preparing…").foregroundStyle(.secondary)
                 }
             } else if models.isDownloaded(model) {
+                // The model in use is not deleted: the next Meeting would download it again.
                 if !isSelected {
-                    Button("Use") { selectedID = model.id }
-                    // The model in use is not deleted: the next Meeting would download it again.
-                    Button("Delete", role: .destructive) { delete(model) }
+                    MoreMenu {
+                        Button("Use") { selectedID = model.id }
+                        Divider()
+                        Button("Delete", role: .destructive) { delete(model) }
+                    }
                 }
             } else {
-                Button("Download") { download(model) }
+                IconButton(title: "Download", systemImage: "arrow.down.circle") { download(model) }
             }
         }
     }

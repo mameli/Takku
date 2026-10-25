@@ -383,7 +383,7 @@ actor MeetingTranscription {
     /// does not matter; otherwise model and language must be this Meeting's.
     private func cacheMiss(_ cached: CachedSegment) -> String? {
         guard let language = cached.language else { return nil }
-        let cachedModel = cached.model ?? TranscriptionModel.default.id
+        let cachedModel = cached.model ?? TranscriptionModel.previousDefault.id
         if cachedModel != model.id { return "cache made with \(cachedModel)" }
         return languages.contains(language) ? nil : "cached language \(language) is not among the Meeting languages"
     }

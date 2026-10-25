@@ -82,6 +82,7 @@ final class MeetingController {
     init() {
         transcriber = LocalTranscriber(models: models)
         AppSettings.registerDefaults()
+        models.keepPreviousDefault()
         AppSettings.addReadyMadeProfilesIfNeeded()
         try? TakkuFolder.ensureDefaultTemplate()
         processor = MeetingProcessor(transcriber: transcriber, diarizer: diarizer)

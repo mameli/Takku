@@ -8,121 +8,95 @@ import SwiftUI
 final class SettingsRequest {
     static let shared = SettingsRequest()
     var showsProfiles = false
+    /// Set when the Summary tab is shown on request: it opens a new Profile if there are none yet.
+    var opensNewProfile = false
 }
 
-/// Settings window: General (start at login, calendar, call suggestions, updates), Vault, Templates,
-/// Vocabulary, Recordings, Meeting languages and transcription models, Provider Profiles for the Summary.
+/// The tabs of the Settings window, in the toolbar as in the Mac's own apps.
+enum SettingsTab: Hashable {
+    case general, notes, transcription, summary, recordings
+}
+
+/// Settings window, one tab per subject: General (start at login, calendar, call suggestions,
+/// updates), Notes (Vault, Templates, Vocabulary), Transcription (Meeting languages and models),
+/// Summary (Provider Profiles) and Recordings (audio and Summary log kept on this Mac).
 struct SettingsView: View {
     let models: TranscriptionModels
-    @State private var vaultPath = AppSettings.vaultPath ?? ""
-    @State private var profiles = AppSettings.summaryProfiles
-    @AppStorage(AppSettings.activeProviderProfileKey) private var activeProfileID = ""
-    @State private var selectedProfileID = AppSettings.activeProviderProfile?.id ?? AppSettings.summaryProfiles.first?.id
-    @State private var defaultTemplate = AppSettings.defaultTemplate
-    @State private var confirmsCreditDeletion = false
+    @State private var tab = SettingsTab.general
     private let request = SettingsRequest.shared
 
     var body: some View {
-        ScrollViewReader { proxy in
-            Form {
-                Section {
-                    LaunchAtLoginToggle()
-                    CalendarToggle()
-                    SuggestCallsToggle()
-                    UpdatesToggle()
-                } header: {
-                    // The header of the first Section, so the icon scrolls away with the rest.
-                    VStack(alignment: .leading, spacing: 16) {
-                        AppIdentity().frame(maxWidth: .infinity)
-                        Text("General")
-                    }
-                }
-
-                Section("Obsidian Vault") {
-                    LabeledContent("Folder") {
-                        HStack {
-                            Text(vaultPath.isEmpty ? String(localized: "None") : vaultPath)
-                                .lineLimit(1)
-                                .truncationMode(.middle)
-                                .foregroundStyle(vaultPath.isEmpty ? .secondary : .primary)
-                            Button("Choose…", action: chooseVault)
-                        }
-                    }
-                    EditorRow()
-                }
-
-                TemplatesSection(defaultTemplate: $defaultTemplate)
-
-                VocabularySection()
-
-                RecordingsSection()
-
-                TranscriptionSection(models: models)
-
-                Section {
-                    if profiles.isEmpty {
-                        Text("No Profile yet. Add one to generate Summaries.")
-                            .foregroundStyle(.secondary)
-                    }
-                    ForEach(profiles) { profile in
-                        ProfileRow(
-                            profile: profile,
-                            isActive: profile.id.uuidString == activeProfileID,
-                            isSelected: profile.id == selectedProfileID
-                        )
-                        .contentShape(Rectangle())
-                        .onTapGesture { selectedProfileID = profile.id }
-                    }
-                    HStack {
-                        Button("Add Profile", action: addProfile)
-                        // For those who had Profiles before it existed, or deleted it: ready-made ones come only once.
-                        if !profiles.contains(where: \.isTakkuCredit) {
-                            Button("Add Takku Credit", action: addTakkuCredit)
-                        }
-                        Spacer()
-                        Button("Delete", role: .destructive, action: askToDeleteSelectedProfile)
-                            .disabled(selectedProfileID == nil)
-                    }
-                    .confirmationDialog("Delete the Takku Credit Profile?", isPresented: $confirmsCreditDeletion) {
-                        Button("Delete", role: .destructive, action: deleteSelectedProfile)
-                    } message: {
-                        Text("The key leaves this Mac, the credit stays with it: keep the email with the key to paste it again.")
-                    }
-                } header: {
-                    Text("Summary Profiles").id(Self.profilesID)
-                } footer: {
-                    Text("Any server with an OpenAI-compatible API. For work meetings use only local Providers or Providers based and hosting data in the EU.")
-                        .foregroundStyle(.secondary)
-                }
-
-                if let index = profiles.firstIndex(where: { $0.id == selectedProfileID }) {
-                    ProfileEditor(
-                        profile: $profiles[index],
-                        isActive: profiles[index].id.uuidString == activeProfileID,
-                        activate: { activeProfileID = profiles[index].id.uuidString }
-                    )
-                    .id(profiles[index].id)
-                }
-
-                // At the bottom, in grey: seen by those who scroll this far, not first thing.
-                Section {
-                } footer: {
-                    Text(Self.supportNote)
-                        .foregroundStyle(.secondary)
-                        .tint(.secondary)
-                        .frame(maxWidth: .infinity)
-                }
-            }
-            .formStyle(.grouped)
-            .onAppear { showProfilesIfRequested(proxy) }
-            .onChange(of: request.showsProfiles) { showProfilesIfRequested(proxy) }
+        TabView(selection: $tab) {
+            GeneralTab()
+                .fittingContent()
+                .tabItem { Label("General", systemImage: "gearshape") }
+                .tag(SettingsTab.general)
+            NotesTab()
+                .fittingContent()
+                .tabItem { Label("Notes", systemImage: "note.text") }
+                .tag(SettingsTab.notes)
+            Form { TranscriptionSection(models: models) }
+                .formStyle(.grouped)
+                .fittingContent()
+                .tabItem { Label("Transcription", systemImage: "waveform") }
+                .tag(SettingsTab.transcription)
+            // The Profile editor is long: this tab keeps a fixed height and scrolls.
+            SummaryTab()
+                .frame(width: Self.width, height: 640)
+                .tabItem { Label("Summary", systemImage: "sparkles") }
+                .tag(SettingsTab.summary)
+            Form { RecordingsSection() }
+                .formStyle(.grouped)
+                .fittingContent()
+                .tabItem { Label("Recordings", systemImage: "internaldrive") }
+                .tag(SettingsTab.recordings)
         }
-        .frame(width: 560)
-        .frame(minHeight: 600)
-        .onChange(of: profiles) { AppSettings.summaryProfiles = profiles }
+        .onAppear(perform: showProfilesIfRequested)
+        .onChange(of: request.showsProfiles, showProfilesIfRequested)
     }
 
-    private static let profilesID = "profiles"
+    static let width: CGFloat = 560
+
+    /// The Summary tab, with a new Profile open in the editor if there are none yet (see `SummaryTab`).
+    private func showProfilesIfRequested() {
+        guard request.showsProfiles else { return }
+        request.showsProfiles = false
+        request.opensNewProfile = true
+        tab = .summary
+    }
+}
+
+private extension View {
+    /// A tab as tall as what it shows: the window grows and shrinks with the tab, with no empty
+    /// space under a short one.
+    func fittingContent() -> some View {
+        frame(width: SettingsView.width).fixedSize(horizontal: false, vertical: true).scrollDisabled(true)
+    }
+}
+
+private struct GeneralTab: View {
+    var body: some View {
+        Form {
+            Section {
+                LaunchAtLoginToggle()
+                CalendarToggle()
+                SuggestCallsToggle()
+                UpdatesToggle()
+            } header: {
+                AppIdentity().frame(maxWidth: .infinity).padding(.bottom, 8)
+            }
+
+            // At the bottom, in grey: seen by those who look, not first thing.
+            Section {
+            } footer: {
+                Text(Self.supportNote)
+                    .foregroundStyle(.secondary)
+                    .tint(.secondary)
+                    .frame(maxWidth: .infinity)
+            }
+        }
+        .formStyle(.grouped)
+    }
 
     /// The link is grey like the text around it, so it is underlined to show it is one.
     private static var supportNote: AttributedString {
@@ -132,20 +106,118 @@ struct SettingsView: View {
         }
         return note
     }
+}
 
-    /// Scrolls to the Summary Profiles, with a new one open in the editor if there are none yet.
-    private func showProfilesIfRequested(_ proxy: ScrollViewProxy) {
-        guard request.showsProfiles else { return }
-        request.showsProfiles = false
-        if profiles.isEmpty { addProfile() }
-        // On the next turn: when the window has just opened the Form is not laid out yet.
-        Task { @MainActor in
-            withAnimation { proxy.scrollTo(Self.profilesID, anchor: .top) }
+/// Where the notes go and what shapes them: the Vault and its Editor, the Templates, the Vocabulary.
+private struct NotesTab: View {
+    @State private var vaultPath = AppSettings.vaultPath ?? ""
+    @State private var defaultTemplate = AppSettings.defaultTemplate
+
+    var body: some View {
+        Form {
+            Section("Obsidian Vault") {
+                LabeledContent("Folder") {
+                    HStack {
+                        Text(vaultPath.isEmpty ? String(localized: "None") : vaultPath)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                            .foregroundStyle(vaultPath.isEmpty ? .secondary : .primary)
+                        Button("Choose…") {
+                            if let path = Vault.choose() { vaultPath = path }
+                        }
+                    }
+                }
+                EditorRow()
+            }
+            TemplatesSection(defaultTemplate: $defaultTemplate)
+            VocabularySection()
+        }
+        .formStyle(.grouped)
+    }
+}
+
+/// The Summary Profiles: the list, adding and deleting them, and the editor of the selected one.
+private struct SummaryTab: View {
+    @State private var profiles = AppSettings.summaryProfiles
+    @AppStorage(AppSettings.activeProviderProfileKey) private var activeProfileID = ""
+    @State private var selectedProfileID = AppSettings.activeProviderProfile?.id ?? AppSettings.summaryProfiles.first?.id
+    @State private var confirmsCreditDeletion = false
+    private let request = SettingsRequest.shared
+
+    var body: some View {
+        Form {
+            Section {
+                if profiles.isEmpty {
+                    Text("No Profile yet. Add one to generate Summaries.")
+                        .foregroundStyle(.secondary)
+                }
+                ForEach(profiles) { profile in
+                    ProfileRow(
+                        profile: profile,
+                        isActive: profile.id.uuidString == activeProfileID,
+                        isSelected: profile.id == selectedProfileID
+                    )
+                    .contentShape(Rectangle())
+                    .onTapGesture { selectedProfileID = profile.id }
+                }
+                addAndDelete
+            } header: {
+                Text("Summary Profiles")
+            } footer: {
+                Text("Any server with an OpenAI-compatible API. For work meetings use only local Providers or Providers based and hosting data in the EU.")
+                    .foregroundStyle(.secondary)
+            }
+
+            if let index = profiles.firstIndex(where: { $0.id == selectedProfileID }) {
+                ProfileEditor(
+                    profile: $profiles[index],
+                    isActive: profiles[index].id.uuidString == activeProfileID,
+                    activate: { activeProfileID = profiles[index].id.uuidString }
+                )
+                .id(profiles[index].id)
+            }
+        }
+        .formStyle(.grouped)
+        .onAppear(perform: addProfileIfRequested)
+        .onChange(of: request.opensNewProfile, addProfileIfRequested)
+        .onChange(of: profiles) { AppSettings.summaryProfiles = profiles }
+        .confirmationDialog("Delete the Takku Credit Profile?", isPresented: $confirmsCreditDeletion) {
+            Button("Delete", role: .destructive, action: deleteSelectedProfile)
+        } message: {
+            Text("The key leaves this Mac, the credit stays with it: keep the email with the key to paste it again.")
         }
     }
 
-    private func chooseVault() {
-        if let path = Vault.choose() { vaultPath = path }
+    /// + and − under the list, as in the Mac's own lists. The + offers Takku Credit to those who
+    /// had Profiles before it existed, or deleted it: ready-made ones come only once.
+    private var addAndDelete: some View {
+        HStack(spacing: 12) {
+            if profiles.contains(where: \.isTakkuCredit) {
+                IconButton(title: "Add Profile", systemImage: "plus", action: addProfile)
+            } else {
+                Menu {
+                    Button("New Profile", action: addProfile)
+                    Button("Takku Credit", action: addTakkuCredit)
+                } label: {
+                    RowIcon(systemImage: "plus").accessibilityLabel(Text("Add Profile"))
+                }
+                .menuStyle(.button)
+                .buttonStyle(.borderless)
+                .menuIndicator(.hidden)
+                .fixedSize()
+                .help(Text("Add Profile"))
+            }
+            IconButton(title: "Delete Profile", systemImage: "minus", action: askToDeleteSelectedProfile)
+                .disabled(selectedProfileID == nil)
+            Spacer()
+        }
+    }
+
+    /// From the welcome window: with no Profiles yet, a new one is open in the editor.
+    private func addProfileIfRequested() {
+        guard request.opensNewProfile else { return }
+        request.opensNewProfile = false
+        if profiles.isEmpty { addProfile() }
     }
 
     private func addProfile() {

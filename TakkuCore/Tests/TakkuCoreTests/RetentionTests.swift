@@ -36,4 +36,11 @@ struct RetentionTests {
         #expect(Retention.expired([twoDaysOld], now: now, days: 1) == [twoDaysOld.takkuID])
         #expect(Retention.expired([twoDaysOld], now: now, days: 3).isEmpty)
     }
+
+    @Test("kept forever, no audio ever expires")
+    func forever() {
+        let yearOld = item(365, .completed)
+
+        #expect(Retention.expired([yearOld], now: now, days: nil).isEmpty)
+    }
 }

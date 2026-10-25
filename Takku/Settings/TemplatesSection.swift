@@ -7,6 +7,8 @@ struct TemplatesSection: View {
     @Binding var defaultTemplate: String
     @State private var names: [String] = []
     @State private var newName = ""
+    /// The New Template row shows its name field.
+    @State private var isNaming = false
     @State private var status: String?
     @State private var pendingDeletion: String?
     /// Read when the section appears: apps come and go.
@@ -14,11 +16,6 @@ struct TemplatesSection: View {
 
     var body: some View {
         Section {
-            Picker("Default Template", selection: $defaultTemplate) {
-                ForEach(TakkuFolder.templateChoices(including: defaultTemplate), id: \.self) { Text($0).tag($0) }
-            }
-            .onChange(of: defaultTemplate) { AppSettings.defaultTemplate = defaultTemplate }
-
             ForEach(names, id: \.self) { name in
                 HStack {
                     Text(name)
@@ -26,22 +23,44 @@ struct TemplatesSection: View {
                         Text("Default").font(.caption).foregroundStyle(.green)
                     }
                     Spacer()
-                    EditWithMenu(title: "Edit With", editors: editors) { app in
-                        TextEditors.open(TakkuFolder.templateURL(name), with: app)
-                    }
-                    // Notes cannot go: Takku would create it again as the fallback Template.
-                    if name != Template.defaultName {
-                        Button("Delete", role: .destructive) { pendingDeletion = name }
+                    MoreMenu {
+                        EditWithMenu(title: "Edit With", editors: editors) { app in
+                            TextEditors.open(TakkuFolder.templateURL(name), with: app)
+                        }
+                        if name != defaultTemplate {
+                            Button("Use as Default") {
+                                defaultTemplate = name
+                                AppSettings.defaultTemplate = name
+                            }
+                        }
+                        // Notes cannot go: Takku would create it again as the fallback Template.
+                        if name != Template.defaultName {
+                            Divider()
+                            Button("Move to Trash…", role: .destructive) { pendingDeletion = name }
+                        }
                     }
                 }
             }
 
-            LabeledContent("New Template") {
-                HStack {
-                    PasteableTextField(placeholder: String(localized: "e.g. Weekly 1:1"), text: $newName)
-                    Button("Create", action: create)
-                        .disabled(newName.trimmingCharacters(in: .whitespaces).isEmpty)
+            if isNaming {
+                LabeledContent("New Template") {
+                    HStack {
+                        PasteableTextField(placeholder: String(localized: "e.g. Weekly 1:1"), text: $newName, onSubmit: create)
+                        Button("Create", action: create)
+                            .disabled(newName.trimmingCharacters(in: .whitespaces).isEmpty)
+                        Button("Cancel") {
+                            isNaming = false
+                            newName = ""
+                        }
+                    }
                 }
+            } else {
+                Button {
+                    isNaming = true
+                } label: {
+                    Label("New Template…", systemImage: "plus")
+                }
+                .buttonStyle(.borderless)
             }
             if let status {
                 Text(status).foregroundStyle(.secondary)
@@ -49,7 +68,7 @@ struct TemplatesSection: View {
         } header: {
             Text("Templates")
         } footer: {
-            Text("A new Template starts from Notes: change instructions and sections with Edit With. They live in ~/.takku/templates/.")
+            Text("The default Template is used for new Meetings; ⋯ changes it. A new Template starts from Notes: change instructions and sections with Edit With. They live in ~/.takku/templates/.")
                 .foregroundStyle(.secondary)
         }
         .onAppear {
@@ -76,8 +95,10 @@ struct TemplatesSection: View {
 
     private func create() {
         do {
+            guard !newName.trimmingCharacters(in: .whitespaces).isEmpty else { return }
             _ = try TakkuFolder.createTemplate(named: newName)
             newName = ""
+            isNaming = false
             reload()
             // The new row, with its Edit With, is enough.
             status = nil
@@ -89,8 +110,8 @@ struct TemplatesSection: View {
     private func delete(_ name: String) {
         do {
             try TakkuFolder.trashTemplate(named: name)
-            if defaultTemplate == name { defaultTemplate = Template.defaultName }
             try? TakkuFolder.ensureDefaultTemplate()
+            defaultTemplate = AppSettings.defaultTemplate
             reload()
             // The row disappearing is enough: no message, and none left over from before.
             status = nil

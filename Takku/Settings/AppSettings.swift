@@ -46,15 +46,19 @@ enum AppSettings {
         set { UserDefaults.standard.set(newValue, forKey: vaultPathKey) }
     }
 
-    /// The WhisperKit variant used for new Meetings and Retry; see `TranscriptionModel.selected`.
+    /// The transcription model used for new Meetings and Retry; see `TranscriptionModel.selected`.
     static var transcriptionModelID: String? {
-        UserDefaults.standard.string(forKey: transcriptionModelKey)
+        get { UserDefaults.standard.string(forKey: transcriptionModelKey) }
+        set { UserDefaults.standard.set(newValue, forKey: transcriptionModelKey) }
     }
 
-    /// Days the audio is kept.
-    static var retentionDays: Int {
-        get { max(1, UserDefaults.standard.integer(forKey: retentionDaysKey)) }
-        set { UserDefaults.standard.set(max(1, newValue), forKey: retentionDaysKey) }
+    /// Days the audio is kept; `nil` forever, saved as 0 (which no earlier version could save).
+    static var retentionDays: Int? {
+        get {
+            let days = UserDefaults.standard.integer(forKey: retentionDaysKey)
+            return days == 0 ? nil : days
+        }
+        set { UserDefaults.standard.set(newValue.map { max(1, $0) } ?? 0, forKey: retentionDaysKey) }
     }
 
     /// Copy every Summary's requests and replies to the Summary log.

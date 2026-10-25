@@ -13,10 +13,10 @@ Before starting: Takku running from the menu bar (notebook icon), Vault and a Su
 
 - [ ] **First use**: move `~/Library/Application Support/Takku/Models` to the Trash, start a Meeting → the menu shows "Downloading transcription model… N%" rising, then "Preparing transcription model, first time only", then nothing; the Meeting is transcribed. The menu does not blink while the percentage changes.
 
-- [ ] **Parakeet**: with Models in the Trash, Settings → *Transcription* → *Download* on Parakeet v3 → percentage, then "Preparing…" while macOS compiles it, then *Use* and *Delete* appear. *Use* on Parakeet v3, record a Meeting with long and short replies → the Transcript is in the Meeting language, with sentences and times; note any reply in the wrong language.
+- [ ] **Parakeet**: with Models in the Trash, Settings → *Transcription* → the download icon on Parakeet v3 → percentage, then "Preparing…" while macOS compiles it, then its ⋯ with *Use* and *Delete* appears. *Use* on Parakeet v3, record a Meeting with long and short replies → the Transcript is in the Meeting language, with sentences and times; note any reply in the wrong language.
 - [ ] **Parakeet Ultra**: the same steps with Parakeet Ultra; *Retry* on a Meeting transcribed with Parakeet v3 transcribes it again with Ultra. *Delete* on Ultra leaves Parakeet v3 downloaded.
 - [ ] **Parakeet, other languages**: with Parakeet Ultra and Italian and English ticked, record a Meeting where a video in German plays for a few seconds → its sentences are missing from the Transcript and the log says "sentences in another language dropped"; the Italian and English sentences around it are there.
-- [ ] **Transcription models**: Settings → *Transcription* → *Download* on Small → percentage, then *Use* and *Delete* appear; *Download* on the model in use → the menu shows the percentage, and nothing once it is done; *Use* → "In use" moves to Small; a Meeting is transcribed with Small; *Retry* on an older Meeting with Large v3 Turbo in use transcribes it again with Large. *Delete* on Small brings back *Download*.
+- [ ] **Transcription models**: Settings → *Transcription* → the download icon on Small → percentage, then its ⋯ with *Use* and *Delete* appears; *Download* on the model in use → the menu shows the percentage, and nothing once it is done; *Use* → "In use" moves to Small; a Meeting is transcribed with Small; *Retry* on an older Meeting with Large v3 Turbo in use transcribes it again with Large. *Delete* on Small brings back *Download*.
 
 ## 1. Recording
 
@@ -44,14 +44,14 @@ Before starting: Takku running from the menu bar (notebook icon), Vault and a Su
 - [x] **Recent meetings → Open note**: opens the right note, even if you renamed or moved it.
 - [ ] **Meeting deleted from the Vault**: delete a Meeting note in Obsidian, open the menu → *Recent meetings* no longer lists it (an older Meeting takes its place); rename a note → the menu shows the new name.
 - [ ] **Templates folder**: move `~/.takku` to the Trash, launch Takku → `~/.takku/templates/Notes.md` is back and is the default Template, also with no Vault chosen.
-- [ ] **New Template**: Settings → *Templates* → type a name → *Create* → the row appears, nothing opens; its *Edit With* → an editor → `~/.takku/templates/<name>.md` opens there; change instructions and sections and save.
-- [x] **Default Template**: choose the new Template as default → the next Meeting starts with it.
-- [x] **Delete Template**: *Delete* → confirm → the row disappears with no message, the file is in the Mac Trash; if it was the default, Notes is back. Notes has no *Delete*.
+- [ ] **New Template**: Settings → *Notes* → *New Template…* → type a name → *Create* → the row appears, nothing opens; its ⋯ → *Edit With* → an editor → `~/.takku/templates/<name>.md` opens there; change instructions and sections and save.
+- [x] **Default Template**: the new Template's ⋯ → *Use as Default* → *Default* moves next to it, the next Meeting starts with it.
+- [x] **Delete Template**: ⋯ → *Move to Trash…* → confirm → the row disappears with no message, the file is in the Mac Trash; if it was the default, Notes is back. Notes has no *Move to Trash…*.
 - [ ] **Retry with another Template**: choose another Template in the menu → *Recent meetings* → a Meeting → *Retry* → the Summary follows the new Template.
-- [ ] **Retry without audio**: Settings → *Recordings* → *Delete audio* → *Retry* on a Meeting → the Summary is made again from the Transcript in the Vault, duration and Transcript do not change.
+- [ ] **Retry without audio**: Settings → *Recordings* → ⋯ → *Delete audio…* → *Retry* on a Meeting → the Summary is made again from the Transcript in the Vault, duration and Transcript do not change.
 - [ ] **Deleted Profile**: start a Meeting with a Profile, delete that Profile in Settings before the Summary → the note says the Profile was deleted; choose another Profile and *Retry* → Summary written.
 - [ ] **New Profile**: *Add Profile* → the menu still shows the Profile active before (or *Transcript*) until *Use for Summaries*.
-- [ ] **Recordings in Settings**: the space used matches the folder opened by *Show in Finder*; *Delete audio* asks for confirmation and brings it to zero.
+- [ ] **Recordings in Settings**: the space used matches the folder opened by ⋯ → *Show in Finder*; *Delete audio…* asks for confirmation and brings it to zero.
 - [ ] **Summary log**: after a Meeting, `~/.takku/summary-log/` has one JSON file named date, Template and model, with `about` and a `single` and a `title` call whose request has the Transcript; no Profile address in it. A Retry adds a second file. Settings → *Recordings*: the log's size matches the folder, *Delete log* asks for confirmation and brings it to zero; with *Keep a Summary log* off a Retry adds nothing.
 - [x] **Retry**: turn off the internet connection, record a short Meeting → "Processing failed" and ⚠️ in the note and in the menu; reconnect and *Retry* → Summary generated.
 
@@ -81,7 +81,7 @@ Before starting: Takku running from the menu bar (notebook icon), Vault and a Su
 
 ## Vocabulary
 
-- [ ] **Edit Vocabulary With**: Settings → *Vocabulary* → *Edit Vocabulary With* → the menu lists only text editors with their icon (no Safari, Pages or Numbers), the default for Markdown first with *(default)*; choose one → `~/.takku/vocabulary.md` is created with the explanation text and opens in that app; the row says *No terms yet*. Add `- Scaleway = scale uai | our EU cloud provider`, go back to the Settings window → *1 term* with *Scaleway* below; with more than four terms the first four and *and N more*.
+- [ ] **Edit Vocabulary With**: Settings → *Notes* → *Vocabulary* → *Edit Vocabulary With* → the menu lists only text editors with their icon (no Safari, Pages or Numbers), the default for Markdown first with *(default)*; choose one → `~/.takku/vocabulary.md` is created with the explanation text and opens in that app; the row says *No terms yet*. Add `- Scaleway = scale uai | our EU cloud provider`, go back to the Settings window → *1 term* with *Scaleway* below; with more than four terms the first four and *and N more*.
 - [ ] **Variants in the Transcript**: add a term with a variant Parakeet really gets wrong in your voice, record a short Meeting saying it → in the Transcript file the term is written right; the Meeting note's Summary writes it right too.
 - [ ] **Terms in the Summary**: say a term that is in the Vocabulary but write no variant for it, with recognition getting it wrong → the Summary spells the term right when the context makes it clear, and leaves other doubtful words alone.
 - [ ] **Short terms**: a term that sounds like common words (like "Takku" next to "meno", "sono") → ordinary sentences with "meno" or "sono" are not changed, in the Transcript or in the Summary.

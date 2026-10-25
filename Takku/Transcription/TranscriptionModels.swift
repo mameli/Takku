@@ -24,8 +24,12 @@ struct TranscriptionModel: Identifiable, Hashable, Sendable {
 
     static let all = [
         TranscriptionModel(
+            id: "parakeet-ultra", engine: .parakeet(.ultra), name: "Parakeet Ultra",
+            downloadMB: 632, note: "Recommended: the most accurate, and fast; on short replies it can switch language."
+        ),
+        TranscriptionModel(
             id: "openai_whisper-large-v3-v20240930_turbo_632MB", engine: .whisper, name: "Large v3 Turbo",
-            downloadMB: 646, note: "Recommended: fast and accurate."
+            downloadMB: 646, note: "Fast and accurate; always in the Meeting language."
         ),
         TranscriptionModel(
             id: "openai_whisper-large-v3-v20240930_turbo", engine: .whisper, name: "Large v3 Turbo (full)",
@@ -39,13 +43,13 @@ struct TranscriptionModel: Identifiable, Hashable, Sendable {
             id: "parakeet-tdt-0.6b-v3", engine: .parakeet(.v3), name: "Parakeet v3",
             downloadMB: 490, note: "Very fast and accurate; on short replies it can switch language."
         ),
-        TranscriptionModel(
-            id: "parakeet-ultra", engine: .parakeet(.ultra), name: "Parakeet Ultra",
-            downloadMB: 632, note: "More accurate than Parakeet v3, just as fast; on short replies it can switch language."
-        ),
     ]
 
+    /// For a new install: Parakeet Ultra since 1.10.0.
     static let `default` = all[0]
+    /// The default up to 1.9.0, Large v3 Turbo: what made the Segment caches written before models
+    /// could be chosen, and what a Mac that never chose one keeps (see `keepPreviousDefault`).
+    static let previousDefault = all[1]
 
     static func == (lhs: Self, rhs: Self) -> Bool { lhs.id == rhs.id }
     func hash(into hasher: inout Hasher) { hasher.combine(id) }
@@ -88,6 +92,14 @@ final class TranscriptionModels {
             // FluidAudio downloads into a folder named after the model, under the one it is given.
             directory.appending(path: "fluidaudio/\(model.id)", directoryHint: .isDirectory)
         }
+    }
+
+    /// A Mac that never chose a model and has the previous default downloaded keeps it: with the
+    /// new default it would download another model at its next Meeting, and transcribe differently.
+    func keepPreviousDefault() {
+        guard AppSettings.transcriptionModelID == nil, isDownloaded(.previousDefault) else { return }
+        AppSettings.transcriptionModelID = TranscriptionModel.previousDefault.id
+        logger.notice("No model chosen, the previous default is downloaded: it stays in use")
     }
 
     func isDownloaded(_ model: TranscriptionModel) -> Bool {

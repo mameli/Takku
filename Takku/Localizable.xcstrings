@@ -71,22 +71,32 @@
         }
       }
     },
+    "%lld days": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld giorni"
+          }
+        }
+      }
+    },
+    "1 day": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 giorno"
+          }
+        }
+      }
+    },
     "< %@": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
             "value": "< %@"
-          }
-        }
-      }
-    },
-    "A new Template starts from Notes: change instructions and sections with Edit With. They live in ~/.takku/templates/.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Un Template nuovo parte da Notes: istruzioni e sezioni le cambi con Modifica con. Sono in ~/.takku/templates/."
           }
         }
       }
@@ -211,6 +221,16 @@
         }
       }
     },
+    "Cancel": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Annulla"
+          }
+        }
+      }
+    },
     "Cannot read the audio of %@.": {
       "localizations": {
         "it": {
@@ -331,16 +351,6 @@
         }
       }
     },
-    "Default Template": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Template di default"
-          }
-        }
-      }
-    },
     "Delete": {
       "localizations": {
         "it": {
@@ -361,12 +371,42 @@
         }
       }
     },
+    "Delete audio…": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancella audio…"
+          }
+        }
+      }
+    },
     "Delete log": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
             "value": "Cancella log"
+          }
+        }
+      }
+    },
+    "Delete log…": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancella log…"
+          }
+        }
+      }
+    },
+    "Delete Profile": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elimina Profilo"
           }
         }
       }
@@ -494,6 +534,26 @@
         }
       }
     },
+    "Fast and accurate; always in the Meeting language.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Veloce e preciso; sempre nella lingua della riunione."
+          }
+        }
+      }
+    },
+    "Forever": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Per sempre"
+          }
+        }
+      }
+    },
     "High": {
       "extractionState": "manual",
       "localizations": {
@@ -565,6 +625,16 @@
         }
       }
     },
+    "Keep audio for": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conserva l'audio per"
+          }
+        }
+      }
+    },
     "Low": {
       "extractionState": "manual",
       "localizations": {
@@ -597,12 +667,42 @@
         }
       }
     },
-    "More accurate than Parakeet v3, just as fast; on short replies it can switch language.": {
+    "More": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Più preciso di Parakeet v3, altrettanto veloce; sulle risposte brevi può cambiare lingua."
+            "value": "Altro"
+          }
+        }
+      }
+    },
+    "Move to Trash…": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sposta nel Cestino…"
+          }
+        }
+      }
+    },
+    "New Profile": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nuovo Profilo"
+          }
+        }
+      }
+    },
+    "New Template…": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nuovo Template…"
           }
         }
       }
@@ -714,16 +814,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Funziona. Risposta: %@"
-          }
-        }
-      }
-    },
-    "Keep audio for %lld days": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Conserva l'audio per %lld giorni"
           }
         }
       }
@@ -968,6 +1058,16 @@
         }
       }
     },
+    "Notes": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Note"
+          }
+        }
+      }
+    },
     "Obsidian Vault": {
       "localizations": {
         "it": {
@@ -1180,12 +1280,12 @@
         }
       }
     },
-    "Recommended: fast and accurate.": {
+    "Recommended: the most accurate, and fast; on short replies it can switch language.": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Consigliato: veloce e preciso."
+            "value": "Consigliato: il più preciso, e veloce; sulle risposte brevi può cambiare lingua."
           }
         }
       }
@@ -1390,6 +1490,16 @@
         }
       }
     },
+    "Summary": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Riepilogo"
+          }
+        }
+      }
+    },
     "Summary log": {
       "localizations": {
         "it": {
@@ -1440,6 +1550,16 @@
         }
       }
     },
+    "Takku Credit": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku Credit"
+          }
+        }
+      }
+    },
     "Takku reads your Personal notes from disk: those not yet saved do not reach the Summary.": {
       "localizations": {
         "it": {
@@ -1486,6 +1606,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "L'editor scelto non è più installato: le note si aprono con quello indicato sopra."
+          }
+        }
+      }
+    },
+    "The default Template is used for new Meetings; ⋯ changes it. A new Template starts from Notes: change instructions and sections with Edit With. They live in ~/.takku/templates/.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il Template di default vale per le nuove riunioni; lo cambi da ⋯. Un Template nuovo parte da Notes: istruzioni e sezioni le cambi con Modifica con. Sono in ~/.takku/templates/."
           }
         }
       }
@@ -1683,6 +1813,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Usa"
+          }
+        }
+      }
+    },
+    "Use as Default": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usa come default"
           }
         }
       }

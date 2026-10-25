@@ -128,7 +128,7 @@ struct ProfileEditor: View {
                 if storedKeySuffix == nil {
                     Button("Buy credit…") { NSWorkspace.shared.open(TakkuCredit.buyURL) }
                 } else {
-                    Button("Refresh") { Task { await readCredit() } }
+                    IconButton(title: "Refresh", systemImage: "arrow.clockwise") { Task { await readCredit() } }
                         .disabled(isReadingCredit)
                     if let credit, let recommended = credit.recommendedPack {
                         // The button buys the recommended pack; its menu has them all.

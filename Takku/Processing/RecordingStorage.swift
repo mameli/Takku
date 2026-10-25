@@ -11,11 +11,11 @@ enum RecordingStorage {
         return files.contains { $0.pathExtension == "m4a" }
     }
 
-    /// Deletes the audio files of concluded Recordings older than `days` days (0: all of them),
+    /// Deletes the audio files of concluded Recordings older than `days` days (0: all of them; `nil`: none),
     /// with the transcription caches, the Screenshots (already in the Vault) and the `transcript.md` copy. Meetings still pending are
     /// kept. The manifests stay: the Meeting stays among the recent ones and Retry makes the
     /// Summary again from the Transcript in the Vault.
-    static func deleteAudio(olderThanDays days: Int) {
+    static func deleteAudio(olderThanDays days: Int?) {
         let folders = (try? FileManager.default.contentsOfDirectory(
             at: MeetingRecorder.recordingsDirectory, includingPropertiesForKeys: nil
         )) ?? []

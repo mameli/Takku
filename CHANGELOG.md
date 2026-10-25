@@ -8,6 +8,8 @@ Takku was called Steno up to 0.2.1.
 
 - **Import audio**: *Import audio…* in the menu turns a recording made elsewhere into a meeting, without recording it again: a voice memo from your iPhone, a lecture, an in-person meeting, a call recorded by another app. Any audio format macOS reads works (m4a, mp3, wav…), and videos too (mp4, mov: only the sound is used), several files at once. Takku transcribes it on your Mac, tells the voices apart and writes the Summary as for a call. The note takes the date and time the file was recorded, and the calendar event of that moment. The file itself is left where it is.
 - **Full text instead of a summary**: a Template with `full_text: true` in its header gets the whole meeting rewritten, cleaned up but complete, for example the full text of a lecture to study from. Takku writes it ten minutes at a time and joins the parts, so the end of a long lecture is as detailed as the beginning.
+- **Parakeet Ultra is the default transcription model** for new installs: the most accurate, and fast. If you never chose a model, you keep Large v3 Turbo, already on your Mac; to switch, *Settings → Transcription*.
+- **Tidier Settings**: one tab per subject (General, Notes, Transcription, Summary, Recordings) instead of one long page, and the actions of each row in a ⋯ menu instead of a row of buttons. Models still to download have a download icon, and how long the audio is kept is a menu of days, with *Forever* too.
 - **Templates for lectures**: two examples to copy into `~/.takku/templates/`: [Lecture](https://github.com/mameli/Takku/blob/main/examples/templates/Lecture.md) for study notes and [Sbobina](https://github.com/mameli/Takku/blob/main/examples/templates/Sbobina.md) for the full text of a lecture.
 
 ## 1.9.0 (2026-10-24)
