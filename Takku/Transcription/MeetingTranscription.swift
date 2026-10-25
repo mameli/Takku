@@ -56,7 +56,8 @@ actor MeetingTranscription {
         /// How the turns were found.
         var version = CachedSpeakers.currentVersion
         /// Bump when the diarizer or its model changes: the Others Track is diarized again.
-        static let currentVersion = 1
+        /// 1: pyannote community-1, 2: Nemotron 3 Diarization (1.11.0).
+        static let currentVersion = 2
     }
 
     private static let languageDetectionSeconds = 30.0

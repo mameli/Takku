@@ -1,6 +1,6 @@
 # Speakers are told apart by local diarization of the Others Track, and named only by the Summary
 
-The others in a call were all "Others" in the Transcript, so the Summary could not say who said or will do what. Takku now diarizes the Others Track on the Mac with FluidAudio's offline pipeline (pyannote community-1), already a dependency for Parakeet, and writes *Speaker 1*, *Speaker 2*… in the Transcript. The Me Track needs no diarization: it is one person, and keeping it separate makes the Others Track the easy case (fewer voices, no overlap with the user). On five real Recordings (13 to 41 minutes, 3 to 7 voices) it took 3 to 8 seconds, and with two or three clear voices the turns matched the conversation; with many people talking over each other more replies are mixed or left as *Others*.
+The others in a call were all "Others" in the Transcript, so the Summary could not say who said or will do what. Takku now diarizes the Others Track on the Mac through FluidAudio, already a dependency for Parakeet: first with its offline pipeline (pyannote community-1), since 1.11.0 with NVIDIA's Nemotron 3 Diarization (see below), and writes *Speaker 1*, *Speaker 2*… in the Transcript. The Me Track needs no diarization: it is one person, and keeping it separate makes the Others Track the easy case (fewer voices, no overlap with the user). On five real Recordings (13 to 41 minutes, 3 to 7 voices) it took 3 to 8 seconds, and with two or three clear voices the turns matched the conversation; with many people talking over each other more replies are mixed or left as *Others*.
 
 Names are not attached to voices by Takku. The Summary model takes a Speaker's name from what is said (the name they introduce themselves with, or answer to when called) and never writes "Speaker N": for a Speaker without a name it leaves out who, with no placeholder. The Transcript keeps the numbers.
 
@@ -11,8 +11,10 @@ Rejected for now:
 - **Microsoft Graph transcripts**: need the organiser to turn on Teams transcription and the tenant admin's consent, and the transcription is then Microsoft's, not local.
 - **Desert Ant's Who** in place of FluidAudio: on two Meetings it agreed on 98% of the words and was right more often on the rest, but its license is not free and Takku is meant to be. [The comparison](../who-vs-fluidaudio.md).
 
+Changed in 1.11.0: **Nemotron 3 Diarization** replaces pyannote community-1. It is free (OpenMDW 1.1), runs in the FluidAudio Takku already had, and on the same two Meetings it made neither mistake Who had found (a voice split in two, a voice that speaks rarely shared between two Speakers), and gave a voice to short replies community-1 left as *Others*. It costs 190 MB instead of 22 and allows at most 8 voices per Meeting. [The comparison](../who-vs-fluidaudio.md).
+
 ## Consequences
 
 - A Speaker number holds within one Meeting only: *Speaker 2* in two Meetings can be two different people.
 - An Utterance takes one Speaker even when two voices share it (recognition joins them into one sentence); splitting by word times is left for when it shows up as a problem.
-- Diarization is not cached: Retry runs it again, a few seconds.
+- The turns are cached per Recording, keyed by the Others Segments and a diarizer version, bumped to 2 for Nemotron: a Retry diarizes again only after a change.
