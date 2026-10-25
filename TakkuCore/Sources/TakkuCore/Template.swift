@@ -7,6 +7,9 @@ public struct Template: Equatable, Sendable {
     public let summaryLanguage: String?
     /// Free-form instructions and structure, passed to the model as they are.
     public let body: String
+    /// `full_text: true`: the whole Transcript rewritten with the Template (e.g. the full text of
+    /// a lecture), in blocks of about 10 minutes joined in order, instead of a Summary.
+    public let isFullText: Bool
 
     /// The Template Takku creates when the Templates folder is empty: notes by
     /// topic, in Meeting order, and Next steps at the end (like Granola).
@@ -46,6 +49,7 @@ public struct Template: Equatable, Sendable {
         let markdown = MarkdownLines(content)
         name = markdown.value("name").flatMap { $0.isEmpty ? nil : $0 } ?? fileName
         summaryLanguage = markdown.value("summary_language").flatMap(Language.code)
+        isFullText = markdown.value("full_text").map { ["true", "yes"].contains($0.lowercased()) } ?? false
         body = markdown.lines[markdown.bodyStart...].joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }

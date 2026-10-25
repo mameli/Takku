@@ -44,6 +44,19 @@ struct TemplateTests {
         #expect(template.summaryLanguage == expected)
     }
 
+    @Test("full_text: true asks for the whole Transcript rewritten, not summarised; anything else or nothing is a Summary", arguments: [
+        ("full_text: true", true),
+        ("full_text: yes", true),
+        ("full_text: false", false),
+        ("full_text: ", false),
+        ("summary_language: it", false),
+    ])
+    func fullText(line: String, expected: Bool) {
+        let template = Template(fileName: "T", content: "---\n\(line)\n---\nBody")
+
+        #expect(template.isFullText == expected)
+    }
+
     @Test("the default Notes Template asks for topics in Meeting order and Next steps at the end")
     func defaultTemplate() {
         let template = Template(fileName: "Notes", content: Template.defaultFileContent)

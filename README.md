@@ -22,7 +22,7 @@ It was built as an alternative to Granola for people whose company does not allo
 - **Transcribes locally** with OpenAI Whisper or NVIDIA Parakeet: the audio never leaves the Mac. Choose between Whisper Large v3 Turbo (default), its full version, Small, Parakeet v3 and Parakeet Ultra in *Settings → Transcription*.
 - **Summarises with a provider you pick**: llama.cpp, Ollama or LM Studio on your Mac, or a remote OpenAI-compatible API. You can also skip the Summary and keep only the Transcript.
 - **Writes Markdown into Obsidian**: one note per meeting, opened when the meeting starts so you can take notes, plus a separate Transcript file. Your own notes are kept and used to steer the Summary.
-- **Templates are Markdown files**: write the structure and instructions of the Summary in `~/.takku/templates/`, with any editor.
+- **Templates are Markdown files**: write the structure and instructions of the Summary in `~/.takku/templates/`, with any editor. With `full_text: true` a Template gets the whole meeting rewritten instead of summarised, for example the full text of a lecture.
 - **Screenshots in the note** (optional): one shortcut keeps what is on screen, under the point of the Summary it belongs to. The model never sees them.
 - **A Vocabulary for your jargon**: names and technical terms that recognition gets wrong are fixed in the Transcript and spelled right in the Summary.
 - **Hands each meeting to your own script** (optional): a Hook sends it to Notion, Confluence, git or anywhere else when it is ready.
@@ -111,6 +111,8 @@ The Transcript then shows *Mario Rossi (Speaker 1)* and the Summary uses the nam
 ### Templates
 
 A Template is a Markdown file in `~/.takku/templates/`: its text tells the model what to write and how. Takku creates a default *Notes* Template there at launch. Create others from *Settings → Templates*, then edit them with *Edit With*, in any text editor. Add `summary_language: en` (or `it`, `fr`, …) to its frontmatter to always get the Summary in that language; otherwise it follows the language of the meeting.
+
+Add `full_text: true` to get the whole meeting rewritten instead of summarised: cleaned up but complete, written ten minutes at a time so the end is as detailed as the beginning. Sections meant to sum up the whole text don't fit there, since every ten minutes gets the Template on its own.
 
 ### Vocabulary
 

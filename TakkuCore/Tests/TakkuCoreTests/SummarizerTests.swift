@@ -100,6 +100,89 @@ struct SummarizerTests {
         #expect(stub.message(0, "system")?.contains("The Transcript may stop mid-sentence") == true)
     }
 
+    @Test("a full-text Template rewrites the Transcript in blocks of about 10 minutes, each with the Template, joined in order without a merge")
+    func fullTextInBlocks() async throws {
+        let stub = StubTransport { index in "### Part \(index + 1)\nText \(index + 1) [\(index * 10):00]" }
+        let template = Template(fileName: "Sbobina", content: "---\nfull_text: true\n---\nWrite it all.")
+        // 75 paragraphs, one every 20 seconds: 25 minutes, so three blocks.
+        let full = transcript(paragraphs: 75)
+        let prompt = SummaryPrompt(template: template, personalNotes: "- exam!", transcript: full, meetingLanguage: "it")
+
+        // Even though it would fit in one request.
+        let summary = try await Summarizer(client: client(stub), maxContextTokens: 128_000).summarize(prompt).text
+
+        #expect(stub.requests.count == 3)
+        #expect(summary == "### Part 1\nText 1\n\n### Part 2\nText 2\n\n### Part 3\nText 3")
+        for index in 0..<3 {
+            let user = try #require(stub.message(index, "user"))
+            #expect(user.contains("Write it all."))
+            #expect(user.contains("- exam!"))
+            #expect(user.contains("part \(index + 1) of 3"))
+        }
+        // Every paragraph ends up in exactly one block, in order, a block per 10 minutes.
+        let sent = (0..<3).map { index in
+            stub.message(index, "user")!.components(separatedBy: "\n").filter { $0.hasPrefix("**[") }
+        }
+        #expect(sent.flatMap { $0 } == full.markdown.components(separatedBy: "\n").filter { $0.hasPrefix("**[") })
+        #expect(sent.map(\.count) == [30, 30, 15])
+        #expect(sent[1].first?.hasPrefix("**[10:00]") == true)
+    }
+
+    @Test("a full-text block goes on under the heading the previous one ended under, which is not repeated")
+    func fullTextHeadingCarriesOver() async throws {
+        let replies = [
+            "### Public debt\nFirst part. [00:10]",
+            "### Public debt\nStill debt. [10:05]\n\n### Ricardian equivalence\nAnother topic. [15:00]",
+            "Ricardo again. [20:30]",
+        ]
+        let stub = StubTransport { replies[$0] }
+        let template = Template(fileName: "Sbobina", content: "---\nfull_text: true\n---\nWrite it all.")
+        let prompt = SummaryPrompt(template: template, personalNotes: "", transcript: transcript(paragraphs: 75), meetingLanguage: "it")
+
+        let summary = try await Summarizer(client: client(stub), maxContextTokens: 128_000).summarize(prompt).text
+
+        #expect(summary == """
+            ### Public debt
+            First part.
+
+            Still debt.
+
+            ### Ricardian equivalence
+            Another topic.
+
+            Ricardo again.
+            """)
+        #expect(stub.message(0, "user")?.contains("previous part ended") == false)
+        #expect(stub.message(1, "user")?.contains("`### Public debt`") == true)
+        #expect(stub.message(2, "user")?.contains("`### Ricardian equivalence`") == true)
+    }
+
+    @Test("a full-text block leaves room for a reply as long as itself: with a small context the blocks are shorter")
+    func fullTextSmallContext() async throws {
+        let stub = StubTransport { _ in "Text" }
+        let template = Template(fileName: "Sbobina", content: "---\nfull_text: true\n---\nWrite it all.")
+        // A fast speaker: 10 minutes are about 27,000 characters, 9,000 tokens, more than the whole context.
+        let full = Transcript(utterances: (0..<75).map { index in
+            Utterance(
+                track: index.isMultiple(of: 2) ? .others : .me, start: Double(index * 20), end: Double(index * 20 + 15),
+                text: "Paragraph \(index): " + String(repeating: "words from the lecture ", count: 40)
+            )
+        })
+        let prompt = SummaryPrompt(template: template, personalNotes: "", transcript: full, meetingLanguage: "it")
+
+        _ = try await Summarizer(client: client(stub), maxContextTokens: 8_192).summarize(prompt)
+
+        #expect(stub.requests.count > 3)
+        let sent = (0..<stub.requests.count).map { index in
+            stub.message(index, "user")!.components(separatedBy: "\n").filter { $0.hasPrefix("**[") }
+        }
+        #expect(sent.flatMap { $0 } == full.markdown.components(separatedBy: "\n").filter { $0.hasPrefix("**[") })
+        for block in sent {
+            // Sent once and written again about as long: both fit.
+            #expect(block.joined(separator: "\n").count / 3 * 2 <= 8_192)
+        }
+    }
+
     @Test("if it does not fit it is summarised in blocks, in order, and the partial summaries are merged with the Template")
     func chunked() async throws {
         let stub = StubTransport { index in "summary \(index + 1)" }

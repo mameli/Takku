@@ -18,6 +18,8 @@ public enum SummaryLog {
             case group
             /// The partial summaries merged into the Summary.
             case merge
+            /// A block of the Transcript rewritten in full with a full-text Template.
+            case block
             /// The title for the note's rename.
             case title
         }

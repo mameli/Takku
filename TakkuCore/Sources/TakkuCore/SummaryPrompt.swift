@@ -105,6 +105,85 @@ public struct SummaryPrompt: Sendable {
         return groups.map { groupRequest($0.joined(separator: "\n\n")) }
     }
 
+    // MARK: - Full text
+
+    /// The Template asks for the whole Transcript rewritten, not summarised.
+    var isFullText: Bool { template.isFullText }
+
+    /// About this much of the Meeting per request with a full-text Template: as long as the first
+    /// ten minutes of a 75-minute lecture, which a single request kept at 71% against 37–49% for the rest.
+    static let fullTextBlockDuration: TimeInterval = 600
+
+    /// The Transcript in consecutive blocks of about `fullTextBlockDuration`, never splitting a
+    /// paragraph. The reply is about as long as its block, so a block takes at most half of the
+    /// context left after the rules: a small context gets shorter blocks.
+    func fullTextBlocks(maxContextTokens: Int) -> [[Paragraph]] {
+        let overhead = Self.estimatedTokens(fullTextRequest(part: 1, of: 2, paragraphs: [], previousHeading: "### Heading"))
+        let budget = max(1, (maxContextTokens - overhead) / 2 * 3)
+        var blocks: [[Paragraph]] = []
+        var blockStart: TimeInterval = 0
+        var size = 0
+        for paragraph in transcript.paragraphs {
+            let length = Transcript.markdown(of: [paragraph]).count + 1
+            if blocks.isEmpty || paragraph.start - blockStart >= Self.fullTextBlockDuration || size + length > budget {
+                blocks.append([])
+                blockStart = paragraph.start
+                size = 0
+            }
+            blocks[blocks.count - 1].append(paragraph)
+            size += length
+        }
+        return blocks
+    }
+
+    /// One block rewritten in full with the Template and all the rules of a single request.
+    /// `previousHeading`: the last heading of the part before, to go on under it.
+    func fullTextRequest(part: Int, of count: Int, paragraphs: [Paragraph], previousHeading: String?) -> [ChatMessage] {
+        var transcriptHeading = "# Transcript"
+        if count > 1 {
+            transcriptHeading += ", part \(part) of \(count)\n"
+                + "The Transcript is long: it is written part by part and the parts are joined in order. "
+                + "Write this part in full, following the Template, with no introduction or conclusion of the whole."
+            if let previousHeading {
+                transcriptHeading += " The previous part ended under the heading `\(previousHeading)`: "
+                    + "go on under it, without writing it again, until the topic changes."
+            }
+        }
+        return [
+            ChatMessage(role: .system, content: systemRules),
+            ChatMessage(role: .user, content: """
+                \(templateAndNotes)
+
+                \(transcriptHeading)
+                \(Transcript.markdown(of: paragraphs).trimmingCharacters(in: .newlines))
+                """),
+        ]
+    }
+
+    /// The last Markdown heading of a part, as written.
+    static func lastHeading(in part: String) -> String? {
+        part.components(separatedBy: "\n")
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .last { $0.hasPrefix("#") }
+    }
+
+    /// The parts written in full, in order; a part that opens with the heading the previous one
+    /// ended under (the model repeats it despite being told) does not write it again.
+    static func joiningFullTextParts(_ parts: [String]) -> String {
+        var joined: [String] = []
+        var previousHeading: String?
+        for part in parts {
+            var lines = part.trimmingCharacters(in: .whitespacesAndNewlines).components(separatedBy: "\n")
+            if let previousHeading, lines.first?.trimmingCharacters(in: .whitespaces) == previousHeading {
+                lines.removeFirst()
+            }
+            let text = lines.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+            if !text.isEmpty { joined.append(text) }
+            previousHeading = lastHeading(in: part) ?? previousHeading
+        }
+        return joined.joined(separator: "\n\n")
+    }
+
     /// Merges the partial summaries into a Summary that follows the Template.
     func mergeRequest(partials: [String]) -> [ChatMessage] {
         let parts = partials.enumerated()
