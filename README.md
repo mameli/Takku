@@ -114,6 +114,11 @@ A Template is a Markdown file in `~/.takku/templates/`: its text tells the model
 
 Add `full_text: true` to get the whole meeting rewritten instead of summarised: cleaned up but complete, written ten minutes at a time so the end is as detailed as the beginning. Sections meant to sum up the whole text don't fit there, since every ten minutes gets the Template on its own.
 
+Two examples for lectures, to copy into `~/.takku/templates/`:
+
+- [`examples/templates/Lecture.md`](examples/templates/Lecture.md): study notes, topic by topic, with definitions, formulas, what the lecturer stresses, a glossary and review questions.
+- [`examples/templates/Sbobina.md`](examples/templates/Sbobina.md): the full text of the lecture (*sbobina* in Italian), with `full_text: true`. Students' questions and remarks stay where they were asked, and misheard technical terms are fixed the same way throughout. Its examples of misheard terms come from an economics lecture: replace them with your subject's.
+
 ### Vocabulary
 
 Names, acronyms and technical words that recognition gets wrong go in `~/.takku/vocabulary.md`: open it from *Settings → Vocabulary → Edit Vocabulary With*. One entry per line: the correct term, then after `=` what is usually heard instead, then after `|` a short description, the last two optional:
