@@ -9,6 +9,7 @@ Rejected for now:
 - **Voice enrollment** (saving colleagues' voice embeddings to recognise them in later Meetings): voice embeddings are biometric data under the GDPR, and recording them for colleagues needs their consent.
 - **Reading the active speaker from Teams** through the Accessibility API, as Granola does: works only with the Teams desktop app, breaks when its interface changes, and needs another permission. It can be added later to name the Speakers by majority vote, on top of diarization.
 - **Microsoft Graph transcripts**: need the organiser to turn on Teams transcription and the tenant admin's consent, and the transcription is then Microsoft's, not local.
+- **Desert Ant's Who** in place of FluidAudio: on two Meetings it agreed on 98% of the words and was right more often on the rest, but its license is not free and Takku is meant to be. [The comparison](../who-vs-fluidaudio.md).
 
 ## Consequences
 
