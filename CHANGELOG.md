@@ -4,7 +4,7 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
-## Unreleased
+## 1.10.0 (2026-10-25)
 
 - **Import audio**: *Import audio…* in the menu turns a recording made elsewhere into a meeting, without recording it again: a voice memo from your iPhone, a lecture, an in-person meeting, a call recorded by another app. Any audio format macOS reads works (m4a, mp3, wav…), and videos too (mp4, mov: only the sound is used), several files at once. Takku transcribes it on your Mac, tells the voices apart and writes the Summary as for a call. The note takes the date and time the file was recorded, and the calendar event of that moment. The file itself is left where it is.
 - **Full text instead of a summary**: a Template with `full_text: true` in its header gets the whole meeting rewritten, cleaned up but complete, for example the full text of a lecture to study from. Takku writes it ten minutes at a time and joins the parts, so the end of a long lecture is as detailed as the beginning.
