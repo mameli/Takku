@@ -79,6 +79,18 @@ final class MeetingProcessor {
         enqueueProcessing(record)
     }
 
+    /// A Meeting made from an imported audio file: its Recording is already complete, so it is queued at once.
+    func meetingImported(
+        takkuID: UUID, startedAt: Date, templateName: String, summaryProfile: ProviderProfile?, noteURL: URL?
+    ) {
+        let record = ProcessingRecord(
+            takkuID: takkuID, startedAt: startedAt, status: .queued,
+            templateName: templateName, summaryProfile: summaryProfile, noteURL: noteURL
+        )
+        save(record)
+        enqueueProcessing(record)
+    }
+
     /// After a restart: resumes Processing left halfway and recovers Recordings interrupted
     /// by a crash, then deletes expired audio.
     func resumeAfterLaunch() {

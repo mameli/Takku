@@ -4,6 +4,10 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
+## Unreleased
+
+- **Import audio**: *Import audio…* in the menu turns a recording made elsewhere into a meeting, without recording it again: a voice memo from your iPhone, a lecture, an in-person meeting, a call recorded by another app. Any audio format macOS reads works (m4a, mp3, wav…), and videos too (mp4, mov: only the sound is used), several files at once. Takku transcribes it on your Mac, tells the voices apart and writes the Summary as for a call. The note takes the date and time the file was recorded, and the calendar event of that moment. The file itself is left where it is.
+
 ## 1.9.0 (2026-10-24)
 
 - **Takku Credit**: summaries with nothing to set up. Buy a pack at [takku.app/credit](https://takku.app/credit), paste the key from the email into the *Takku Credit* profile in *Settings → Summary Profiles*, then press *Use for Summaries*. The profile shows how much credit is left, and *Add credit…* buys another pack for the same key. It's optional and prepaid, with a model hosted in the EU: Takku stays free and works with any provider you choose. A new install finds it first among the ready-made profiles; if you already have profiles, press *Add Takku Credit*.

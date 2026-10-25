@@ -7,7 +7,7 @@ Personal macOS app that records meetings, produces a Transcript and a Summary wi
 ### Meeting and capture
 
 **Meeting** (`Meeting`):
-A call recorded with Takku, from start to stop. Everything else revolves around it.
+A call recorded with Takku, from start to stop, or an audio or video file recorded elsewhere and imported. Everything else revolves around it.
 _Avoid_: call, session
 
 **Recording** (`Recording`):

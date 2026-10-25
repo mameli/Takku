@@ -15,6 +15,7 @@ A macOS menu bar app that records your meetings, transcribes them **on your Mac*
 It was built as an alternative to Granola for people whose company does not allow meeting audio and text to leave the EU.
 
 - **Records both sides of a call**: your microphone and the system audio (Meet, Zoom, Teams, any app).
+- **Imports recordings made elsewhere**: a voice memo from your iPhone, a lecture, an in-person meeting, the video of a call. *Import audio…* in the menu, and the file becomes a meeting like the others.
 - **Tells the others apart**: the Transcript shows Speaker 1, Speaker 2… by voice, and the Summary names them when the call makes clear who they are, or when you name them in the note.
 - **Knows your calendar** (optional): the note takes the name and the participants of the event in progress.
 - **Suggests when to record** (optional): a notification when a call app takes the microphone, and another when the call seems over.

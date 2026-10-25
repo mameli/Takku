@@ -31,7 +31,7 @@ Personal use, one machine (M3 Pro, 18 GB, macOS 26). Meetings in Italian or Engl
 4. Vocabulary for the recognition engines (a prompt for Whisper; CTC boosting for Parakeet, tried and not usable in Italian). See ADR 0005.
 5. An LLM pass that corrects the Transcript before the Summary (only if the variants and the Summary prompt prove not enough)
 
-Dropped: Room capture mode (microphone only, for in-person meetings). Takku is for calls.
+Dropped: Room capture mode (microphone only, for in-person meetings). Takku is for calls; an in-person meeting recorded elsewhere is imported instead (see [Imported audio](#imported-audio)).
 
 ## Main flow
 
@@ -187,7 +187,7 @@ The folders are fixed: `Meetings/`, `Meetings/Transcripts/`, `Meetings/Screensho
 
 ## Menu bar
 
-- **Idle**: Start meeting (shortcut) · Template ▸ (hidden when the Summary Profile is *Transcript*) · Summary Profile ▸ (*Transcript* or a Profile) · Recent meetings ▸ (Open note · Retry, then Show all in Obsidian…) · "Takku x.y.z is available…" when there is one · Set up Takku… (only without a Vault) · Report a problem… · Settings… · Quit
+- **Idle**: Start meeting (shortcut) · Import audio… · Template ▸ (hidden when the Summary Profile is *Transcript*) · Summary Profile ▸ (*Transcript* or a Profile) · Recent meetings ▸ (Open note · Retry, then Show all in Obsidian…) · "Takku x.y.z is available…" when there is one · Set up Takku… (only without a Vault) · Report a problem… · Settings… · Quit
 - **Recording**: only a red dot in the bar (a star for a second after a Mark, a camera after a Screenshot); in the menu "Recording · duration" · the silent Track warnings · Stop · Mark this moment (⌃⌥⌘M) · Take a screenshot (⌃⌥⌘S) · "Marked moments: N" · "Screenshots: N" · Template ▸ · Settings…
 - **Processing**: hourglass in the bar; in the menu "Processing… (N more queued)"
 
@@ -335,6 +335,17 @@ The screen of a moment kept in the Meeting note, without the model ever seeing i
 - **Regeneration**: the list comes from the embeds in the Transcript in the Vault, and the new Summary places them again. An embed the user removed from the Transcript disappears from the note too; a file deleted while its embed stays shows as a broken link. Takku never deletes Screenshots from the Vault.
 - The Summary model never receives them, nor their names, neither for the Summary nor for the title (asked on the Summary without them). The Hook does not change: the embeds in the note and in the Transcript name files in `Meetings/Screenshots/`, and the Hook runs in the Vault.
 - If ⌃⌥⌘S is taken by another app, the menu says so, like for ⌃⌥⌘R.
+
+### Imported audio
+
+A recording made elsewhere (a voice memo on the iPhone, a lecture, a call recorded by another app, a video) becomes a Meeting without recording it again.
+
+- *Import audio…* in the menu, when idle: a panel to choose one or more audio or video files (any format macOS decodes: m4a, mp3, wav, aiff, caf, and the sound of mp4 and mov videos, e.g. a Zoom or Teams recording or a screen recording). Each file becomes its own Meeting, processed in the queue like a recorded one, with the Template and the Summary Profile chosen in the menu. While a file is being converted the bar shows the hourglass and the menu "Importing <file>…".
+- **Recording**: the audio is converted to mono 16 kHz AAC and written as the **Others** Track, in 5-minute Segments like a recorded one (same `SegmentedTrackWriter`), so Transcript, Speakers, Summary, Retry and retention work unchanged. There is no Me Track: the user's voice is one of the Speakers, and the Me level filter and the echo removal have nothing to do. The original file is only read, never moved or deleted.
+- **Start**: when the file was recorded, from its metadata (`AVAsset.creationDate`: Voice Memos and most recorders write it); without it, the file's creation date. The end is the start plus the duration. The note is named after the start, like a recorded Meeting.
+- **Meeting note**: created at once, not opened in the Editor (the "Summary ready" notification opens it). It takes the calendar event in progress at the start only when the start comes from the metadata: the creation date of a copied or downloaded file is when it was copied, and would pick an unrelated event.
+- A file with no sound macOS can decode (not audio or video, or a video without sound) is not imported: the menu shows "Not imported: Cannot read the audio of <file>." and no Recording folder is left behind.
+- Room capture (recording an in-person meeting with the microphone only) stays out: an in-person meeting recorded on the phone is imported instead.
 
 ### Call start and end
 

@@ -40,7 +40,7 @@ final class MeetingRecorder {
         return URL.applicationSupportDirectory.appending(path: "Takku/Recordings", directoryHint: .isDirectory)
     }
 
-    private static var segmentDuration: TimeInterval {
+    static var segmentDuration: TimeInterval {
         #if DEBUG
         // `--args -segmentSeconds 5` to test Segment rotation without waiting 5 minutes.
         let override = UserDefaults.standard.double(forKey: "segmentSeconds")

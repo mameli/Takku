@@ -45,7 +45,7 @@ private struct MenuBarLabel: View {
             Image(nsImage: .markIndicator)
         } else if controller.isInProgress {
             Image(nsImage: .recordingIndicator)
-        } else if controller.processor.pendingCount > 0 {
+        } else if controller.processor.pendingCount > 0 || controller.importingFileName != nil {
             Image(systemName: "hourglass")
         } else {
             Image("MenuBarIcon")
@@ -93,6 +93,12 @@ private struct MeetingMenu: View {
             }
         } else {
             Button("Start meeting    ⌃⌥⌘R") { Task { await controller.start() } }
+            if controller.importingFileName == nil {
+                Button("Import audio…") { controller.chooseAudioToImport() }
+            }
+        }
+        if let importingFileName = controller.importingFileName {
+            Text("Importing \(importingFileName)…")
         }
         if !controller.isHotKeyAvailable {
             Text("⌃⌥⌘R is already used by another app")

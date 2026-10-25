@@ -68,6 +68,8 @@ final class MeetingController {
     private(set) var microphoneDenied = false
     private(set) var recordingError: String?
     private(set) var lastRecordingDirectory: URL?
+    /// The audio file being imported, as the menu shows it; `nil` when none.
+    private(set) var importingFileName: String?
     /// Tracks of the Meeting in progress already notified as silent since the start.
     @ObservationIgnored private var silentTracksNotified: Set<Track> = []
     /// Template for the Meeting in progress or the next one; it can change until the stop.
@@ -374,6 +376,61 @@ final class MeetingController {
         }
     }
 
+    /// From the menu: audio or video files recorded elsewhere (a voice memo, a lecture, a call
+    /// recorded by another app), each made a Meeting and processed like a recorded one, with the Template and
+    /// Summary Profile chosen now.
+    func chooseAudioToImport() {
+        // Takku has no Dock icon: without activating it the panel would stay behind the others.
+        NSApplication.shared.activate()
+        let panel = NSOpenPanel()
+        // Video too (mp4, mov): only its audio is read.
+        panel.allowedContentTypes = [.audiovisualContent]
+        panel.allowsMultipleSelection = true
+        panel.message = String(localized: "Choose the recording of a meeting, a lecture or a voice memo, audio or video.")
+        panel.prompt = String(localized: "Import")
+        guard panel.runModal() == .OK else { return }
+        let urls = panel.urls
+        Task { await importAudio(urls) }
+    }
+
+    private func importAudio(_ urls: [URL]) async {
+        for url in urls {
+            importingFileName = url.lastPathComponent
+            do {
+                let imported = try await AudioFileImport.run(
+                    url, into: MeetingRecorder.recordingsDirectory, segmentDuration: MeetingRecorder.segmentDuration
+                )
+                let recording = imported.recording
+                logger.notice("Imported \(recording.segments.count) Segments as Meeting \(recording.meetingID, privacy: .public)")
+                lastRecordingDirectory = imported.directory
+                processor.meetingImported(
+                    takkuID: recording.meetingID, startedAt: recording.startedAt, templateName: templateName,
+                    summaryProfile: AppSettings.activeProviderProfile, noteURL: createImportedNote(imported)
+                )
+            } catch {
+                logger.error("Import failed: \(error, privacy: .public)")
+                recordingError = String(localized: "Not imported: \(error.localizedDescription)")
+            }
+        }
+        importingFileName = nil
+    }
+
+    /// The Meeting note of an imported file, not opened: the notification at the end of Processing
+    /// opens it. If it cannot be created here, Processing creates it at the end.
+    private func createImportedNote(_ imported: AudioFileImport.Imported) -> URL? {
+        guard let vault = Vault.configured else { return nil }
+        let startedAt = imported.recording.startedAt
+        // Only a date from the file's metadata says when it was recorded: the date of a copied or
+        // downloaded file would name the note after an unrelated event.
+        let event = imported.isRecordingDate ? MeetingCalendar.eventsInProgress(at: startedAt).first : nil
+        do {
+            return try vault.createMeetingNote(takkuID: imported.recording.meetingID, startedAt: startedAt, event: event)
+        } catch {
+            logger.error("Meeting note of the imported file not created: \(error, privacy: .public)")
+            return nil
+        }
+    }
+
     /// From the menu: the Meeting in progress is for another calendar event, or for none. The note
     /// takes its name (see `Vault.renameForEvent`) and, a moment later, its participants; Obsidian
     /// is shown the renamed note if it was showing it.
@@ -426,6 +483,7 @@ final class MeetingController {
     /// - `open Takku.app --args -smokeTestSeconds 20` records for N seconds (with
     ///   `-simulateMicrophoneChangeAfter 5` the microphone restarts after 5 seconds, 2 of them silent);
     /// - `open Takku.app --args -transcribeRecording <folder>` reprocesses a Recording of the data folder;
+    /// - `open Takku.app --args -importAudio <file>` imports an audio file as a Meeting and processes it;
     /// - `open Takku.app --args -regenerateMeeting <takku_id> -regenerateTemplate <name>` retries a Meeting
     ///   (only the Summary if its audio is deleted) with that Template (a failed one keeps its own)
     ///   and the active Profile;
@@ -433,7 +491,8 @@ final class MeetingController {
     ///   otherwise the test refuses to start; `-opensNotes NO` does not open the Editor.
     func runSmokeTestIfRequested() async {
         let arguments = UserDefaults.standard.volatileDomain(forName: UserDefaults.argumentDomain)
-        let isTest = ["smokeTestSeconds", "transcribeRecording", "regenerateMeeting"].contains { arguments[$0] != nil }
+        let isTest = ["smokeTestSeconds", "transcribeRecording", "regenerateMeeting", "importAudio"]
+            .contains { arguments[$0] != nil }
         let isIsolated = ["vaultPath", "testSummaryBaseURL", "dataDirectory"].allSatisfy { arguments[$0] != nil }
         guard !isTest || isIsolated else {
             // An automated test without isolation would write to the real Vault with the real Provider.
@@ -453,6 +512,12 @@ final class MeetingController {
         if let path = UserDefaults.standard.string(forKey: "transcribeRecording") {
             let url = await processor.reprocess(URL(filePath: path, directoryHint: .isDirectory))
             writeSmokeTestOutcome(url)
+            return
+        }
+        if let path = UserDefaults.standard.string(forKey: "importAudio") {
+            await importAudio([URL(filePath: path)])
+            await processor.waitUntilIdle()
+            writeSmokeTestOutcome(processor.lastNoteURL ?? processor.lastTranscriptURL)
             return
         }
 

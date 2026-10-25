@@ -11,6 +11,16 @@
         }
       }
     },
+    "%@ contains no audio.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ non contiene audio."
+          }
+        }
+      }
+    },
     "%@ pack": {
       "localizations": {
         "it": {
@@ -217,6 +227,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Le modifiche si salvano mentre scrivi. La chiave va nel Portachiavi quando premi Invio o Salva chiave."
+          }
+        }
+      }
+    },
+    "Choose the recording of a meeting, a lecture or a voice memo, audio or video.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scegli la registrazione di una riunione, di una lezione o un memo vocale, audio o video."
           }
         }
       }
@@ -481,6 +501,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Alto"
+          }
+        }
+      }
+    },
+    "Import": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importa"
+          }
+        }
+      }
+    },
+    "Import audio…": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importa audio…"
+          }
+        }
+      }
+    },
+    "Importing %@…": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importazione di %@…"
           }
         }
       }
@@ -904,6 +954,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nessuno"
+          }
+        }
+      }
+    },
+    "Not imported: %@": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non importato: %@"
           }
         }
       }
