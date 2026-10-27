@@ -8,6 +8,7 @@ struct TakkuApp: App {
 
     init() {
         _controller = State(initialValue: MeetingController())
+        DockPresence.start()
     }
 
     var body: some Scene {
