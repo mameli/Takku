@@ -4,7 +4,7 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
-## 1.11.1
+## 1.11.1 (2026-10-27)
 
 - **Takku's icon in Mission Control**: while Settings or the welcome window is open, Takku shows up like any other app, with its icon in the Dock, in ⌘-Tab and under its window in Mission Control (useful with *Group windows by application* on). When you close the window it goes back to the menu bar only.
 
