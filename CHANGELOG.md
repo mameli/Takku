@@ -4,6 +4,10 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
+## 1.11.1
+
+- **Takku's icon in Mission Control**: while Settings or the welcome window is open, Takku shows up like any other app, with its icon in the Dock, in ⌘-Tab and under its window in Mission Control (useful with *Group windows by application* on). When you close the window it goes back to the menu bar only.
+
 ## 1.11.0 (2026-10-27)
 
 - **Better at telling the voices apart**: Takku now uses NVIDIA's Nemotron 3 Diarization, free and on your Mac like the previous one. On real meetings it no longer splits one person into two Speakers, keeps apart someone who speaks rarely, and gives a Speaker to short replies that used to stay as *Others*. Up to 8 voices per meeting. The model is about 190 MB, downloaded once at the first meeting with other people; the previous one is deleted. *Retry* on a meeting that still has its audio tells its voices apart again.
