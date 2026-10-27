@@ -1,5 +1,8 @@
 import AVFoundation
 import TakkuCore
+import os
+
+private let logger = Logger(subsystem: "app.takku.takku", category: "import")
 
 /// An audio or video file recorded elsewhere (a voice memo, a lecture, a call recorded by another
 /// app) turned into the Recording of a new Meeting; of a video only the sound is read. Its audio becomes the Others Track, in Segments
@@ -16,6 +19,8 @@ enum AudioFileImport {
 
     /// Frames read at a time: about a second of audio.
     private static let framesPerRead: AVAudioFrameCount = 48_000
+    /// Frames read at a time after a read error: one AAC packet, the smallest stretch skipped.
+    private static let framesPerCarefulRead: AVAudioFrameCount = 1024
 
     static func run(_ url: URL, into recordingsDirectory: URL, segmentDuration: TimeInterval) async throws -> Imported {
         let name = url.lastPathComponent
@@ -41,14 +46,47 @@ enum AudioFileImport {
             guard let buffer = AVAudioPCMBuffer(pcmFormat: file.processingFormat, frameCapacity: framesPerRead) else {
                 throw CaptureError.unsupportedFormat(file.processingFormat.description)
             }
+            // macOS's decoder can fail in the middle of a file that other players read (seen on an
+            // AAC written by ffmpeg): the stretch is read again a packet at a time, which after the
+            // seek often works, and only the packets still unreadable are skipped. The writer fills
+            // what is skipped with silence.
+            var carefulUntil: AVAudioFramePosition = 0
+            var skipped: [Range<AVAudioFramePosition>] = []
+            var firstError: Error?
             while file.framePosition < file.length {
                 let position = file.framePosition
-                try file.read(into: buffer, frameCount: framesPerRead)
+                let isCareful = position < carefulUntil
+                do {
+                    try file.read(into: buffer, frameCount: isCareful ? framesPerCarefulRead : framesPerRead)
+                } catch {
+                    firstError = firstError ?? error
+                    if isCareful {
+                        let end = min(position + AVAudioFramePosition(framesPerCarefulRead), file.length)
+                        if let last = skipped.last, last.upperBound == position {
+                            skipped[skipped.count - 1] = last.lowerBound..<end
+                        } else {
+                            skipped.append(position..<end)
+                        }
+                        file.framePosition = end
+                    } else {
+                        carefulUntil = position + AVAudioFramePosition(framesPerRead)
+                        file.framePosition = position
+                    }
+                    continue
+                }
                 guard buffer.frameLength > 0 else { break }
                 writer.write(buffer, hostTime: AVAudioTime.hostTime(forSeconds: Double(position) / sampleRate))
             }
             let outcome = writer.finish()
             if let error = outcome.error { throw error }
+            if outcome.segments.isEmpty, let firstError { throw firstError }
+            for stretch in skipped {
+                let start = Double(stretch.lowerBound) / sampleRate, end = Double(stretch.upperBound) / sampleRate
+                logger.warning("Skipped unreadable audio in \(name, privacy: .public) from \(start, format: .fixed(precision: 3)) s to \(end, format: .fixed(precision: 3)) s")
+            }
+            if let firstError {
+                logger.notice("Read errors in \(name, privacy: .public), stretches skipped: \(skipped.count); the first error: \(firstError, privacy: .public)")
+            }
             let recording = Recording(
                 meetingID: meetingID, startedAt: startedAt,
                 endedAt: startedAt.addingTimeInterval(Double(file.length) / sampleRate), segments: outcome.segments
