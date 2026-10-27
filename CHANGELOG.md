@@ -4,7 +4,7 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
-## 1.11.0
+## 1.11.0 (2026-10-27)
 
 - **Better at telling the voices apart**: Takku now uses NVIDIA's Nemotron 3 Diarization, free and on your Mac like the previous one. On real meetings it no longer splits one person into two Speakers, keeps apart someone who speaks rarely, and gives a Speaker to short replies that used to stay as *Others*. Up to 8 voices per meeting. The model is about 190 MB, downloaded once at the first meeting with other people; the previous one is deleted. *Retry* on a meeting that still has its audio tells its voices apart again.
 - **Import audio** no longer gives up on a video whose sound macOS cannot read in a few points (seen on files exported with ffmpeg): it reads the rest and leaves a short silence where it could not.
