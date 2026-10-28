@@ -314,6 +314,40 @@ struct MeetingNoteTests {
         #expect(!note.content.contains("summary_provider"))
     }
 
+    @Test("a failed Regeneration keeps the previous Summary")
+    func failedRegenerationKeepsPreviousSummary() {
+        var note = MeetingNote.initial(takkuID: takkuID, startedAt: startedAt, timeZone: rome)
+        note.recordProcessing(
+            takkuID: takkuID, duration: 60, language: "it", transcriptName: "T",
+            summary: .written(text: "### Budget\nApproved.", template: "Notes", provider: "Mistral EU")
+        )
+        let previous = note.content
+
+        note.recordRegeneration(
+            takkuID: takkuID, transcriptName: "T",
+            summary: .failed(reason: "The provider is offline")
+        )
+
+        #expect(note.content == previous)
+    }
+
+    @Test("a failed Processing Retry keeps the previous Summary and metadata")
+    func failedProcessingRetryKeepsPreviousResult() {
+        var note = MeetingNote.initial(takkuID: takkuID, startedAt: startedAt, timeZone: rome)
+        note.recordProcessing(
+            takkuID: takkuID, duration: 60, language: "it", transcriptName: "T",
+            summary: .written(text: "### Budget\nApproved.", template: "Notes", provider: "Mistral EU")
+        )
+        let previous = note.content
+
+        note.recordProcessing(
+            takkuID: takkuID, duration: 120, language: "en", transcriptName: "New",
+            summary: .failed(reason: "The provider is offline")
+        )
+
+        #expect(note.content == previous)
+    }
+
     @Test("without a Summary Profile the managed section holds only the Transcript link, with no warning")
     func transcriptOnly() {
         var note = MeetingNote.initial(takkuID: takkuID, startedAt: startedAt, timeZone: rome)
@@ -377,6 +411,20 @@ struct MeetingNoteTests {
             ⚠️ Transcription failed: model unavailable.
             %% takku:end %%
             """))
+    }
+
+    @Test("a transcription failure during Retry keeps the previous result")
+    func failedTranscriptionRetryKeepsPreviousResult() {
+        var note = MeetingNote.initial(takkuID: takkuID, startedAt: startedAt, timeZone: rome)
+        note.recordProcessing(
+            takkuID: takkuID, duration: 60, language: "it", transcriptName: "T",
+            summary: .written(text: "Approved.", template: "Notes", provider: "Mistral EU")
+        )
+        let previous = note.content
+
+        note.recordFailure(takkuID: takkuID, reason: "Transcription failed: model unavailable.")
+
+        #expect(note.content == previous)
     }
 
     @Test("Regeneration changes Summary, Template and provider but keeps duration, language and Transcript")

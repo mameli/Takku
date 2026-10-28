@@ -41,6 +41,8 @@ final class MeetingController {
     var isScreenshotHotKeyAvailable: Bool { screenshotHotKey?.isRegistered ?? false }
     /// The Recording folder of the Meeting in progress, where its Marks and Screenshots are saved.
     private var currentDirectory: URL?
+    /// Captures that Processing must await so a Screenshot taken just before Stop is not lost.
+    @ObservationIgnored private var pendingScreenshots: [UUID: [Task<Void, Never>]] = [:]
     /// The Meeting note of the Meeting in progress, where Takku created it; `nil` if it was not created.
     private var currentNoteURL: URL?
     /// The calendar events the Meeting in progress can be for, the likeliest first: the menu
@@ -84,7 +86,14 @@ final class MeetingController {
         AppSettings.registerDefaults()
         models.keepPreviousDefault()
         AppSettings.addReadyMadeProfilesIfNeeded()
-        try? TakkuFolder.ensureDefaultTemplate()
+        #if DEBUG
+        let hasTestIsolation = !Self.isAutomatedTest || Self.hasAutomatedTestIsolation
+        #else
+        let hasTestIsolation = true
+        #endif
+        if hasTestIsolation {
+            try? TakkuFolder.ensureDefaultTemplate()
+        }
         processor = MeetingProcessor(transcriber: transcriber, diarizer: diarizer)
         templateName = AppSettings.defaultTemplate
         Notifications.shared.configure()
@@ -115,7 +124,9 @@ final class MeetingController {
                 )
             }
         }
-        processor.resumeAfterLaunch()
+        if hasTestIsolation {
+            processor.resumeAfterLaunch()
+        }
         startDailyCleanUp()
         updates.start()
         keepTimerLiveWithoutRebuildingMenus()
@@ -226,15 +237,17 @@ final class MeetingController {
     /// ⌃⌥⌘S or the menu: a Screenshot of the Meeting in progress, saved at once in the Recording
     /// folder, and a Mark at the same moment, made even when the Screenshot is not.
     func takeScreenshot() {
-        guard let startedAt, let currentDirectory else { return }
+        guard let takkuID = currentTakkuID, let startedAt, let currentDirectory else { return }
         let time = Date().timeIntervalSince(startedAt)
+        // A Screenshot is also a Mark, whether the asynchronous capture succeeds or not. Saving it
+        // now keeps it even if Stop or a new Meeting changes the in-memory state meanwhile.
+        saveMark(at: time)
         guard ScreenshotTaker.isAllowed() else {
             screenshotNotAllowed = true
-            saveMark(at: time)
             flash(\.isShowingMark)
             return
         }
-        Task {
+        let capture = Task {
             do {
                 // Before the indicator changes: the menu bar is in the image.
                 let jpeg = try await ScreenshotTaker.jpeg()
@@ -246,17 +259,20 @@ final class MeetingController {
                     taken: Set(taken.map { $0.deletingPathExtension().lastPathComponent })
                 )
                 try jpeg.write(to: folder.appending(path: "\(name).\(Screenshot.fileExtension)"), options: .atomic)
-                screenshotCount += 1
-                screenshotNotAllowed = false
-                flash(\.isShowingScreenshot)
+                if self.currentTakkuID == takkuID {
+                    screenshotCount += 1
+                    screenshotNotAllowed = false
+                    flash(\.isShowingScreenshot)
+                }
             } catch {
                 logger.error("Screenshot not taken: \(error, privacy: .public)")
-                recordingError = String(localized: "Screenshot not taken: \(error.localizedDescription)")
-                flash(\.isShowingMark)
+                if self.currentTakkuID == takkuID {
+                    recordingError = String(localized: "Screenshot not taken: \(error.localizedDescription)")
+                    flash(\.isShowingMark)
+                }
             }
-            // Not if the Meeting stopped meanwhile: `marks` would overwrite its marks.json.
-            if self.currentDirectory == currentDirectory { saveMark(at: time) }
         }
+        pendingScreenshots[takkuID, default: []].append(capture)
     }
 
     /// ⌃⌥⌘R: starts or stops the Meeting from any app.
@@ -342,8 +358,16 @@ final class MeetingController {
             logger.error("Closing the recording failed: \(error, privacy: .public)")
             recordingError = error.localizedDescription
         }
+        let captures = currentTakkuID.flatMap { pendingScreenshots.removeValue(forKey: $0) } ?? []
         if let currentTakkuID {
-            processor.meetingStopped(takkuID: currentTakkuID)
+            if captures.isEmpty {
+                processor.meetingStopped(takkuID: currentTakkuID)
+            } else {
+                Task {
+                    for capture in captures { await capture.value }
+                    processor.meetingStopped(takkuID: currentTakkuID)
+                }
+            }
         }
         currentTakkuID = nil
         currentDirectory = nil
@@ -488,16 +512,39 @@ final class MeetingController {
     /// - `open Takku.app --args -regenerateMeeting <takku_id> -regenerateTemplate <name>` retries a Meeting
     ///   (only the Summary if its audio is deleted) with that Template (a failed one keeps its own)
     ///   and the active Profile;
-    /// - always together with `-vaultPath <folder>`, `-testSummaryBaseURL <url>` and `-dataDirectory <folder>`,
-    ///   otherwise the test refuses to start; `-opensNotes NO` does not open the Editor.
-    func runSmokeTestIfRequested() async {
+    /// - always together with `-vaultPath <folder>`, `-testSummaryBaseURL <url>`, `-dataDirectory <folder>`
+    ///   and `-testTakkuFolder <folder>`, otherwise the test refuses to start; `-opensNotes NO` does not open
+    ///   the Editor.
+    private static var isAutomatedTest: Bool {
         let arguments = UserDefaults.standard.volatileDomain(forName: UserDefaults.argumentDomain)
-        let isTest = ["smokeTestSeconds", "transcribeRecording", "regenerateMeeting", "importAudio"]
+        return ["smokeTestSeconds", "transcribeRecording", "regenerateMeeting", "importAudio"]
             .contains { arguments[$0] != nil }
-        let isIsolated = ["vaultPath", "testSummaryBaseURL", "dataDirectory"].allSatisfy { arguments[$0] != nil }
-        guard !isTest || isIsolated else {
+    }
+
+    private static var hasAutomatedTestIsolation: Bool {
+        let arguments = UserDefaults.standard.volatileDomain(forName: UserDefaults.argumentDomain)
+        guard ["vaultPath", "testSummaryBaseURL", "dataDirectory", "testTakkuFolder"]
+            .allSatisfy({ arguments[$0] != nil }),
+            let dataPath = arguments["dataDirectory"] as? String,
+            let takkuPath = arguments["testTakkuFolder"] as? String
+        else { return false }
+        // The runner keeps Recordings and .takku side by side in the run's sandbox. Do not allow
+        // an explicit argument to point the test back at the real ~/.takku or another folder.
+        let normalized: (String) -> [String] = {
+            URL(filePath: $0, directoryHint: .isDirectory).resolvingSymlinksInPath().standardizedFileURL.pathComponents
+        }
+        let sandbox = normalized(URL(filePath: dataPath, directoryHint: .isDirectory)
+            .deletingLastPathComponent().path(percentEncoded: false))
+        let takkuFolder = normalized(takkuPath)
+        return takkuFolder.starts(with: sandbox)
+            && takkuFolder != sandbox
+            && takkuFolder != normalized(URL.homeDirectory.appending(path: ".takku").path(percentEncoded: false))
+    }
+
+    func runSmokeTestIfRequested() async {
+        guard !Self.isAutomatedTest || Self.hasAutomatedTestIsolation else {
             // An automated test without isolation would write to the real Vault with the real Provider.
-            recordingError = "Automated test refused: -vaultPath, -testSummaryBaseURL and -dataDirectory are required."
+            recordingError = "Automated test refused: -vaultPath, -testSummaryBaseURL, -dataDirectory and -testTakkuFolder are required."
             writeSmokeTestOutcome(nil)
             return
         }

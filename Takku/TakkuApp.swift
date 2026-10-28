@@ -227,6 +227,7 @@ private struct RecentMeetingsMenu: View {
             ForEach(controller.processor.recent) { meeting in
                 Menu(label(meeting)) {
                     Button("Open note") { controller.processor.openNote(meeting.id) }
+                    Button("Open Transcript") { controller.processor.openTranscript(meeting.id) }
                     // Only for a concluded Meeting: one being recorded or queued is left alone.
                     // It uses the Summary Profile chosen in this menu, and its Template too unless the
                     // Meeting failed: then it keeps its own.
