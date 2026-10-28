@@ -125,6 +125,20 @@ final class MeetingProcessor {
         Vault.openInEditor(note)
     }
 
+    /// The Transcript in the Vault, or its local copy when the Meeting has none there.
+    func openTranscript(_ takkuID: UUID) {
+        if let vault = Vault.configured, let transcript = vault.findTranscript(takkuID: takkuID) {
+            Vault.openInEditor(transcript)
+            return
+        }
+        let local = Self.directory(for: takkuID).appending(path: Transcript.recordingCopyFileName)
+        guard FileManager.default.fileExists(atPath: local.path(percentEncoded: false)) else {
+            lastError = String(localized: "Transcript not found.")
+            return
+        }
+        NSWorkspace.shared.open(local)
+    }
+
     /// In the Editor like the notes; the copy in the Recording folder (no Vault) with the default app.
     func openLastTranscript() {
         guard let url = lastTranscriptURL else { return }
@@ -287,7 +301,10 @@ final class MeetingProcessor {
                 transcript, language: language, into: noteURL, record: record, vault: vault, vocabulary: TakkuFolder.vocabulary()
             ) { noteURL, summary, speakerNames in
                 // Only the labels: the text of a Transcript already in the Vault is the user's.
-                if let relabeled = Transcript.relabeling(vaultFile: transcriptFile, names: speakerNames) {
+                // Read it again after the model wait, so edits made meanwhile are not restored
+                // to the older version used for the request.
+                let currentTranscriptFile = try String(contentsOf: transcriptURL, encoding: .utf8)
+                if let relabeled = Transcript.relabeling(vaultFile: currentTranscriptFile, names: speakerNames) {
                     try relabeled.write(to: transcriptURL, atomically: true, encoding: .utf8)
                 }
                 try vault.update(noteURL) {
@@ -323,7 +340,7 @@ final class MeetingProcessor {
             logger.error("\(reason, privacy: .public)")
         }
         Notifications.shared.processingFinished(
-            noteName: noteName, note: record.noteURL, hasVault: Vault.configured != nil,
+            noteName: noteName, note: record.noteURL ?? lastTranscriptURL, hasVault: Vault.configured != nil,
             hasSummary: record.summaryProfile != nil, problems: problems, warnings: warnings
         )
         save(record)
@@ -409,6 +426,12 @@ final class MeetingProcessor {
             await writeSummaryLog(log, summary: summary, noteURL: rename.url, template: template.name, record: record)
         }
         if rename.url != noteURL { try? await Task.sleep(for: Vault.settleAfterRename) }
+        // Do not replace a good Transcript and Summary with a failed Retry. The error stays in
+        // Processing's status and notification; the previous result remains usable in the Vault.
+        if case .failed(let reason) = summary,
+           (try? vault.meetingNote(at: rename.url))?.hasSuccessfulOutcome == true {
+            return (rename.url, String(localized: "Summary not generated: \(reason)"))
+        }
         try writeNote(rename.url, summary, speakerNames)
         if rename.follow { RenamedNoteFollower.follow(rename.url, in: vault) }
         if case .failed(let reason) = summary {

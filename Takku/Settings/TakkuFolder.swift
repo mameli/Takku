@@ -6,7 +6,15 @@ import TakkuCore
 /// user's editor (*Edit With* in Settings). Also the user's Hook (`hooks/`), never created by Takku,
 /// and the Summary log (`summary-log/`), which Takku writes and never reads.
 enum TakkuFolder {
-    static let root = URL.homeDirectory.appending(path: ".takku", directoryHint: .isDirectory)
+    static var root: URL {
+        #if DEBUG
+        // Automated tests: Templates, Vocabulary, Summary log and Hooks stay outside the real folder.
+        if let path = UserDefaults.standard.string(forKey: "testTakkuFolder") {
+            return URL(filePath: path, directoryHint: .isDirectory)
+        }
+        #endif
+        return URL.homeDirectory.appending(path: ".takku", directoryHint: .isDirectory)
+    }
     static var templatesFolder: URL { root.appending(path: "templates", directoryHint: .isDirectory) }
     static var vocabularyURL: URL { root.appending(path: "vocabulary.md") }
     static var hooksFolder: URL { root.appending(path: "hooks", directoryHint: .isDirectory) }

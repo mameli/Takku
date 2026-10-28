@@ -201,8 +201,9 @@ struct ScreenshotTests {
             **[00:03]** ![[a.jpg]]
             """))
 
+        let previous = note.content
         note.recordRegeneration(takkuID: takkuID, transcriptName: "T", summary: .failed(reason: "-"))
-        #expect(!note.content.contains("Screenshots"))
+        #expect(note.content == previous)
     }
 
     @Test("saved in the Recording folder and listed in time order; without the folder there are none")

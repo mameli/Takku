@@ -55,7 +55,8 @@ public struct Paragraph: Equatable, Sendable {
 
 /// The spoken text of a Meeting, with the two Tracks merged in time order.
 public struct Transcript: Sendable {
-    /// The copy of the Transcript in the Recording folder (deleted together with the audio).
+    /// The copy of the Transcript in the Recording folder. It expires with the audio only when
+    /// the Vault holds another copy; without one, retention must not delete the only Transcript.
     public static let recordingCopyFileName = "transcript.md"
 
     /// After a longer pause the same Track starts a new paragraph with a new timestamp.

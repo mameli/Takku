@@ -12,9 +12,10 @@ enum RecordingStorage {
     }
 
     /// Deletes the audio files of concluded Recordings older than `days` days (0: all of them; `nil`: none),
-    /// with the transcription caches, the Screenshots (already in the Vault) and the `transcript.md` copy. Meetings still pending are
-    /// kept. The manifests stay: the Meeting stays among the recent ones and Retry makes the
-    /// Summary again from the Transcript in the Vault.
+    /// with the transcription caches and the Screenshots already in the Vault. Meetings still
+    /// pending are kept. The manifests stay: the Meeting stays among the recent ones and Retry
+    /// makes the Summary again from the Transcript in the Vault. The local `transcript.md` is
+    /// deleted too, unless it is the only copy left (Meetings processed without a Vault).
     static func deleteAudio(olderThanDays days: Int?) {
         let folders = (try? FileManager.default.contentsOfDirectory(
             at: MeetingRecorder.recordingsDirectory, includingPropertiesForKeys: nil
@@ -22,11 +23,19 @@ enum RecordingStorage {
         let items = folders.compactMap { folder -> Retention.Item? in
             guard let takkuID = UUID(uuidString: folder.lastPathComponent) else { return nil }
             guard let record = try? ProcessingRecord.load(fromFolder: folder) else { return nil }
-            return Retention.Item(takkuID: takkuID, startedAt: record.startedAt, status: record.status)
+            // An imported file keeps its original date in the Meeting note and calendar, but its
+            // local copy must get a full retention period from when it was imported.
+            let retainedSince = (try? folder.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? record.startedAt
+            return Retention.Item(takkuID: takkuID, startedAt: retainedSince, status: record.status)
         }
-        let kept = Set([Recording.fileName, ProcessingRecord.fileName] + Track.allCases.map(Segment.listFileName(for:)))
+        let manifests = Set([Recording.fileName, ProcessingRecord.fileName] + Track.allCases.map(Segment.listFileName(for:)))
+        let vault = Vault.configured
         for takkuID in Retention.expired(items, now: Date(), days: days) {
             let folder = MeetingProcessor.directory(for: takkuID)
+            var kept = manifests
+            if vault?.findTranscript(takkuID: takkuID) == nil {
+                kept.insert(Transcript.recordingCopyFileName)
+            }
             let files = (try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)) ?? []
             for file in files where !kept.contains(file.lastPathComponent) {
                 try? FileManager.default.removeItem(at: file)

@@ -908,6 +908,16 @@
         }
       }
     },
+    "Transcript not found.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transcript non trovato."
+          }
+        }
+      }
+    },
     "Meeting state not saved to disk: a restart now would not resume it. %@": {
       "localizations": {
         "it": {
@@ -1125,6 +1135,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Apri nota"
+          }
+        }
+      }
+    },
+    "Open Transcript": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apri Transcript"
           }
         }
       }

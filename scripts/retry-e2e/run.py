@@ -23,9 +23,11 @@ class Run:
         shutil.rmtree(self.base, ignore_errors=True)
         self.data = os.path.join(self.base, "Recordings")
         self.vault = os.path.join(self.base, "vault")
+        self.takku_folder = os.path.join(self.base, "takku")
         self.folder = os.path.join(self.data, recording)
         os.makedirs(self.vault)
         os.makedirs(self.data)
+        os.makedirs(self.takku_folder)
         subprocess.run(["/bin/cp", "-c", "-R", os.path.join(REAL, recording), self.folder], check=True)
         # The copied record points at the real note: without it the test makes its own note in the test Vault.
         record = os.path.join(self.folder, "processing.json")
@@ -61,6 +63,7 @@ class Run:
             os.remove(outcome)
         before = {p: os.path.getmtime(p) for p in self.caches()}
         argv = [APP, "-vaultPath", self.vault, "-dataDirectory", self.data,
+                "-testTakkuFolder", self.takku_folder,
                 "-testSummaryBaseURL", f"http://127.0.0.1:{PORT}{llm}", "-opensNotes", "NO",
                 "-useCalendar", "NO", "-suggestCalls", "NO", "-ApplePersistenceIgnoreState", "YES", *args]
         if mode == "transcribe":

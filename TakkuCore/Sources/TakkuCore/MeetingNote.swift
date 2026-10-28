@@ -151,6 +151,17 @@ public struct MeetingNote: Equatable, Sendable {
         return kept.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+    /// Whether the Managed section holds a completed Summary or Transcript, rather than the
+    /// recording placeholder, an error or no result. A failed Retry must leave that result intact.
+    public var hasSuccessfulOutcome: Bool {
+        let markdown = MarkdownLines(content)
+        guard let managed = Self.managedRange(in: markdown) else { return false }
+        let body = markdown.lines[(managed.lowerBound + 1)..<managed.upperBound]
+            .joined(separator: "\n")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        return !body.isEmpty && !body.hasPrefix("⚠️") && !body.hasPrefix("⏺")
+    }
+
     /// Records the outcome of Processing: Takku's frontmatter keys (restoring `takku_id` if the
     /// user deleted it), the Summary or the failure reason, the Screenshots and the Transcript link
     /// in the managed section.
@@ -158,6 +169,7 @@ public struct MeetingNote: Equatable, Sendable {
         takkuID: UUID, duration: TimeInterval, language: String?, transcriptName: String,
         summary: SummaryOutcome, screenshots: [Screenshot] = []
     ) {
+        if case .failed = summary, hasSuccessfulOutcome { return }
         var values: [(key: TakkuKey, value: String)] = [
             (.takkuID, takkuID.uuidString),
             (.duration, Self.durationValue(duration)),
@@ -176,8 +188,10 @@ public struct MeetingNote: Equatable, Sendable {
         recordSummary(takkuID: takkuID, transcriptName: transcriptName, summary: summary, screenshots: screenshots)
     }
 
-    /// Records a failed Processing: the reason appears in the Managed section.
+    /// Records a failed Processing: the reason appears in the Managed section. A Meeting that
+    /// already had a successful outcome keeps it; the failure remains visible in the app.
     public mutating func recordFailure(takkuID: UUID, reason: String) {
+        guard !hasSuccessfulOutcome else { return }
         setFrontmatter([(.takkuID, takkuID.uuidString)])
         replaceManagedSection(with: "⚠️ \(reason)")
     }
@@ -241,6 +255,7 @@ public struct MeetingNote: Equatable, Sendable {
     private mutating func recordSummary(
         takkuID: UUID, transcriptName: String, summary: SummaryOutcome, screenshots: [Screenshot]
     ) {
+        if case .failed = summary, hasSuccessfulOutcome { return }
         var values: [(key: TakkuKey, value: String)] = [(.takkuID, takkuID.uuidString)]
         var blocks: [String] = []
         switch summary {
