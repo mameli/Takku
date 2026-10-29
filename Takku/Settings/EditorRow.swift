@@ -77,3 +77,18 @@ struct EditorRow: View {
         !chosen.isEmpty && chosen != Editor.obsidianBundleID && Editor.appURL(chosen) == nil
     }
 }
+
+/// Whether the Meeting note opens in the Editor when the Meeting starts; otherwise *Open note* in
+/// the menu opens it.
+struct OpenNoteAtStartToggle: View {
+    @AppStorage(AppSettings.opensNoteAtStartKey) private var opensNoteAtStart = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Toggle("Open the note when a meeting starts", isOn: $opensNoteAtStart)
+            Text("To write Personal notes during the meeting. When off, open it with Open note in the menu.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+}

@@ -154,6 +154,7 @@ private struct NotesTab: View {
                     }
                 }
                 EditorRow()
+                OpenNoteAtStartToggle()
             }
             TemplatesSection(defaultTemplate: $defaultTemplate)
             VocabularySection()

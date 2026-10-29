@@ -281,6 +281,24 @@ final class MeetingController {
         pendingScreenshots[takkuID, default: []].append(capture)
     }
 
+    /// Whether the Meeting in progress has its note in the Vault, to open from the menu.
+    var hasNote: Bool { currentNoteURL != nil }
+
+    /// From the menu: the note of the Meeting in progress, found again if it was renamed after
+    /// another calendar event.
+    func openNote() {
+        guard let currentTakkuID, let vault = Vault.configured else { return }
+        do {
+            guard let note = try vault.findMeetingNote(takkuID: currentTakkuID, expected: currentNoteURL) else {
+                recordingError = String(localized: "Meeting note not found in the Vault.")
+                return
+            }
+            Vault.openInEditor(note)
+        } catch {
+            recordingError = error.localizedDescription
+        }
+    }
+
     /// ⌃⌥⌘R: starts or stops the Meeting from any app.
     func toggle() {
         if isInProgress {
@@ -465,8 +483,8 @@ final class MeetingController {
         )
     }
 
-    /// Creates the Meeting note in the Vault and opens it in the Editor. If that fails the Meeting
-    /// goes on anyway: the note will be created at the end of Processing.
+    /// Creates the Meeting note in the Vault and, if chosen in Settings, opens it in the Editor. If
+    /// that fails the Meeting goes on anyway: the note will be created at the end of Processing.
     private func createMeetingNote(takkuID: UUID, startedAt: Date) -> URL? {
         guard let vault = Vault.configured else { return nil }
         do {
@@ -476,7 +494,7 @@ final class MeetingController {
             // Only with a note: without one there is nothing to point at another event.
             calendarEvents = events
             calendarEvent = events.first
-            if AppSettings.opensNotes {
+            if AppSettings.opensNotes, AppSettings.opensNoteAtStart {
                 Vault.openNewFileInEditor(url)
             }
             return url

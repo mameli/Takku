@@ -15,6 +15,8 @@ enum AppSettings {
     /// Also used by `@AppStorage` in Settings.
     static let checkForUpdatesKey = "checkForUpdates"
     private static let opensNotesKey = "opensNotes"
+    /// Also used by `@AppStorage` in Settings.
+    static let opensNoteAtStartKey = "opensNoteAtStart"
     /// Bundle ID of the Editor chosen in Settings, empty if never chosen. Also used by `@AppStorage`
     /// in Settings and in the menu.
     static let editorKey = "editor"
@@ -117,6 +119,12 @@ enum AppSettings {
     /// Off only in automated tests, which write to a test Vault no Editor should open.
     static var opensNotes: Bool {
         UserDefaults.standard.bool(forKey: opensNotesKey)
+    }
+
+    /// Open the Meeting note in the Editor as soon as the Meeting starts. Off by default: the note
+    /// is opened from the menu (*Open note*) when wanted.
+    static var opensNoteAtStart: Bool {
+        UserDefaults.standard.bool(forKey: opensNoteAtStartKey)
     }
 
     /// See `Editor.current` for the Editor actually in use.

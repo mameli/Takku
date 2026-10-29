@@ -1018,6 +1018,16 @@
         }
       }
     },
+    "Open the note when a meeting starts": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apri la nota quando inizia una riunione"
+          }
+        }
+      }
+    },
     "Play a few seconds of this voice. Play again for another passage.": {
       "localizations": {
         "it": {
@@ -1114,6 +1124,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Takku ricostruirà il Transcript dall'audio, con il Vocabolario e i nomi degli speaker attuali, riusando la trascrizione già salvata dove è ancora valida. Se l'elaborazione riesce, le modifiche che hai fatto al Transcript attuale saranno sostituite."
+          }
+        }
+      }
+    },
+    "To write Personal notes during the meeting. When off, open it with Open note in the menu.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Per scrivere le note personali durante la riunione. Se è spento, aprila con Apri nota nel menu."
           }
         }
       }

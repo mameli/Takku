@@ -84,6 +84,9 @@ private struct MeetingMenu: View {
                     controller.takeScreenshot()
                 }
             }
+            if controller.hasNote {
+                Button("Open note") { controller.openNote() }
+            }
             if !controller.marks.isEmpty {
                 Text("Marked moments: \(controller.marks.count)")
             }
