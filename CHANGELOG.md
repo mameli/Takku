@@ -4,6 +4,15 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
+## Unreleased
+
+- **Recent meetings, clearer actions**: *Retry* is replaced by *Regenerate Summary*, which always writes the Summary again from the Transcript in your Vault (your corrections included, even while the audio is still there), and *Reprocess Recording…*, which transcribes the audio again from scratch and tells the voices apart again, after asking, because it replaces the edits you made to the Transcript. *Open Transcript* opens it directly, and a failed meeting shows its error in its own submenu.
+- **Name speakers**: *Recent meetings → Name speakers…* opens a small window with a field for each Speaker of the Transcript and the calendar's invited participants as suggestions. *Save and Regenerate* writes the names in the note and a new Summary. Editing `speakers` in the frontmatter still works.
+- **What Takku is doing**: while it works, the menu shows the meeting and its phase: transcribing (part N of M), identifying speakers, writing the Summary (part N of M on a long meeting), merging it. Importing several files shows which one is being converted.
+- **A failed attempt no longer erases a good Summary**: if *Regenerate Summary* or *Reprocess Recording…* fails (no internet, provider error), the previous Summary and Transcript stay in the Vault; the error is in the menu and in the notification.
+- **Imported files**: the note says the recording is queued instead of *Recording in progress*; an old memo imported now appears first in *Recent meetings*, and its audio is kept for the full period from the import, not from when it was recorded. If parts of the file could not be read, the notification says which seconds were skipped.
+- **Safer with your data**: if Obsidian Sync leaves two copies of a note or Transcript with the same ID, Takku tells you which files instead of updating one at random. Without a Vault the Transcript is never deleted with the audio, since it is the only copy, and the notification opens it. A damaged Recording folder is reported and its audio kept, never cleaned up. A screenshot taken just before *Stop* is no longer lost.
+
 ## 1.11.1 (2026-10-27)
 
 - **Takku's icon in Mission Control**: while Settings or the welcome window is open, Takku shows up like any other app, with its icon in the Dock, in ⌘-Tab and under its window in Mission Control (useful with *Group windows by application* on). When you close the window it goes back to the menu bar only.

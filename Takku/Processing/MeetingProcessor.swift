@@ -130,11 +130,13 @@ final class MeetingProcessor {
 
     /// A Meeting made from an imported audio file: its Recording is already complete, so it is queued at once.
     func meetingImported(
-        takkuID: UUID, startedAt: Date, templateName: String, summaryProfile: ProviderProfile?, noteURL: URL?
+        takkuID: UUID, startedAt: Date, templateName: String, summaryProfile: ProviderProfile?, noteURL: URL?,
+        warnings: [String]
     ) {
         let record = ProcessingRecord(
             takkuID: takkuID, startedAt: startedAt, status: .queued,
-            templateName: templateName, summaryProfile: summaryProfile, noteURL: noteURL
+            templateName: templateName, summaryProfile: summaryProfile, noteURL: noteURL,
+            importedAt: Date(), importWarnings: warnings
         )
         save(record)
         enqueueProcessing(record)
@@ -165,20 +167,31 @@ final class MeetingProcessor {
     // MARK: - Actions from the Recent meetings menu
 
     func openNote(_ takkuID: UUID) {
-        guard let vault = Vault.configured,
-              let note = vault.findMeetingNote(takkuID: takkuID, expected: record(takkuID)?.noteURL)
-        else {
-            lastError = String(localized: "Meeting note not found in the Vault.")
-            return
+        do {
+            guard let vault = Vault.configured,
+                  let note = try vault.findMeetingNote(takkuID: takkuID, expected: record(takkuID)?.noteURL)
+            else {
+                lastError = String(localized: "Meeting note not found in the Vault.")
+                return
+            }
+            Vault.openInEditor(note)
+        } catch {
+            lastError = error.localizedDescription
         }
-        Vault.openInEditor(note)
     }
 
     /// The Transcript in the Vault, or its local copy when the Meeting has none there.
     func openTranscript(_ takkuID: UUID) {
-        if let vault = Vault.configured, let transcript = vault.findTranscript(takkuID: takkuID) {
-            Vault.openInEditor(transcript)
-            return
+        if let vault = Vault.configured {
+            do {
+                if let transcript = try vault.findTranscript(takkuID: takkuID, expectedNote: record(takkuID)?.noteURL) {
+                    Vault.openInEditor(transcript)
+                    return
+                }
+            } catch {
+                lastError = error.localizedDescription
+                return
+            }
         }
         let local = Self.directory(for: takkuID).appending(path: Transcript.recordingCopyFileName)
         guard FileManager.default.fileExists(atPath: local.path(percentEncoded: false)) else {
@@ -191,22 +204,27 @@ final class MeetingProcessor {
     /// The Speakers found in the current Transcript, with the names and calendar participants
     /// already in the Meeting note.
     func speakerNamingContext(_ takkuID: UUID) -> SpeakerNamingContext? {
-        guard let vault = Vault.configured,
-              let noteURL = vault.findMeetingNote(takkuID: takkuID, expected: record(takkuID)?.noteURL),
-              let transcriptURL = vault.findTranscript(takkuID: takkuID),
-              let transcriptFile = try? String(contentsOf: transcriptURL, encoding: .utf8),
-              let note = try? vault.meetingNote(at: noteURL)
-        else {
-            lastError = String(localized: "Meeting note or Transcript not found in the Vault.")
+        do {
+            guard let vault = Vault.configured,
+                  let noteURL = try vault.findMeetingNote(takkuID: takkuID, expected: record(takkuID)?.noteURL),
+                  let transcriptURL = try vault.findTranscript(takkuID: takkuID, expectedNote: noteURL),
+                  let transcriptFile = try? String(contentsOf: transcriptURL, encoding: .utf8),
+                  let note = try? vault.meetingNote(at: noteURL)
+            else {
+                lastError = String(localized: "Meeting note or Transcript not found in the Vault.")
+                return nil
+            }
+            let (transcript, _) = Transcript.parse(vaultFile: transcriptFile)
+            let speakers = Array(Set(transcript.paragraphs.compactMap(\.speaker))).sorted()
+            guard !speakers.isEmpty else {
+                lastError = String(localized: "No Speakers found in the Transcript.")
+                return nil
+            }
+            return SpeakerNamingContext(speakers: speakers, names: note.speakerNames, participants: note.participants)
+        } catch {
+            lastError = error.localizedDescription
             return nil
         }
-        let (transcript, _) = Transcript.parse(vaultFile: transcriptFile)
-        let speakers = Array(Set(transcript.paragraphs.compactMap(\.speaker))).sorted()
-        guard !speakers.isEmpty else {
-            lastError = String(localized: "No Speakers found in the Transcript.")
-            return nil
-        }
-        return SpeakerNamingContext(speakers: speakers, names: note.speakerNames, participants: note.participants)
     }
 
     /// Saves the user-owned Speaker names, then regenerates from the current Transcript so the
@@ -214,13 +232,13 @@ final class MeetingProcessor {
     func saveSpeakerNames(
         _ names: [Int: String], for takkuID: UUID, templateName: String, profile: ProviderProfile?
     ) -> Bool {
-        guard let vault = Vault.configured,
-              let noteURL = vault.findMeetingNote(takkuID: takkuID, expected: record(takkuID)?.noteURL)
-        else {
-            lastError = String(localized: "Meeting note not found in the Vault.")
-            return false
-        }
         do {
+            guard let vault = Vault.configured,
+                  let noteURL = try vault.findMeetingNote(takkuID: takkuID, expected: record(takkuID)?.noteURL)
+            else {
+                lastError = String(localized: "Meeting note not found in the Vault.")
+                return false
+            }
             try vault.update(noteURL) { $0.replaceSpeakerNames(with: names) }
         } catch {
             lastError = String(localized: "Speaker names not saved: \(error.localizedDescription)")
@@ -390,7 +408,7 @@ final class MeetingProcessor {
         var problems: [String] = []
         // An unreadable Segment (e.g. the one open during a crash) leaves a gap in the
         // Transcript but does not prevent the Summary: it is a warning, not a failure.
-        var warnings: [String] = []
+        var warnings = record.importWarnings
         let finished: MeetingTranscription.Finished?
         do {
             finished = try await transcription.finish(
@@ -401,6 +419,9 @@ final class MeetingProcessor {
             }
             if let speakersProblem = finished?.speakersProblem {
                 warnings.append(String(localized: "Speakers not told apart: \(speakersProblem)"))
+            }
+            if let cacheProblems = finished?.cacheProblems, !cacheProblems.isEmpty {
+                warnings.append(String(localized: "Cache not saved; this Processing's result is preserved: \(cacheProblems.joined(separator: "; "))"))
             }
             lastTranscriptURL = finished?.url
             logger.notice("Transcript ready after \(secondsSince(started), privacy: .public)")
@@ -434,12 +455,24 @@ final class MeetingProcessor {
         let started = ContinuousClock.now
         show(.writingSummary(part: 0, total: 0), for: record)
         logger.notice("Regeneration \(takkuID, privacy: .public) started")
-        guard let vault = Vault.configured,
-              var noteURL = vault.findMeetingNote(takkuID: takkuID, expected: record.noteURL),
-              let transcriptURL = vault.findTranscript(takkuID: takkuID),
-              let transcriptFile = try? String(contentsOf: transcriptURL, encoding: .utf8)
-        else {
-            finish(&record, problems: [String(localized: "Retry not possible: the audio is deleted and the Meeting note or Transcript is not in the Vault.")], warnings: [], started: started)
+        let vault: Vault
+        var noteURL: URL
+        let transcriptURL: URL
+        let transcriptFile: String
+        do {
+            guard let configured = Vault.configured,
+                  let foundNote = try configured.findMeetingNote(takkuID: takkuID, expected: record.noteURL),
+                  let foundTranscript = try configured.findTranscript(takkuID: takkuID, expectedNote: foundNote)
+            else {
+                finish(&record, problems: [String(localized: "Retry not possible: the audio is deleted and the Meeting note or Transcript is not in the Vault.")], warnings: [], started: started)
+                return
+            }
+            vault = configured
+            noteURL = foundNote
+            transcriptURL = foundTranscript
+            transcriptFile = try String(contentsOf: transcriptURL, encoding: .utf8)
+        } catch {
+            finish(&record, problems: [String(localized: "Retry failed: \(error.localizedDescription)")], warnings: [], started: started)
             return
         }
 
@@ -500,9 +533,15 @@ final class MeetingProcessor {
         currentTitle = nil
         currentPhase = nil
         // After every completed Processing, Retry included, so the Hook can update what it sent.
-        if problems.isEmpty, HookRunner.isInstalled, let vault = Vault.configured, let noteURL = record.noteURL,
-           let transcriptURL = vault.findTranscript(takkuID: record.takkuID) {
-            HookRunner.shared.run(note: noteURL, transcript: transcriptURL, vault: vault.root)
+        if problems.isEmpty, HookRunner.isInstalled, let vault = Vault.configured, let noteURL = record.noteURL {
+            do {
+                if let transcriptURL = try vault.findTranscript(takkuID: record.takkuID, expectedNote: noteURL) {
+                    HookRunner.shared.run(note: noteURL, transcript: transcriptURL, vault: vault.root)
+                }
+            } catch {
+                lastError = String(localized: "Hook not run: \(error.localizedDescription)")
+                logger.error("Hook not run: \(error, privacy: .public)")
+            }
         }
     }
 
@@ -526,6 +565,9 @@ final class MeetingProcessor {
             return (noteURL, nil)
         }
 
+        // Resolve Sync duplicates before a Summary wait or provisional rename: a conflict must not
+        // strand processing.json at the old note path or do expensive work that cannot be committed.
+        _ = try vault.findTranscript(takkuID: record.takkuID, expectedNote: noteURL)
         let directory = Self.directory(for: record.takkuID)
         let screenshots = Screenshot.load(fromFolder: directory)
         try vault.copyScreenshots(screenshots, fromRecordingFolder: directory)
@@ -538,6 +580,7 @@ final class MeetingProcessor {
             let transcriptURL = try vault.writeTranscript(
                 transcript.naming(speakerNames),
                 takkuID: record.takkuID,
+                meetingNote: noteURL,
                 meetingNoteName: noteURL.deletingPathExtension().lastPathComponent,
                 language: finished.language
             )
@@ -698,7 +741,10 @@ final class MeetingProcessor {
     // MARK: - State on disk
 
     private func record(_ takkuID: UUID) -> ProcessingRecord? {
-        try? ProcessingRecord.load(fromFolder: Self.directory(for: takkuID))
+        guard let record = try? ProcessingRecord.load(fromFolder: Self.directory(for: takkuID)),
+              record.takkuID == takkuID
+        else { return nil }
+        return record
     }
 
     private func save(_ record: ProcessingRecord) {
@@ -712,7 +758,13 @@ final class MeetingProcessor {
     }
 
     private func allRecords() -> [ProcessingRecord] {
-        recordingFolders().compactMap { try? ProcessingRecord.load(fromFolder: $0) }
+        recordingFolders().compactMap { folder in
+            guard let takkuID = UUID(uuidString: folder.lastPathComponent),
+                  let record = try? ProcessingRecord.load(fromFolder: folder),
+                  record.takkuID == takkuID
+            else { return nil }
+            return record
+        }
     }
 
     private func recordingFolders() -> [URL] {
@@ -728,43 +780,38 @@ final class MeetingProcessor {
         // Read only if a note is not where Takku left it.
         lazy var notesByTakkuID = vault?.meetingNotesByTakkuID() ?? [:]
         var meetings: [RecentMeeting] = []
-        for record in allRecords().sorted(by: { $0.startedAt > $1.startedAt }) where meetings.count < 5 {
+        for record in allRecords().sorted(by: { $0.recentAt > $1.recentAt }) where meetings.count < 5 {
             var note = record.noteURL
-            if vault != nil, let expected = record.noteURL, !record.status.isPending,
+            var lookupProblem: String?
+            if let vault, let expected = record.noteURL, !record.status.isPending,
                !FileManager.default.fileExists(atPath: expected.path(percentEncoded: false)) {
-                guard let moved = notesByTakkuID[record.takkuID] else { continue }
-                note = moved
+                guard let matches = notesByTakkuID[record.takkuID] else { continue }
+                do {
+                    guard let moved = try vault.uniqueMatch(matches, takkuID: record.takkuID) else { continue }
+                    note = moved
+                } catch {
+                    lookupProblem = error.localizedDescription
+                }
             }
             let title = note?.deletingPathExtension().lastPathComponent
                 ?? record.startedAt.formatted(date: .abbreviated, time: .shortened)
-            let failureReason: String? = if case .failed(let reason) = record.status { reason } else { nil }
-            meetings.append(RecentMeeting(id: record.takkuID, title: title, status: record.status, failureReason: failureReason))
+            let statusFailure: String? = if case .failed(let reason) = record.status { reason } else { nil }
+            meetings.append(RecentMeeting(id: record.takkuID, title: title, status: record.status, failureReason: lookupProblem ?? statusFailure))
         }
         // Unchanged most of the time: assigning would rebuild the menu anyway.
         if meetings != recent { recent = meetings }
     }
 
-    /// Rebuilds `recording.json` of a Recording interrupted by a crash from the Segment
-    /// lists; the end is the last write of a Segment.
+    /// Rebuilds `recording.json` of a Recording interrupted by a crash, without silently
+    /// dropping a Track whose Segment list is damaged.
     private func recoverRecording(_ record: ProcessingRecord, in directory: URL) throws {
-        let segments = Track.allCases.flatMap { track -> [Segment] in
-            let url = directory.appending(path: Segment.listFileName(for: track))
-            return (try? JSONDecoder().decode([Segment].self, from: Data(contentsOf: url))) ?? []
-        }
-        let files = try FileManager.default.contentsOfDirectory(
-            at: directory, includingPropertiesForKeys: [.contentModificationDateKey]
-        )
-        let lastWrite = files
-            .filter { $0.pathExtension == "m4a" }
-            .compactMap { try? $0.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate }
-            .max() ?? record.startedAt
-        try Recording.recovered(takkuID: record.takkuID, startedAt: record.startedAt, segments: segments, lastWrite: lastWrite)
-            .save(inFolder: directory)
+        try Recording.recover(fromFolder: directory, takkuID: record.takkuID, startedAt: record.startedAt)
     }
 
     /// Deletes the audio of expired Recordings (see `RecordingStorage.deleteAudio(olderThanDays:)`).
     func cleanUpExpiredRecordings() {
-        RecordingStorage.deleteAudio(olderThanDays: AppSettings.retentionDays)
+        let problems = RecordingStorage.deleteAudio(olderThanDays: AppSettings.retentionDays)
+        if !problems.isEmpty { lastError = problems.joined(separator: " ") }
         refreshRecent()
     }
 }

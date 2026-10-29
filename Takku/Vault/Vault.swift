@@ -68,37 +68,46 @@ struct Vault {
     }
 
     /// The Meeting note: at the known path or, if the user renamed or moved it, by looking
-    /// for its `takku_id` in the Meetings folder (Transcripts excluded).
-    func findMeetingNote(takkuID: UUID, expected: URL?) -> URL? {
+    /// for its `takku_id` in the Meetings folder (Transcripts excluded). Sync copies with the
+    /// same ID are an error unless the expected path identifies one; the first one is never chosen.
+    func findMeetingNote(takkuID: UUID, expected: URL?) throws -> URL? {
         // Only inside this Vault: a note left in another Vault (or a test's copy of a real Meeting) is not touched.
         if let expected, contains(expected), Self.belongs(expected, to: takkuID) { return expected }
-        return firstFile(in: meetingsFolder, excluding: transcriptsFolder) { Self.belongs($0, to: takkuID) }
+        let matches = files(in: meetingsFolder, excluding: transcriptsFolder).filter { Self.belongs($0, to: takkuID) }
+        return try uniqueMatch(matches, takkuID: takkuID)
     }
 
-    /// The Meeting notes in the Meetings folder (Transcripts excluded) by `takku_id`, in one pass:
-    /// for looking up many Meetings at once.
-    func meetingNotesByTakkuID() -> [UUID: URL] {
-        var notes: [UUID: URL] = [:]
-        _ = firstFile(in: meetingsFolder, excluding: transcriptsFolder) { url in
-            if let takkuID = (try? String(contentsOf: url, encoding: .utf8)).flatMap({ MeetingNote(content: $0).takkuID }),
-               notes[takkuID] == nil {
-                notes[takkuID] = url
+    /// Every Meeting note by `takku_id`, duplicates included, in one pass.
+    func meetingNotesByTakkuID() -> [UUID: [URL]] {
+        var notes: [UUID: [URL]] = [:]
+        for url in files(in: meetingsFolder, excluding: transcriptsFolder) {
+            if let takkuID = (try? String(contentsOf: url, encoding: .utf8)).flatMap({ MeetingNote(content: $0).takkuID }) {
+                notes[takkuID, default: []].append(url)
             }
-            return false
         }
         return notes
     }
 
-    /// The Transcript file of a Meeting, found by its `takku_id`.
-    func findTranscript(takkuID: UUID) -> URL? {
-        firstFile(in: transcriptsFolder) { Self.belongs($0, to: takkuID) }
+    /// The Transcript file of a Meeting. If Sync created several files with the same ID, the
+    /// Meeting note's own Transcript link identifies the right one; otherwise this is a conflict.
+    func findTranscript(takkuID: UUID, expectedNote: URL?) throws -> URL? {
+        let matches = files(in: transcriptsFolder).filter { Self.belongs($0, to: takkuID) }
+        if matches.count > 1,
+           let noteURL = try findMeetingNote(takkuID: takkuID, expected: expectedNote),
+           let linkedName = try? meetingNote(at: noteURL).transcriptName {
+            let linked = matches.filter { $0.deletingPathExtension().lastPathComponent == linkedName }
+            if linked.count == 1 { return linked[0] }
+        }
+        return try uniqueMatch(matches, takkuID: takkuID)
     }
 
     /// Writes the Transcript in the Vault. If a file of the same Meeting already exists it is
     /// overwritten, so a new Processing does not create duplicates.
-    func writeTranscript(_ transcript: Transcript, takkuID: UUID, meetingNoteName: String, language: String?) throws -> URL {
+    func writeTranscript(
+        _ transcript: Transcript, takkuID: UUID, meetingNote: URL?, meetingNoteName: String, language: String?
+    ) throws -> URL {
         try FileManager.default.createDirectory(at: transcriptsFolder, withIntermediateDirectories: true)
-        let url = findTranscript(takkuID: takkuID) ?? {
+        let url = try findTranscript(takkuID: takkuID, expectedNote: meetingNote) ?? {
             let name = VaultNaming.available("\(meetingNoteName) (transcript)", taken: Self.noteNames(in: transcriptsFolder))
             return transcriptsFolder.appending(path: name + ".md")
         }()
@@ -279,16 +288,27 @@ struct Vault {
         (try? String(contentsOf: url, encoding: .utf8)).map { MeetingNote(content: $0).takkuID == takkuID } ?? false
     }
 
-    private func firstFile(in folder: URL, excluding excluded: URL? = nil, where matches: (URL) -> Bool) -> URL? {
+    func uniqueMatch(_ matches: [URL], takkuID: UUID) throws -> URL? {
+        guard matches.count > 1 else { return matches.first }
+        let rootPath = root.path(percentEncoded: false)
+        let paths = matches.map { url in
+            let path = url.path(percentEncoded: false)
+            return path.hasPrefix(rootPath + "/") ? String(path.dropFirst(rootPath.count + 1)) : path
+        }.sorted()
+        throw VaultError.duplicateTakkuID(takkuID, paths)
+    }
+
+    private func files(in folder: URL, excluding excluded: URL? = nil) -> [URL] {
         let normalized = normalizer()
         let excludedComponents = excluded.map(normalized)
         let files = FileManager.default.enumerator(at: folder, includingPropertiesForKeys: nil)
+        var matches: [URL] = []
         while let url = files?.nextObject() as? URL {
             guard url.pathExtension == "md" else { continue }
             if let excludedComponents, normalized(url).starts(with: excludedComponents) { continue }
-            if matches(url) { return url }
+            matches.append(url)
         }
-        return nil
+        return matches
     }
 
     private static func noteNames(in folder: URL) -> Set<String> {
@@ -305,12 +325,15 @@ enum VaultError: LocalizedError {
     case unreachable(String)
     case busy(String)
     case invalidName(String)
+    case duplicateTakkuID(UUID, [String])
 
     var errorDescription: String? {
         switch self {
         case .unreachable(let path): String(localized: "Vault not reachable: \(path).")
         case .busy(let file): String(localized: "\(file) keeps changing while Takku tries to update it.")
         case .invalidName(let name): String(localized: "\"\(name)\" is not a valid file name.")
+        case .duplicateTakkuID(let takkuID, let paths):
+            String(localized: "Duplicate takku_id \(takkuID.uuidString). Takku cannot safely choose between: \(paths.joined(separator: ", ")). Fix the duplicate notes or Transcript links in the Vault.")
         }
     }
 }

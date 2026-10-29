@@ -37,6 +37,15 @@ struct MeetingNoteTests {
         #expect(!note.content.contains("Recording in progress"))
     }
 
+    @Test("the Transcript link gives the expected file name for resolving Sync duplicates")
+    func transcriptName() {
+        let note = MeetingNote(content: "---\ntranscript: \"[[Archive/Meeting (transcript)|Transcript]]\"\n---\nBody.")
+        let missing = MeetingNote.initial(takkuID: takkuID, startedAt: startedAt)
+
+        #expect(note.transcriptName == "Meeting (transcript)")
+        #expect(missing.transcriptName == nil)
+    }
+
     @Test("rewriting the managed section leaves everything else untouched")
     func replaceManagedSection() {
         var note = MeetingNote(content: """
@@ -419,6 +428,25 @@ struct MeetingNoteTests {
             ⚠️ Transcription failed: model unavailable.
             %% takku:end %%
             """))
+    }
+
+    @Test("a failed first Processing of an imported Meeting replaces the queued placeholder")
+    func importedFailureRecorded() {
+        var failedTranscription = MeetingNote.initial(takkuID: takkuID, startedAt: startedAt, timeZone: rome, isImport: true)
+        var failedSummary = failedTranscription
+
+        #expect(!failedTranscription.hasSuccessfulOutcome)
+
+        failedTranscription.recordFailure(takkuID: takkuID, reason: "Transcription failed: model unavailable.")
+        failedSummary.recordProcessing(
+            takkuID: takkuID, duration: 60, language: "it", transcriptName: "T",
+            summary: .failed(reason: "The provider is offline")
+        )
+
+        #expect(failedTranscription.content.contains("⚠️ Transcription failed: model unavailable."))
+        #expect(failedSummary.content.contains("⚠️ Summary not generated: The provider is offline"))
+        #expect(failedSummary.content.contains("[[T]]"))
+        #expect(!failedSummary.content.contains("queued for Processing"))
     }
 
     @Test("a transcription failure during Retry keeps the previous result")

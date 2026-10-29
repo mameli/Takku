@@ -21,6 +21,8 @@ actor MeetingTranscription {
         let language: String?
         let failedSegments: [String]
         let speakersProblem: String?
+        /// Cache writes that failed after the result was safely produced in memory.
+        let cacheProblems: [String]
     }
 
     /// Result of a Segment saved next to the audio: a new Processing does not redo it.
@@ -86,6 +88,7 @@ actor MeetingTranscription {
     private var provisionalSegments: [String: (segment: Segment, language: String)] = [:]
     private var pending: [String: Task<CachedSegment, Error>] = [:]
     private var onPhase: @Sendable (Phase) -> Void = { _ in }
+    private var cacheProblems: [String] = []
 
     /// `languages`: the Meeting languages; with only one it is forced, otherwise detected among them.
     init(transcriber: LocalTranscriber, diarizer: SpeakerDiarizer, model: TranscriptionModel, languages: [String]) {
@@ -145,7 +148,9 @@ actor MeetingTranscription {
                 }
             }
         }
-        bySegment = await Self.measuringMissingLevels(recording, bySegment, in: directory)
+        let measured = await Self.measuringMissingLevels(recording, bySegment, in: directory)
+        bySegment = measured.segments
+        cacheProblems.append(contentsOf: measured.cacheProblems)
 
         // The echo removal, the Speakers, the Vocabulary variants and the Marks are applied here and not to
         // the cache: Retry on an old Recording benefits too. Only what they are computed from is cached
@@ -173,7 +178,8 @@ actor MeetingTranscription {
         let language = locked ?? provisionalSegments.values.first?.language
         logger.notice("Transcript written in \(secondsSince(started), privacy: .public), language \(language ?? "none", privacy: .public)")
         return Finished(
-            url: url, transcript: transcript, language: language, failedSegments: failed, speakersProblem: speakersProblem
+            url: url, transcript: transcript, language: language, failedSegments: failed,
+            speakersProblem: speakersProblem, cacheProblems: cacheProblems
         )
     }
 
@@ -218,7 +224,7 @@ actor MeetingTranscription {
         }
         let turns = try await diarizing(othersSegments, in: directory)
         // Turns missing an unreadable Segment are cached too: the key changes if that file does.
-        try? CachedSpeakers(segments: key, turns: turns).save(to: cacheURL)
+        saveCache(CachedSpeakers(segments: key, turns: turns), to: cacheURL)
         return turns
     }
 
@@ -290,7 +296,7 @@ actor MeetingTranscription {
         let ranges = speechRanges(in: samples, sampleRate: sampleRate)
         guard !ranges.isEmpty else {
             let silent = CachedSegment(model: model.id, language: nil, isLanguageReliable: true, utterances: [], levels: [])
-            try silent.save(to: cacheURL)
+            saveCache(silent, to: cacheURL)
             return silent
         }
 
@@ -328,8 +334,20 @@ actor MeetingTranscription {
         let result = CachedSegment(
             model: model.id, language: language, isLanguageReliable: isReliable, utterances: utterances, levels: levels
         )
-        try result.save(to: cacheURL)
+        saveCache(result, to: cacheURL)
         return result
+    }
+
+    /// A cache is only an optimization: failing to write it must never discard recognized text
+    /// or Speaker turns. The next Processing will simply compute them again.
+    private func saveCache<C: CacheFile>(_ cache: C, to url: URL) {
+        do {
+            try cache.save(to: url)
+        } catch {
+            let problem = "\(url.lastPathComponent): \(error.localizedDescription)"
+            cacheProblems.append(problem)
+            logger.warning("Cache not saved, result kept in memory: \(problem, privacy: .public)")
+        }
     }
 
     /// A usable cached Segment: its language joins the Meeting's. Missing levels are measured in
@@ -350,28 +368,44 @@ actor MeetingTranscription {
     /// Every Me Segment cached without current levels, measured on its audio (in parallel) and saved.
     private nonisolated static func measuringMissingLevels(
         _ recording: Recording, _ bySegment: [String: CachedSegment], in directory: URL
-    ) async -> [String: CachedSegment] {
-        await withTaskGroup(of: (String, CachedSegment).self) { group in
+    ) async -> (segments: [String: CachedSegment], cacheProblems: [String]) {
+        await withTaskGroup(of: (String, CachedSegment, String?).self) { group in
             for segment in recording.segments where segment.track == .me {
                 guard let cached = bySegment[segment.fileName], !cached.utterances.isEmpty, cached.currentLevels == nil
                 else { continue }
-                group.addTask { (segment.fileName, await withLevels(cached, segment, in: directory)) }
+                group.addTask {
+                    let (measured, problem) = await withLevels(cached, segment, in: directory)
+                    return (segment.fileName, measured, problem)
+                }
             }
             var measured = bySegment
-            for await (fileName, cached) in group { measured[fileName] = cached }
-            return measured
+            var problems: [String] = []
+            for await (fileName, cached, problem) in group {
+                measured[fileName] = cached
+                if let problem { problems.append(problem) }
+            }
+            return (measured, problems)
         }
     }
 
     /// The Segment's cache with the peak level of each Utterance measured on the audio, and saved.
-    /// It decodes the audio, so it runs off the actor.
-    private nonisolated static func withLevels(_ cached: CachedSegment, _ segment: Segment, in directory: URL) async -> CachedSegment {
-        guard let samples = try? await loadSamples(directory.appending(path: segment.fileName)) else { return cached }
+    /// It decodes the audio, so it runs off the actor. A failed save keeps the measured levels.
+    private nonisolated static func withLevels(
+        _ cached: CachedSegment, _ segment: Segment, in directory: URL
+    ) async -> (CachedSegment, String?) {
+        guard let samples = try? await loadSamples(directory.appending(path: segment.fileName)) else { return (cached, nil) }
         var measured = cached
         measured.levels = levels(of: cached.utterances, in: samples, startingAt: segment.start)
         measured.levelsVersion = CachedSegment.currentLevelsVersion
-        try? measured.save(to: directory.appending(path: segment.transcriptionCacheFileName))
-        return measured
+        let cacheURL = directory.appending(path: segment.transcriptionCacheFileName)
+        do {
+            try measured.save(to: cacheURL)
+            return (measured, nil)
+        } catch {
+            let problem = "\(cacheURL.lastPathComponent): \(error.localizedDescription)"
+            logger.warning("Cache not saved, levels kept in memory: \(problem, privacy: .public)")
+            return (measured, problem)
+        }
     }
 
     /// One language per Meeting, detected once on up to 30 seconds of speech (silence
@@ -406,12 +440,12 @@ actor MeetingTranscription {
         }
     }
 
-    /// Why a Segment's cache cannot be used, for the log; `nil` if it can. Without speech the model
-    /// does not matter; otherwise model and language must be this Meeting's.
+    /// Why a Segment's cache cannot be used, for the log; `nil` if it can. Model identity matters
+    /// for silent Segments too: a better model may recover speech the previous one missed.
     private func cacheMiss(_ cached: CachedSegment) -> String? {
-        guard let language = cached.language else { return nil }
         let cachedModel = cached.model ?? TranscriptionModel.previousDefault.id
         if cachedModel != model.id { return "cache made with \(cachedModel)" }
+        guard let language = cached.language else { return nil }
         return languages.contains(language) ? nil : "cached language \(language) is not among the Meeting languages"
     }
 

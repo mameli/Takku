@@ -459,7 +459,8 @@ final class MeetingController {
                 lastRecordingDirectory = imported.directory
                 processor.meetingImported(
                     takkuID: recording.meetingID, startedAt: recording.startedAt, templateName: templateName,
-                    summaryProfile: AppSettings.activeProviderProfile, noteURL: createImportedNote(imported)
+                    summaryProfile: AppSettings.activeProviderProfile, noteURL: createImportedNote(imported),
+                    warnings: imported.warnings
                 )
             } catch {
                 logger.error("Import failed: \(error, privacy: .public)")
@@ -491,12 +492,11 @@ final class MeetingController {
     /// takes its name (see `Vault.renameForEvent`) and, a moment later, its participants; Obsidian
     /// is shown the renamed note if it was showing it.
     func chooseCalendarEvent(_ event: CalendarEvent?) {
-        guard event != calendarEvent, let currentTakkuID, let startedAt, let vault = Vault.configured,
-              let noteURL = vault.findMeetingNote(takkuID: currentTakkuID, expected: currentNoteURL)
-        else { return }
-        // Read before the rename: afterwards Obsidian may already show another note.
-        let wasShownInObsidian = vault.isShownInObsidian(noteURL) ?? true
+        guard event != calendarEvent, let currentTakkuID, let startedAt, let vault = Vault.configured else { return }
         do {
+            guard let noteURL = try vault.findMeetingNote(takkuID: currentTakkuID, expected: currentNoteURL) else { return }
+            // Read before the rename: afterwards Obsidian may already show another note.
+            let wasShownInObsidian = vault.isShownInObsidian(noteURL) ?? true
             let url = try vault.renameForEvent(noteURL, startedAt: startedAt, from: calendarEvent, to: event)
             calendarEvent = event
             currentNoteURL = url
@@ -507,9 +507,9 @@ final class MeetingController {
             // Always after the same wait, renamed or not: two choices in a row write in their order.
             Task { [weak self] in
                 try? await Task.sleep(for: Vault.settleAfterRename)
-                // Found again: another choice in the meantime may have renamed it once more.
-                guard let note = vault.findMeetingNote(takkuID: currentTakkuID, expected: url) else { return }
                 do {
+                    // Found again: another choice in the meantime may have renamed it once more.
+                    guard let note = try vault.findMeetingNote(takkuID: currentTakkuID, expected: url) else { return }
                     try vault.update(note) { $0.replaceParticipants(with: event?.participants ?? []) }
                 } catch {
                     logger.error("Writing the event's participants failed: \(error, privacy: .public)")

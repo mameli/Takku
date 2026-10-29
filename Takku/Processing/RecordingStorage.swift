@@ -16,31 +16,68 @@ enum RecordingStorage {
     /// pending are kept. The manifests stay: the Meeting stays among the recent ones and Retry
     /// makes the Summary again from the Transcript in the Vault. The local `transcript.md` is
     /// deleted too, unless it is the only copy left (Meetings processed without a Vault).
-    static func deleteAudio(olderThanDays days: Int?) {
+    /// Returns damaged state that made cleanup skip a Recording; its audio is always preserved.
+    @discardableResult
+    static func deleteAudio(olderThanDays days: Int?) -> [String] {
+        var problems: [String] = []
         let folders = (try? FileManager.default.contentsOfDirectory(
             at: MeetingRecorder.recordingsDirectory, includingPropertiesForKeys: nil
         )) ?? []
         let items = folders.compactMap { folder -> Retention.Item? in
             guard let takkuID = UUID(uuidString: folder.lastPathComponent) else { return nil }
-            guard let record = try? ProcessingRecord.load(fromFolder: folder) else { return nil }
-            // An imported file keeps its original date in the Meeting note and calendar, but its
-            // local copy must get a full retention period from when it was imported.
-            let retainedSince = (try? folder.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? record.startedAt
-            return Retention.Item(takkuID: takkuID, startedAt: retainedSince, status: record.status)
+            do {
+                let record = try ProcessingRecord.load(fromFolder: folder)
+                guard record.takkuID == takkuID else {
+                    problems.append(String(localized: "Processing state belongs to another Meeting in \(folder.lastPathComponent). Audio kept."))
+                    return nil
+                }
+                // An imported file keeps its original date in the Meeting note and calendar, but its
+                // local copy must get a full retention period from when it was imported.
+                let retainedSince = (try? folder.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? record.startedAt
+                return Retention.Item(takkuID: takkuID, startedAt: retainedSince, status: record.status)
+            } catch {
+                let manifest = folder.appending(path: ProcessingRecord.fileName)
+                let problem = if FileManager.default.fileExists(atPath: manifest.path(percentEncoded: false)) {
+                    String(localized: "Processing state is unreadable in \(folder.lastPathComponent): \(error.localizedDescription) Audio kept.")
+                } else {
+                    String(localized: "Processing state is missing in \(folder.lastPathComponent). Audio kept.")
+                }
+                problems.append(problem)
+                return nil
+            }
         }
         let manifests = Set([Recording.fileName, ProcessingRecord.fileName] + Track.allCases.map(Segment.listFileName(for:)))
         let vault = Vault.configured
         for takkuID in Retention.expired(items, now: Date(), days: days) {
             let folder = MeetingProcessor.directory(for: takkuID)
-            var kept = manifests
-            if vault?.findTranscript(takkuID: takkuID) == nil {
-                kept.insert(Transcript.recordingCopyFileName)
+            do {
+                let recording = try Recording.load(fromFolder: folder)
+                guard recording.meetingID == takkuID else {
+                    problems.append(String(localized: "Recording manifest belongs to another Meeting in \(folder.lastPathComponent). Audio kept."))
+                    continue
+                }
+            } catch {
+                problems.append(String(localized: "Recording manifest is unreadable in \(folder.lastPathComponent): \(error.localizedDescription) Audio kept."))
+                continue
             }
+            var kept = manifests
+            var hasVaultTranscript = false
+            if let vault {
+                do {
+                    let expectedNote = (try? ProcessingRecord.load(fromFolder: folder))?.noteURL ?? nil
+                    hasVaultTranscript = try vault.findTranscript(takkuID: takkuID, expectedNote: expectedNote) != nil
+                } catch {
+                    // An ambiguous Vault copy must not make Takku delete the only known-safe one.
+                    problems.append(error.localizedDescription)
+                }
+            }
+            if !hasVaultTranscript { kept.insert(Transcript.recordingCopyFileName) }
             let files = (try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)) ?? []
             for file in files where !kept.contains(file.lastPathComponent) {
                 try? FileManager.default.removeItem(at: file)
             }
         }
+        return problems
     }
 
     /// Bytes of audio kept, shown in Settings.
