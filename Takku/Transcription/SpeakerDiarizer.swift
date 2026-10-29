@@ -11,6 +11,11 @@ private let logger = Logger(subsystem: "app.takku.takku", category: "transcripti
 /// is downloaded on first use into Takku's models folder and stays loaded for the whole app.
 /// Processing runs one Meeting at a time, so there is one request at a time.
 actor SpeakerDiarizer {
+    enum Phase: Sendable {
+        case preparing
+        case identifying
+    }
+
     private var diarizer: Nemotron3Diarizer?
 
     /// Audio read from the file at a time: the whole Track never sits in memory.
@@ -19,8 +24,9 @@ actor SpeakerDiarizer {
     /// The turns of each voice in the audio file (16 kHz mono), with times from its start. The
     /// file is read and fed to the model a block at a time, which gives the same turns as
     /// handing it the whole Track at once.
-    func turns(inFile url: URL) async throws -> [SpeakerTurn] {
-        let diarizer = try await loaded()
+    func turns(inFile url: URL, onPhase: @escaping @Sendable (Phase) -> Void = { _ in }) async throws -> [SpeakerTurn] {
+        let diarizer = try await loaded(onPhase: onPhase)
+        onPhase(.identifying)
         let started = ContinuousClock.now
         defer { logger.notice("Diarization pipeline ran in \(secondsSince(started), privacy: .public)") }
 
@@ -51,8 +57,9 @@ actor SpeakerDiarizer {
         }
     }
 
-    private func loaded() async throws -> Nemotron3Diarizer {
+    private func loaded(onPhase: @Sendable (Phase) -> Void) async throws -> Nemotron3Diarizer {
         if let diarizer { return diarizer }
+        onPhase(.preparing)
         let started = ContinuousClock.now
         let folder = await TranscriptionModels.directory.appending(path: "fluidaudio", directoryHint: .isDirectory)
         // FluidAudio puts the model in a `nemotron-3-diarization` folder under the one it is given.

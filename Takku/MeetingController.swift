@@ -72,6 +72,10 @@ final class MeetingController {
     private(set) var lastRecordingDirectory: URL?
     /// The audio file being imported, as the menu shows it; `nil` when none.
     private(set) var importingFileName: String?
+    private(set) var importingFileIndex = 0
+    private(set) var importingFileTotal = 0
+    /// The Speaker naming window's draft, if it is open.
+    var speakerNaming: SpeakerNamingDraft?
     /// Tracks of the Meeting in progress already notified as silent since the start.
     @ObservationIgnored private var silentTracksNotified: Set<Track> = []
     /// Template for the Meeting in progress or the next one; it can change until the stop.
@@ -379,6 +383,29 @@ final class MeetingController {
         templateName = AppSettings.defaultTemplate
     }
 
+    /// Opens the naming window only when both the Meeting note and a Transcript with Speakers exist.
+    func prepareSpeakerNaming(for meeting: MeetingProcessor.RecentMeeting) -> Bool {
+        guard let context = processor.speakerNamingContext(meeting.id) else { return false }
+        speakerNaming = SpeakerNamingDraft(
+            takkuID: meeting.id, meetingTitle: meeting.title, speakers: context.speakers,
+            names: context.names, participants: context.participants
+        )
+        return true
+    }
+
+    /// Confirms the only Retry that can replace edits made to the Transcript in the Vault.
+    func confirmReprocessing(_ takkuID: UUID) {
+        let alert = NSAlert()
+        alert.alertStyle = .warning
+        alert.messageText = String(localized: "Reprocess Recording?")
+        alert.informativeText = String(localized: "Takku will rebuild the Transcript from the audio. If Processing succeeds, edits you made to the current Transcript will be replaced.")
+        alert.addButton(withTitle: String(localized: "Reprocess Recording"))
+        alert.addButton(withTitle: String(localized: "Cancel"))
+        NSApplication.shared.activate()
+        guard alert.runModal() == .alertFirstButtonReturn else { return }
+        processor.retry(takkuID, templateName: templateName, profile: AppSettings.activeProviderProfile, mode: .recording)
+    }
+
     /// Creates the Meeting note in the Vault and opens it in the Editor. If that fails the Meeting
     /// goes on anyway: the note will be created at the end of Processing.
     private func createMeetingNote(takkuID: UUID, startedAt: Date) -> URL? {
@@ -419,8 +446,10 @@ final class MeetingController {
     }
 
     private func importAudio(_ urls: [URL]) async {
-        for url in urls {
+        for (index, url) in urls.enumerated() {
             importingFileName = url.lastPathComponent
+            importingFileIndex = index + 1
+            importingFileTotal = urls.count
             do {
                 let imported = try await AudioFileImport.run(
                     url, into: MeetingRecorder.recordingsDirectory, segmentDuration: MeetingRecorder.segmentDuration
@@ -438,6 +467,8 @@ final class MeetingController {
             }
         }
         importingFileName = nil
+        importingFileIndex = 0
+        importingFileTotal = 0
     }
 
     /// The Meeting note of an imported file, not opened: the notification at the end of Processing
@@ -449,7 +480,7 @@ final class MeetingController {
         // downloaded file would name the note after an unrelated event.
         let event = imported.isRecordingDate ? MeetingCalendar.eventsInProgress(at: startedAt).first : nil
         do {
-            return try vault.createMeetingNote(takkuID: imported.recording.meetingID, startedAt: startedAt, event: event)
+            return try vault.createMeetingNote(takkuID: imported.recording.meetingID, startedAt: startedAt, event: event, isImport: true)
         } catch {
             logger.error("Meeting note of the imported file not created: \(error, privacy: .public)")
             return nil

@@ -34,10 +34,27 @@ struct ProcessingRecordTests {
         var saved = record(.failed(reason: "The provider answered with error 401"))
         saved.summaryProfile = ProviderProfile(name: "Mistral UE", baseURL: "https://api.mistral.ai/v1", model: "m", maxContextTokens: 32_000)
         saved.noteURL = URL(filePath: "/Vault/Meetings/2026-10-04 1430 - Meeting.md")
+        saved.ignoreTranscriptionCache = true
 
         try saved.save(inFolder: directory)
 
         #expect(try ProcessingRecord.load(fromFolder: directory) == saved)
+    }
+
+    @Test("a record written before the cache flag existed keeps cached Processing")
+    func legacyCacheFlag() throws {
+        let directory = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let saved = record(.completed)
+        try saved.save(inFolder: directory)
+        let url = directory.appending(path: ProcessingRecord.fileName)
+        var object = try #require(try JSONSerialization.jsonObject(with: Data(contentsOf: url)) as? [String: Any])
+        object.removeValue(forKey: "ignoreTranscriptionCache")
+        let data = try JSONSerialization.data(withJSONObject: object)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+
+        #expect(try decoder.decode(ProcessingRecord.self, from: data).ignoreTranscriptionCache == false)
     }
 
     @Test("a Recording interrupted by a crash is rebuilt from the saved Segment lists")

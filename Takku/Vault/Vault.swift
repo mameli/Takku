@@ -39,7 +39,7 @@ struct Vault {
     /// provisional title (replaced by the generated one at the end of Processing). Never creates the
     /// Vault folder: if it is missing (volume not mounted) it fails, and the note is created at the
     /// end of Processing.
-    func createMeetingNote(takkuID: UUID, startedAt: Date, event: CalendarEvent? = nil) throws -> URL {
+    func createMeetingNote(takkuID: UUID, startedAt: Date, event: CalendarEvent? = nil, isImport: Bool = false) throws -> URL {
         guard FileManager.default.fileExists(atPath: root.path(percentEncoded: false)) else {
             throw VaultError.unreachable(root.path(percentEncoded: false))
         }
@@ -49,7 +49,7 @@ struct Vault {
             taken: Self.noteNames(in: meetingsFolder)
         )
         let url = meetingsFolder.appending(path: name + ".md")
-        let note = MeetingNote.initial(takkuID: takkuID, startedAt: startedAt, participants: event?.participants ?? [])
+        let note = MeetingNote.initial(takkuID: takkuID, startedAt: startedAt, participants: event?.participants ?? [], isImport: isImport)
         try note.content.write(to: url, atomically: true, encoding: .utf8)
         return url
     }

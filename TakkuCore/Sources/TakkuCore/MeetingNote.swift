@@ -51,9 +51,13 @@ public struct MeetingNote: Equatable, Sendable {
     /// `participants`: the invited participants of the calendar event, if there is one. Like `date`
     /// and `tags` they are written only here and belong to the user afterwards.
     public static func initial(
-        takkuID: UUID, startedAt: Date, participants: [String] = [], timeZone: TimeZone = .current
+        takkuID: UUID, startedAt: Date, participants: [String] = [], timeZone: TimeZone = .current,
+        isImport: Bool = false
     ) -> MeetingNote {
         let participantsEntry = participantsLines(participants).map { "\n" + $0 }.joined()
+        let status = isImport
+            ? "⏳ Imported recording queued for Processing."
+            : "⏺ Recording in progress: the summary will appear here after you stop."
         return MeetingNote(content: """
             ---
             takku_id: \(takkuID.uuidString)
@@ -61,7 +65,7 @@ public struct MeetingNote: Equatable, Sendable {
             tags: [meeting]\(participantsEntry)
             ---
             \(managedStart)
-            ⏺ Recording in progress: the summary will appear here after you stop.
+            \(status)
             \(managedEnd)
 
             \(personalNotesHeading)
@@ -101,6 +105,25 @@ public struct MeetingNote: Equatable, Sendable {
         var markdown = MarkdownLines(content)
         let entry = Self.participantsLines(participants)
         if let entryLines = Self.entryLines("participants", in: markdown) {
+            markdown.lines.replaceSubrange(entryLines, with: entry)
+        } else if !entry.isEmpty {
+            if markdown.frontmatterClose == nil { markdown.lines.insert(contentsOf: ["---", "---"], at: 0) }
+            markdown.lines.insert(contentsOf: entry, at: markdown.frontmatterClose!)
+        }
+        content = markdown.text
+    }
+
+    /// Replaces the user-owned `speakers` list. Empty names are omitted and the list stays sorted
+    /// by Speaker number; every other frontmatter key and the body stay untouched.
+    public mutating func replaceSpeakerNames(with names: [Int: String]) {
+        var markdown = MarkdownLines(content)
+        let cleaned = names.compactMap { number, name -> (Int, String)? in
+            let name = name.trimmingCharacters(in: .whitespacesAndNewlines)
+            return name.isEmpty ? nil : (number, name)
+        }
+        .sorted { $0.0 < $1.0 }
+        let entry = cleaned.isEmpty ? [] : ["speakers:"] + cleaned.map { "  - Speaker \($0.0) = \($0.1)" }
+        if let entryLines = Self.entryLines("speakers", in: markdown) {
             markdown.lines.replaceSubrange(entryLines, with: entry)
         } else if !entry.isEmpty {
             if markdown.frontmatterClose == nil { markdown.lines.insert(contentsOf: ["---", "---"], at: 0) }

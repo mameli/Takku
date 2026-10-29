@@ -45,10 +45,14 @@ public struct ProcessingRecord: Codable, Equatable, Sendable {
     public var summaryProfile: ProviderProfile?
     /// Path of the Meeting note, if it was created.
     public var noteURL: URL?
+    /// True only for an explicit Reprocess Recording: rebuild the Transcript and Speaker turns
+    /// instead of reusing their caches. Kept here so a restart cannot turn it back into a cache hit.
+    public var ignoreTranscriptionCache: Bool
 
     public init(
         takkuID: UUID, startedAt: Date, status: Status,
-        templateName: String, summaryProfile: ProviderProfile?, noteURL: URL?
+        templateName: String, summaryProfile: ProviderProfile?, noteURL: URL?,
+        ignoreTranscriptionCache: Bool = false
     ) {
         self.takkuID = takkuID
         self.startedAt = startedAt
@@ -56,6 +60,23 @@ public struct ProcessingRecord: Codable, Equatable, Sendable {
         self.templateName = templateName
         self.summaryProfile = summaryProfile
         self.noteURL = noteURL
+        self.ignoreTranscriptionCache = ignoreTranscriptionCache
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case takkuID, startedAt, status, templateName, summaryProfile, noteURL, ignoreTranscriptionCache
+    }
+
+    /// Records written before the cache flag existed keep the normal cached Processing behavior.
+    public init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        takkuID = try values.decode(UUID.self, forKey: .takkuID)
+        startedAt = try values.decode(Date.self, forKey: .startedAt)
+        status = try values.decode(Status.self, forKey: .status)
+        templateName = try values.decode(String.self, forKey: .templateName)
+        summaryProfile = try values.decodeIfPresent(ProviderProfile.self, forKey: .summaryProfile)
+        noteURL = try values.decodeIfPresent(URL.self, forKey: .noteURL)
+        ignoreTranscriptionCache = try values.decodeIfPresent(Bool.self, forKey: .ignoreTranscriptionCache) ?? false
     }
 
     /// After a restart: Meetings queued, in progress or interrupted while recording resume.

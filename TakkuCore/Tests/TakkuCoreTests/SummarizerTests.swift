@@ -2,6 +2,13 @@ import Foundation
 import Testing
 import TakkuCore
 
+private final class SummaryProgressRecorder: @unchecked Sendable {
+    private let lock = NSLock()
+    private var recorded: [Summarizer.Progress] = []
+    var values: [Summarizer.Progress] { lock.withLock { recorded } }
+    func append(_ progress: Summarizer.Progress) { lock.withLock { recorded.append(progress) } }
+}
+
 @Suite("Summary in one or more requests")
 struct SummarizerTests {
     let template = Template(fileName: "Notes", content: "### Topics\n### Next steps")
@@ -30,6 +37,20 @@ struct SummarizerTests {
 
         #expect(summary == "### Topics\nAll good.")
         #expect(stub.requests.count == 1)
+    }
+
+    @Test("Summary progress reports the request being written")
+    func progress() async throws {
+        let stub = StubTransport { _ in "### Topics\nAll good." }
+        let prompt = SummaryPrompt(template: template, personalNotes: "", transcript: transcript(paragraphs: 6), meetingLanguage: "it")
+        let progress = SummaryProgressRecorder()
+
+        _ = try await Summarizer(
+            client: client(stub), maxContextTokens: 32_000,
+            onProgress: progress.append
+        ).summarize(prompt)
+
+        #expect(progress.values == [.writing(part: 1, total: 1)])
     }
 
     @Test("the times the model cites are removed from the Summary, the rest of the Markdown stays as it is")

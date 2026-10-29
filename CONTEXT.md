@@ -80,7 +80,7 @@ The copy, in `~/.takku/summary-log/`, of every request Takku sent the model for 
 _Avoid_: history, trace, prompt log
 
 **Regeneration** (`Regeneration`):
-Producing a new Summary for a Meeting already processed from its Transcript in the Vault, without the audio. It is what Retry does once the audio is deleted.
+Producing a new Summary for a Meeting already processed from the current Transcript in the Vault, without using the audio. It is what *Regenerate Summary* does, even while the Recording is still available.
 
 ### Providers
 

@@ -7,6 +7,12 @@ private let logger = Logger(subsystem: "app.takku.takku", category: "transcripti
 /// Transcribes the Segments of a Meeting as they close and, at the stop, writes
 /// `transcript.md` in the Recording folder.
 actor MeetingTranscription {
+    enum Phase: Equatable, Sendable {
+        case transcribing(part: Int, total: Int)
+        case preparingSpeakers
+        case identifyingSpeakers
+    }
+
     /// The Transcript written, the language used (`nil` if there was no speech), the Segments
     /// that could not be transcribed and why the others could not be told apart, if they could not.
     struct Finished {
@@ -79,6 +85,7 @@ actor MeetingTranscription {
     /// at the end they are transcribed again if the Meeting language turns out different.
     private var provisionalSegments: [String: (segment: Segment, language: String)] = [:]
     private var pending: [String: Task<CachedSegment, Error>] = [:]
+    private var onPhase: @Sendable (Phase) -> Void = { _ in }
 
     /// `languages`: the Meeting languages; with only one it is forced, otherwise detected among them.
     init(transcriber: LocalTranscriber, diarizer: SpeakerDiarizer, model: TranscriptionModel, languages: [String]) {
@@ -89,17 +96,24 @@ actor MeetingTranscription {
         self.forcedLanguage = MeetingLanguages.forced(languages)
     }
 
+    func setPhaseHandler(_ handler: @escaping @Sendable (Phase) -> Void) {
+        onPhase = handler
+    }
+
     func segmentClosed(_ segment: Segment, in directory: URL) {
         startIfNeeded(segment, in: directory)
     }
 
     /// Transcribes the missing Segments, waits for those in progress and writes the Transcript.
     /// A failing Segment does not block the others: the Transcript comes out with a gap.
-    func finish(_ recording: Recording, in directory: URL, vocabulary: Vocabulary) async throws -> Finished {
+    func finish(
+        _ recording: Recording, in directory: URL, vocabulary: Vocabulary, ignoringCache: Bool = false
+    ) async throws -> Finished {
         let started = ContinuousClock.now
+        onPhase(.transcribing(part: 0, total: recording.segments.count))
         let alreadyStarted = recording.segments.filter { pending[$0.fileName] != nil }.count
         for segment in recording.segments {
-            startIfNeeded(segment, in: directory)
+            startIfNeeded(segment, in: directory, ignoringCache: ignoringCache)
         }
         logger.notice("""
             Finishing the Transcript: \(recording.segments.count) Segments, \(alreadyStarted) started while recording, \
@@ -107,7 +121,8 @@ actor MeetingTranscription {
             """)
         var bySegment: [String: CachedSegment] = [:]
         var failed: [String] = []
-        for segment in recording.segments {
+        for (index, segment) in recording.segments.enumerated() {
+            onPhase(.transcribing(part: index + 1, total: recording.segments.count))
             do {
                 bySegment[segment.fileName] = try await pending[segment.fileName]!.value
             } catch {
@@ -143,7 +158,7 @@ actor MeetingTranscription {
         if utterances.contains(where: { $0.track == .others }) {
             stage = .now
             do {
-                let turns = try await othersTurns(recording, in: directory)
+                let turns = try await othersTurns(recording, in: directory, ignoringCache: ignoringCache)
                 utterances = assigningSpeakers(to: utterances, turns: turns)
                 logger.notice("Speakers told apart in \(secondsSince(stage), privacy: .public): \(turns.count) turns")
             } catch {
@@ -186,7 +201,8 @@ actor MeetingTranscription {
     /// The voices of the whole Others Track, diarized in one pass so a voice keeps its number
     /// across Segments. The Segments are joined in a temporary file, each at its start with
     /// silence before it, so turn times are Meeting times and a long Meeting is not held in memory.
-    private func othersTurns(_ recording: Recording, in directory: URL) async throws -> [SpeakerTurn] {
+    private func othersTurns(_ recording: Recording, in directory: URL, ignoringCache: Bool) async throws -> [SpeakerTurn] {
+        onPhase(.identifyingSpeakers)
         let cacheURL = directory.appending(path: CachedSpeakers.fileName)
         let othersSegments = recording.segments.filter { $0.track == .others }.sorted { $0.start < $1.start }
         let key = othersSegments.map { segment in
@@ -195,7 +211,7 @@ actor MeetingTranscription {
                 size: try? directory.appending(path: segment.fileName).resourceValues(forKeys: [.fileSizeKey]).fileSize
             )
         }
-        if let cached = CachedSpeakers.load(at: cacheURL),
+        if !ignoringCache, let cached = CachedSpeakers.load(at: cacheURL),
            cached.version == CachedSpeakers.currentVersion, cached.segments == key {
             logger.notice("Speakers from the cache")
             return cached.turns
@@ -221,7 +237,13 @@ actor MeetingTranscription {
                 try Self.write(samples, to: file, format: format)
             }
         }
-        return try await diarizer.turns(inFile: timeline)
+        let onPhase = self.onPhase
+        return try await diarizer.turns(inFile: timeline) { phase in
+            switch phase {
+            case .preparing: onPhase(.preparingSpeakers)
+            case .identifying: onPhase(.identifyingSpeakers)
+            }
+        }
     }
 
     private static func write(_ samples: [Float], to file: AVAudioFile, format: AVAudioFormat) throws {
@@ -234,19 +256,23 @@ actor MeetingTranscription {
         try file.write(from: buffer)
     }
 
-    private func startIfNeeded(_ segment: Segment, in directory: URL) {
+    private func startIfNeeded(_ segment: Segment, in directory: URL, ignoringCache: Bool = false) {
         guard pending[segment.fileName] == nil else { return }
-        pending[segment.fileName] = Task { try await self.transcribe(segment, in: directory, language: nil) }
+        pending[segment.fileName] = Task { try await self.transcribe(segment, in: directory, language: nil, ignoringCache: ignoringCache) }
     }
 
     /// `language` forces the language and ignores the cache; `nil` uses the cache or detects it.
-    private func transcribe(_ segment: Segment, in directory: URL, language forced: String?) async throws -> CachedSegment {
+    private func transcribe(
+        _ segment: Segment, in directory: URL, language forced: String?, ignoringCache: Bool = false
+    ) async throws -> CachedSegment {
         let cacheURL = directory.appending(path: segment.transcriptionCacheFileName)
         if let forced {
             logger.notice("\(segment.fileName, privacy: .public): transcribing again in \(forced, privacy: .public)")
         } else {
             let miss: String
-            if let cached = CachedSegment.load(at: cacheURL) {
+            if ignoringCache {
+                miss = "cache ignored"
+            } else if let cached = CachedSegment.load(at: cacheURL) {
                 guard let reason = cacheMiss(cached) else { return fromCache(cached, segment) }
                 miss = reason
             } else {

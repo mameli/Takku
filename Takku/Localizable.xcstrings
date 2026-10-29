@@ -2677,6 +2677,246 @@
         }
       }
     },
+    "Regenerate Summary": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rigenera Riepilogo"
+          }
+        }
+      }
+    },
+    "Reprocess Recording…": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rielabora Registrazione…"
+          }
+        }
+      }
+    },
+    "Reprocess Recording?": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rielaborare la Registrazione?"
+          }
+        }
+      }
+    },
+    "Reprocess Recording": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rielabora Registrazione"
+          }
+        }
+      }
+    },
+    "Takku will rebuild the Transcript from the audio. If Processing succeeds, edits you made to the current Transcript will be replaced.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku ricostruirà il Transcript dall'audio. Se l'elaborazione riesce, le modifiche che hai fatto al Transcript attuale saranno sostituite."
+          }
+        }
+      }
+    },
+    "Recording not found: regenerate the Summary from the current Transcript instead.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registrazione non trovata: rigenera invece il Riepilogo dal Transcript attuale."
+          }
+        }
+      }
+    },
+    "Name speakers…": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Assegna nomi agli Speaker…"
+          }
+        }
+      }
+    },
+    "Name speakers": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Assegna nomi agli Speaker"
+          }
+        }
+      }
+    },
+    "Participants": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Partecipanti"
+          }
+        }
+      }
+    },
+    "Choose an invited participant or enter a name. Empty fields stay unnamed.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scegli un partecipante invitato o inserisci un nome. I campi vuoti restano senza nome."
+          }
+        }
+      }
+    },
+    "Save and Regenerate": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salva e rigenera"
+          }
+        }
+      }
+    },
+    "Meeting note or Transcript not found in the Vault.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nota della Riunione o Transcript non trovati nel Vault."
+          }
+        }
+      }
+    },
+    "No Speakers found in the Transcript.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nessuno Speaker trovato nel Transcript."
+          }
+        }
+      }
+    },
+    "Speaker names not saved: %@": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nomi degli Speaker non salvati: %@"
+          }
+        }
+      }
+    },
+    "Transcribing…": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trascrizione…"
+          }
+        }
+      }
+    },
+    "Transcribing · part %lld/%lld": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trascrizione · parte %lld/%lld"
+          }
+        }
+      }
+    },
+    "Preparing speaker recognition…": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preparazione riconoscimento speaker…"
+          }
+        }
+      }
+    },
+    "Identifying speakers…": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Identificazione speaker…"
+          }
+        }
+      }
+    },
+    "Writing Summary…": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scrittura Riepilogo…"
+          }
+        }
+      }
+    },
+    "Writing Summary · part %lld/%lld": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scrittura Riepilogo · parte %lld/%lld"
+          }
+        }
+      }
+    },
+    "Merging Summary…": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unione Riepilogo…"
+          }
+        }
+      }
+    },
+    "Writing note…": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scrittura nota…"
+          }
+        }
+      }
+    },
+    "%lld more queued": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld in coda"
+          }
+        }
+      }
+    },
+    "Importing file %lld/%lld: %@…": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importazione file %lld/%lld: %@…"
+          }
+        }
+      }
+    },
     "Screenshots (optional)": {
       "localizations": {
         "it": {
