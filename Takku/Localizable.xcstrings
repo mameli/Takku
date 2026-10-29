@@ -908,6 +908,36 @@
         }
       }
     },
+    "Takku will rebuild the Transcript from the audio, with the current Vocabulary and Speaker names, reusing the transcription already saved where it is still valid. If Processing succeeds, edits you made to the current Transcript will be replaced.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku ricostruirà il Transcript dall'audio, con il Vocabolario e i nomi degli speaker attuali, riusando la trascrizione già salvata dove è ancora valida. Se l'elaborazione riesce, le modifiche che hai fatto al Transcript attuale saranno sostituite."
+          }
+        }
+      }
+    },
+    "Transcribe again from scratch (slower: also tells the voices apart again)": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trascrivi di nuovo da zero (più lento: distingue di nuovo anche le voci)"
+          }
+        }
+      }
+    },
+    "Transcribed again from scratch, voices included.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trascritto di nuovo da zero, voci comprese."
+          }
+        }
+      }
+    },
     "Transcript not found.": {
       "localizations": {
         "it": {
@@ -1386,6 +1416,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Manifest della Registrazione illeggibile in %@: %@ Audio conservato."
+          }
+        }
+      }
+    },
+    "Transcript rebuilt from the audio. Segments transcribed again: %lld; from the saved transcription: %lld.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transcript ricostruito dall'audio. Segmenti trascritti di nuovo: %lld; dalla trascrizione salvata: %lld."
           }
         }
       }
@@ -2823,16 +2863,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Rielabora Registrazione"
-          }
-        }
-      }
-    },
-    "Takku will rebuild the Transcript from the audio. If Processing succeeds, edits you made to the current Transcript will be replaced.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Takku ricostruirà il Transcript dall'audio. Se l'elaborazione riesce, le modifiche che hai fatto al Transcript attuale saranno sostituite."
           }
         }
       }

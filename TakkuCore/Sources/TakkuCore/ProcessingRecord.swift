@@ -45,13 +45,26 @@ public struct ProcessingRecord: Codable, Equatable, Sendable {
     public var summaryProfile: ProviderProfile?
     /// Path of the Meeting note, if it was created.
     public var noteURL: URL?
-    /// True only for an explicit Reprocess Recording: rebuild the Transcript and Speaker turns
-    /// instead of reusing their caches. Kept here so a restart cannot turn it back into a cache hit.
-    public var ignoreTranscriptionCache: Bool
+    /// Set only while an explicit Reprocess Recording is queued or running. Kept here so a restart
+    /// cannot turn one from scratch back into a cache hit, and so its outcome can say how the
+    /// Transcript was rebuilt.
+    public var reprocessing: Reprocessing?
     /// When the source file was imported, not when the Meeting was originally recorded.
     public var importedAt: Date?
     /// Source audio skipped during import: persisted so Processing can report it after a restart.
     public var importWarnings: [String]
+
+    /// How Reprocess Recording rebuilds the Transcript from the audio.
+    public enum Reprocessing: String, Codable, Sendable {
+        /// Segments and Speaker turns whose cache is still valid are reused: the Transcript is
+        /// rebuilt with the current Vocabulary, echo removal and Speaker names, and only Segments
+        /// cached by another model or language are transcribed again.
+        case reusingCache
+        /// Every Segment is transcribed and the Others Track diarized again, ignoring the caches.
+        case fromScratch
+    }
+
+    public var ignoresTranscriptionCache: Bool { reprocessing == .fromScratch }
 
     /// Recency in the menu: an old memo imported now is a recent Meeting.
     public var recentAt: Date { importedAt ?? startedAt }
@@ -59,7 +72,7 @@ public struct ProcessingRecord: Codable, Equatable, Sendable {
     public init(
         takkuID: UUID, startedAt: Date, status: Status,
         templateName: String, summaryProfile: ProviderProfile?, noteURL: URL?,
-        ignoreTranscriptionCache: Bool = false, importedAt: Date? = nil, importWarnings: [String] = []
+        reprocessing: Reprocessing? = nil, importedAt: Date? = nil, importWarnings: [String] = []
     ) {
         self.takkuID = takkuID
         self.startedAt = startedAt
@@ -67,16 +80,16 @@ public struct ProcessingRecord: Codable, Equatable, Sendable {
         self.templateName = templateName
         self.summaryProfile = summaryProfile
         self.noteURL = noteURL
-        self.ignoreTranscriptionCache = ignoreTranscriptionCache
+        self.reprocessing = reprocessing
         self.importedAt = importedAt
         self.importWarnings = importWarnings
     }
 
     private enum CodingKeys: String, CodingKey {
-        case takkuID, startedAt, status, templateName, summaryProfile, noteURL, ignoreTranscriptionCache, importedAt, importWarnings
+        case takkuID, startedAt, status, templateName, summaryProfile, noteURL, reprocessing, importedAt, importWarnings
     }
 
-    /// Records written before the cache flag existed keep the normal cached Processing behavior.
+    /// Records written before these fields existed keep the normal cached Processing behavior.
     public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         takkuID = try values.decode(UUID.self, forKey: .takkuID)
@@ -85,7 +98,7 @@ public struct ProcessingRecord: Codable, Equatable, Sendable {
         templateName = try values.decode(String.self, forKey: .templateName)
         summaryProfile = try values.decodeIfPresent(ProviderProfile.self, forKey: .summaryProfile)
         noteURL = try values.decodeIfPresent(URL.self, forKey: .noteURL)
-        ignoreTranscriptionCache = try values.decodeIfPresent(Bool.self, forKey: .ignoreTranscriptionCache) ?? false
+        reprocessing = try values.decodeIfPresent(Reprocessing.self, forKey: .reprocessing)
         importedAt = try values.decodeIfPresent(Date.self, forKey: .importedAt)
         importWarnings = try values.decodeIfPresent([String].self, forKey: .importWarnings) ?? []
     }

@@ -23,6 +23,9 @@ actor MeetingTranscription {
         let speakersProblem: String?
         /// Cache writes that failed after the result was safely produced in memory.
         let cacheProblems: [String]
+        /// Segments in the Transcript taken from their cache, and transcribed in this Processing.
+        let segmentsFromCache: Int
+        let segmentsTranscribed: Int
     }
 
     /// Result of a Segment saved next to the audio: a new Processing does not redo it.
@@ -89,6 +92,8 @@ actor MeetingTranscription {
     private var pending: [String: Task<CachedSegment, Error>] = [:]
     private var onPhase: @Sendable (Phase) -> Void = { _ in }
     private var cacheProblems: [String] = []
+    /// Segments whose current result comes from the cache: a Segment transcribed again leaves it.
+    private var fromCacheSegments: Set<String> = []
 
     /// `languages`: the Meeting languages; with only one it is forced, otherwise detected among them.
     init(transcriber: LocalTranscriber, diarizer: SpeakerDiarizer, model: TranscriptionModel, languages: [String]) {
@@ -177,9 +182,12 @@ actor MeetingTranscription {
         try transcript.markdown.write(to: url, atomically: true, encoding: .utf8)
         let language = locked ?? provisionalSegments.values.first?.language
         logger.notice("Transcript written in \(secondsSince(started), privacy: .public), language \(language ?? "none", privacy: .public)")
+        let done = recording.segments.map(\.fileName).filter { bySegment[$0] != nil }
+        let fromCache = done.filter(fromCacheSegments.contains).count
         return Finished(
             url: url, transcript: transcript, language: language, failedSegments: failed,
-            speakersProblem: speakersProblem, cacheProblems: cacheProblems
+            speakersProblem: speakersProblem, cacheProblems: cacheProblems,
+            segmentsFromCache: fromCache, segmentsTranscribed: done.count - fromCache
         )
     }
 
@@ -286,6 +294,7 @@ actor MeetingTranscription {
             }
             logger.notice("\(segment.fileName, privacy: .public): transcribing, \(miss, privacy: .public)")
         }
+        fromCacheSegments.remove(segment.fileName)
         let started = ContinuousClock.now
         defer { logger.notice("\(segment.fileName, privacy: .public): done in \(secondsSince(started), privacy: .public)") }
 
@@ -354,6 +363,7 @@ actor MeetingTranscription {
     /// `finish`, once a provisional Segment is known to be kept.
     private func fromCache(_ cached: CachedSegment, _ segment: Segment) -> CachedSegment {
         logger.notice("\(segment.fileName, privacy: .public): from the cache")
+        fromCacheSegments.insert(segment.fileName)
         if let language = cached.language, forcedLanguage == nil {
             if cached.isLanguageReliable {
                 // Same language for the whole Meeting, even if some Segments come from the cache.

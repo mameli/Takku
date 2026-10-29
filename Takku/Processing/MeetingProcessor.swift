@@ -16,8 +16,9 @@ final class MeetingProcessor {
         case automatic
         /// Always from the current Transcript in the Vault, even when the audio exists.
         case summary
-        /// Rebuild the Transcript from the Recording, then write the Summary.
-        case recording
+        /// Rebuild the Transcript from the Recording, then write the Summary. `fromScratch` ignores
+        /// the transcription and Speaker caches; otherwise the valid ones are reused.
+        case recording(fromScratch: Bool)
     }
 
     enum Phase: Equatable {
@@ -268,18 +269,23 @@ final class MeetingProcessor {
     func retry(_ takkuID: UUID, templateName: String, profile: ProviderProfile?, mode: RetryMode = .automatic) {
         guard var record = record(takkuID) else { return }
         let hasAudio = hasRecording(takkuID)
-        let regenerating = switch mode {
-        case .automatic: !hasAudio
-        case .summary: true
-        case .recording: false
-        }
-        guard mode != .recording || hasAudio else {
-            lastError = String(localized: "Recording not found: regenerate the Summary from the current Transcript instead.")
-            return
+        let regenerating: Bool
+        let reprocessing: ProcessingRecord.Reprocessing?
+        switch mode {
+        case .automatic:
+            (regenerating, reprocessing) = (!hasAudio, nil)
+        case .summary:
+            (regenerating, reprocessing) = (true, nil)
+        case .recording(let fromScratch):
+            guard hasAudio else {
+                lastError = String(localized: "Recording not found: regenerate the Summary from the current Transcript instead.")
+                return
+            }
+            (regenerating, reprocessing) = (false, fromScratch ? .fromScratch : .reusingCache)
         }
         record.templateName = record.retryTemplate(chosen: templateName)
         record.summaryProfile = profile
-        record.ignoreTranscriptionCache = mode == .recording
+        record.reprocessing = reprocessing
         do {
             if regenerating { try record.beginRegeneration() } else { try record.queueForRetry() }
         } catch {
@@ -288,7 +294,8 @@ final class MeetingProcessor {
         lastError = nil
         // Once accepted and before enqueueing, so the count leaves this Retry out.
         logger.notice("""
-            Retry \(takkuID, privacy: .public): \(regenerating ? "Regeneration" : "full Processing", privacy: .public), \
+            Retry \(takkuID, privacy: .public): \(regenerating ? "Regeneration" : "full Processing", privacy: .public)\
+            \(reprocessing.map { " (\($0.rawValue))" } ?? "", privacy: .public), \
             Template \(record.templateName, privacy: .public), model \(profile?.model ?? "none", privacy: .public), \
             \(self.pendingCount) ahead in the queue
             """)
@@ -412,7 +419,7 @@ final class MeetingProcessor {
         let finished: MeetingTranscription.Finished?
         do {
             finished = try await transcription.finish(
-                recording, in: directory, vocabulary: vocabulary, ignoringCache: record.ignoreTranscriptionCache
+                recording, in: directory, vocabulary: vocabulary, ignoringCache: record.ignoresTranscriptionCache
             )
             if let failedSegments = finished?.failedSegments, !failedSegments.isEmpty {
                 warnings.append(String(localized: "Incomplete transcript: \(failedSegments.joined(separator: "; "))"))
@@ -446,7 +453,19 @@ final class MeetingProcessor {
             update(.writingNote, for: record.takkuID)
             warnings.append(String(localized: "No Vault configured: no Summary, the Transcript is only in the Recording folder."))
         }
-        finish(&record, problems: problems, warnings: warnings, started: started)
+        finish(&record, problems: problems, warnings: warnings, started: started, rebuild: rebuildDescription(record, finished))
+    }
+
+    /// For a Reprocess, how the Transcript was rebuilt: otherwise the notification would look
+    /// like a new Summary only.
+    private func rebuildDescription(_ record: ProcessingRecord, _ finished: MeetingTranscription.Finished?) -> String? {
+        guard let reprocessing = record.reprocessing, let finished else { return nil }
+        switch reprocessing {
+        case .fromScratch:
+            return String(localized: "Transcribed again from scratch, voices included.")
+        case .reusingCache:
+            return String(localized: "Transcript rebuilt from the audio. Segments transcribed again: \(finished.segmentsTranscribed); from the saved transcription: \(finished.segmentsFromCache).")
+        }
     }
 
     private func runRegeneration(_ queued: ProcessingRecord) async {
@@ -507,7 +526,10 @@ final class MeetingProcessor {
         finish(&record, problems: problems, warnings: [], started: started)
     }
 
-    private func finish(_ record: inout ProcessingRecord, problems: [String], warnings: [String], started: ContinuousClock.Instant) {
+    private func finish(
+        _ record: inout ProcessingRecord, problems: [String], warnings: [String], started: ContinuousClock.Instant,
+        rebuild: String? = nil
+    ) {
         let noteName = record.noteURL?.deletingPathExtension().lastPathComponent ?? String(localized: "Meeting")
         let takkuID = record.takkuID
         logger.notice("""
@@ -523,11 +545,16 @@ final class MeetingProcessor {
             lastError = reason
             logger.error("\(reason, privacy: .public)")
         }
+        // Without a note, this Meeting's own local Transcript: `lastTranscriptURL` may belong to an
+        // earlier Meeting when this one's transcription failed.
+        let localTranscript = Self.directory(for: takkuID).appending(path: Transcript.recordingCopyFileName)
+        let opened = record.noteURL
+            ?? (FileManager.default.fileExists(atPath: localTranscript.path(percentEncoded: false)) ? localTranscript : nil)
         Notifications.shared.processingFinished(
-            noteName: noteName, note: record.noteURL ?? lastTranscriptURL, hasVault: Vault.configured != nil,
-            hasSummary: record.summaryProfile != nil, problems: problems, warnings: warnings
+            noteName: noteName, note: opened, hasVault: Vault.configured != nil,
+            hasSummary: record.summaryProfile != nil, problems: problems, warnings: warnings, rebuild: rebuild
         )
-        record.ignoreTranscriptionCache = false
+        record.reprocessing = nil
         save(record)
         currentID = nil
         currentTitle = nil
@@ -808,10 +835,19 @@ final class MeetingProcessor {
         try Recording.recover(fromFolder: directory, takkuID: record.takkuID, startedAt: record.startedAt)
     }
 
+    /// Damaged Recording folders already shown in the menu by a previous cleanup.
+    private static let reportedCleanupProblemsKey = "reportedCleanupProblems"
+
     /// Deletes the audio of expired Recordings (see `RecordingStorage.deleteAudio(olderThanDays:)`).
+    /// A damaged folder is shown in the menu once, not at every launch and every day: it stays in
+    /// the log and in Settings → Recordings → *Delete audio…*.
     func cleanUpExpiredRecordings() {
         let problems = RecordingStorage.deleteAudio(olderThanDays: AppSettings.retentionDays)
-        if !problems.isEmpty { lastError = problems.joined(separator: " ") }
+        for problem in problems { logger.error("Cleanup: \(problem, privacy: .public)") }
+        let reported = Set(UserDefaults.standard.stringArray(forKey: Self.reportedCleanupProblemsKey) ?? [])
+        UserDefaults.standard.set(problems, forKey: Self.reportedCleanupProblemsKey)
+        let new = problems.filter { !reported.contains($0) }
+        if !new.isEmpty { lastError = new.joined(separator: " ") }
         refreshRecent()
     }
 }
