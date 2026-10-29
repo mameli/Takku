@@ -121,6 +121,13 @@ Two examples for lectures, to copy into `~/.takku/templates/`:
 - [`examples/templates/Lecture.md`](examples/templates/Lecture.md): study notes, topic by topic, with definitions, formulas, what the lecturer stresses, a glossary and review questions.
 - [`examples/templates/Sbobina.md`](examples/templates/Sbobina.md): the full text of the lecture (*sbobina* in Italian), with `full_text: true`. Students' questions and remarks stay where they were asked, and misheard technical terms are fixed the same way throughout. Its examples of misheard terms come from an economics lecture: replace them with your subject's.
 
+Two for circles run with Holacracy, written to leave no update, tension or action out:
+
+- [`examples/templates/Tactical.md`](examples/templates/Tactical.md): the minutes of a Tactical Meeting, checklists, metrics, project updates, one section per tension with its discussion and outputs, then every next action and project as a checklist and the tensions to bring to Governance.
+- [`examples/templates/Governance.md`](examples/templates/Governance.md): the minutes of a Governance Meeting, one section per proposal with questions, reactions, objections and integrations, the adopted texts as close to verbatim as possible, and the list of changes for the governance records.
+
+A long meeting needs a model that reasons: with a small one or a low reasoning effort, discussions get shorter and points go missing.
+
 ### Vocabulary
 
 Names, acronyms and technical words that recognition gets wrong go in `~/.takku/vocabulary.md`: open it from *Settings → Vocabulary → Edit Vocabulary With*. One entry per line: the correct term, then after `=` what is usually heard instead, then after `|` a short description, the last two optional:
