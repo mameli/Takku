@@ -35,13 +35,15 @@ struct ProcessingRecordTests {
         saved.summaryProfile = ProviderProfile(name: "Mistral UE", baseURL: "https://api.mistral.ai/v1", model: "m", maxContextTokens: 32_000)
         saved.noteURL = URL(filePath: "/Vault/Meetings/2026-10-04 1430 - Meeting.md")
         saved.ignoreTranscriptionCache = true
+        saved.importedAt = start.addingTimeInterval(3_600)
+        saved.importWarnings = ["Unreadable audio skipped from 1.000 s to 1.064 s."]
 
         try saved.save(inFolder: directory)
 
         #expect(try ProcessingRecord.load(fromFolder: directory) == saved)
     }
 
-    @Test("a record written before the cache flag existed keeps cached Processing")
+    @Test("a record written before cache and import metadata existed keeps safe defaults")
     func legacyCacheFlag() throws {
         let directory = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
@@ -50,11 +52,26 @@ struct ProcessingRecordTests {
         let url = directory.appending(path: ProcessingRecord.fileName)
         var object = try #require(try JSONSerialization.jsonObject(with: Data(contentsOf: url)) as? [String: Any])
         object.removeValue(forKey: "ignoreTranscriptionCache")
+        object.removeValue(forKey: "importedAt")
+        object.removeValue(forKey: "importWarnings")
         let data = try JSONSerialization.data(withJSONObject: object)
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
 
-        #expect(try decoder.decode(ProcessingRecord.self, from: data).ignoreTranscriptionCache == false)
+        let decoded = try decoder.decode(ProcessingRecord.self, from: data)
+        #expect(decoded.ignoreTranscriptionCache == false)
+        #expect(decoded.importedAt == nil)
+        #expect(decoded.importWarnings.isEmpty)
+        #expect(decoded.recentAt == decoded.startedAt)
+    }
+
+    @Test("an old Recording imported now is more recent than a newer recorded Meeting")
+    func importedRecency() {
+        var imported = record(.completed)
+        imported.importedAt = start.addingTimeInterval(3_600)
+        let recordedLater = record(.completed, minutesAfterStart: 30)
+
+        #expect([recordedLater, imported].sorted { $0.recentAt > $1.recentAt }.map(\.takkuID) == [imported.takkuID, recordedLater.takkuID])
     }
 
     @Test("a Recording interrupted by a crash is rebuilt from the saved Segment lists")

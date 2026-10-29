@@ -48,11 +48,18 @@ public struct ProcessingRecord: Codable, Equatable, Sendable {
     /// True only for an explicit Reprocess Recording: rebuild the Transcript and Speaker turns
     /// instead of reusing their caches. Kept here so a restart cannot turn it back into a cache hit.
     public var ignoreTranscriptionCache: Bool
+    /// When the source file was imported, not when the Meeting was originally recorded.
+    public var importedAt: Date?
+    /// Source audio skipped during import: persisted so Processing can report it after a restart.
+    public var importWarnings: [String]
+
+    /// Recency in the menu: an old memo imported now is a recent Meeting.
+    public var recentAt: Date { importedAt ?? startedAt }
 
     public init(
         takkuID: UUID, startedAt: Date, status: Status,
         templateName: String, summaryProfile: ProviderProfile?, noteURL: URL?,
-        ignoreTranscriptionCache: Bool = false
+        ignoreTranscriptionCache: Bool = false, importedAt: Date? = nil, importWarnings: [String] = []
     ) {
         self.takkuID = takkuID
         self.startedAt = startedAt
@@ -61,10 +68,12 @@ public struct ProcessingRecord: Codable, Equatable, Sendable {
         self.summaryProfile = summaryProfile
         self.noteURL = noteURL
         self.ignoreTranscriptionCache = ignoreTranscriptionCache
+        self.importedAt = importedAt
+        self.importWarnings = importWarnings
     }
 
     private enum CodingKeys: String, CodingKey {
-        case takkuID, startedAt, status, templateName, summaryProfile, noteURL, ignoreTranscriptionCache
+        case takkuID, startedAt, status, templateName, summaryProfile, noteURL, ignoreTranscriptionCache, importedAt, importWarnings
     }
 
     /// Records written before the cache flag existed keep the normal cached Processing behavior.
@@ -77,6 +86,8 @@ public struct ProcessingRecord: Codable, Equatable, Sendable {
         summaryProfile = try values.decodeIfPresent(ProviderProfile.self, forKey: .summaryProfile)
         noteURL = try values.decodeIfPresent(URL.self, forKey: .noteURL)
         ignoreTranscriptionCache = try values.decodeIfPresent(Bool.self, forKey: .ignoreTranscriptionCache) ?? false
+        importedAt = try values.decodeIfPresent(Date.self, forKey: .importedAt)
+        importWarnings = try values.decodeIfPresent([String].self, forKey: .importWarnings) ?? []
     }
 
     /// After a restart: Meetings queued, in progress or interrupted while recording resume.

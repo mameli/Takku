@@ -1310,6 +1310,116 @@
         }
       }
     },
+    "Cache not saved; this Processing's result is preserved: %@": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cache non salvata; il risultato di questa elaborazione è al sicuro: %@"
+          }
+        }
+      }
+    },
+    "Cannot recover the Recording: %@ is missing although its Track has audio.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossibile recuperare la Registrazione: manca %@ anche se la sua Traccia contiene audio."
+          }
+        }
+      }
+    },
+    "Cannot recover the Recording: %@ is unreadable (%@).": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossibile recuperare la Registrazione: %@ è illeggibile (%@)."
+          }
+        }
+      }
+    },
+    "Duplicate takku_id %@. Takku cannot safely choose between: %@. Fix the duplicate notes or Transcript links in the Vault.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "takku_id %@ duplicato. Takku non può scegliere in sicurezza tra: %@. Correggi le note duplicate o i link al Transcript nel Vault."
+          }
+        }
+      }
+    },
+    "Hook not run: %@": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hook non eseguito: %@"
+          }
+        }
+      }
+    },
+    "Processing state is missing in %@. Audio kept.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stato del Processing mancante in %@. Audio conservato."
+          }
+        }
+      }
+    },
+    "Processing state is unreadable in %@: %@ Audio kept.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stato del Processing illeggibile in %@: %@ Audio conservato."
+          }
+        }
+      }
+    },
+    "Recording manifest is unreadable in %@: %@ Audio kept.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manifest della Registrazione illeggibile in %@: %@ Audio conservato."
+          }
+        }
+      }
+    },
+    "Unreadable audio skipped from %@ s to %@ s; the Transcript and Summary may be incomplete.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Audio illeggibile saltato da %@ s a %@ s; Trascrizione e Riepilogo potrebbero essere incompleti."
+          }
+        }
+      }
+    },
+    "Processing state belongs to another Meeting in %@. Audio kept.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lo stato del Processing appartiene a un'altra riunione in %@. Audio conservato."
+          }
+        }
+      }
+    },
+    "Recording manifest belongs to another Meeting in %@. Audio kept.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il manifest della Registrazione appartiene a un'altra riunione in %@. Audio conservato."
+          }
+        }
+      }
+    },
     "Recording interrupted and not recoverable: %@": {
       "localizations": {
         "it": {

@@ -15,6 +15,8 @@ enum AudioFileImport {
         /// The start was read from the file's own metadata, when it was recorded. Otherwise it is
         /// the file's creation date, which can be when it was copied or downloaded.
         let isRecordingDate: Bool
+        /// Recovered read errors that left actual gaps in the source audio.
+        let warnings: [String]
     }
 
     /// Frames read at a time: about a second of audio.
@@ -80,9 +82,11 @@ enum AudioFileImport {
             let outcome = writer.finish()
             if let error = outcome.error { throw error }
             if outcome.segments.isEmpty, let firstError { throw firstError }
+            var warnings: [String] = []
             for stretch in skipped {
                 let start = Double(stretch.lowerBound) / sampleRate, end = Double(stretch.upperBound) / sampleRate
                 logger.warning("Skipped unreadable audio in \(name, privacy: .public) from \(start, format: .fixed(precision: 3)) s to \(end, format: .fixed(precision: 3)) s")
+                warnings.append(String(localized: "Unreadable audio skipped from \(String(format: "%.3f", start)) s to \(String(format: "%.3f", end)) s; the Transcript and Summary may be incomplete."))
             }
             if let firstError {
                 logger.notice("Read errors in \(name, privacy: .public), stretches skipped: \(skipped.count); the first error: \(firstError, privacy: .public)")
@@ -92,7 +96,7 @@ enum AudioFileImport {
                 endedAt: startedAt.addingTimeInterval(Double(file.length) / sampleRate), segments: outcome.segments
             )
             try recording.save(inFolder: directory)
-            return Imported(directory: directory, recording: recording, isRecordingDate: isRecordingDate)
+            return Imported(directory: directory, recording: recording, isRecordingDate: isRecordingDate, warnings: warnings)
         } catch {
             try? FileManager.default.removeItem(at: directory)
             throw error

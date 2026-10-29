@@ -6,6 +6,7 @@ import SwiftUI
 struct RecordingsSection: View {
     @State private var days = AppSettings.retentionDays
     @State private var size: Int64 = 0
+    @State private var cleanupProblems: [String] = []
     @State private var isConfirmingDeletion = false
     @AppStorage(AppSettings.keepSummaryLogKey) private var keepSummaryLog = true
     @State private var summaryLogSize: Int64 = 0
@@ -34,6 +35,12 @@ struct RecordingsSection: View {
                     }
                 }
             }
+            if !cleanupProblems.isEmpty {
+                Text(cleanupProblems.joined(separator: "\n"))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .textSelection(.enabled)
+            }
             Toggle("Keep a Summary log", isOn: $keepSummaryLog)
             LabeledContent("Summary log") {
                 HStack {
@@ -59,7 +66,7 @@ struct RecordingsSection: View {
             isPresented: $isConfirmingDeletion
         ) {
             Button("Delete audio", role: .destructive) {
-                RecordingStorage.deleteAudio(olderThanDays: 0)
+                cleanupProblems = RecordingStorage.deleteAudio(olderThanDays: 0)
                 size = RecordingStorage.audioSize()
             }
         } message: {

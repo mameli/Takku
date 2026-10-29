@@ -80,6 +80,17 @@ public struct MeetingNote: Equatable, Sendable {
         return markdown.value(TakkuKey.takkuID.rawValue).flatMap(UUID.init(uuidString:))
     }
 
+    /// The Transcript file named by Takku's frontmatter link, without its extension. Used to
+    /// disambiguate Sync copies that have the same `takku_id`.
+    public var transcriptName: String? {
+        guard let link = MarkdownLines(content).value(TakkuKey.transcript.rawValue),
+              link.prefix(2) == "[[", link.suffix(2) == "]]"
+        else { return nil }
+        let target = link.dropFirst(2).dropLast(2).split(separator: "|", maxSplits: 1).first.map(String.init) ?? ""
+        let name = target.split(separator: "/").last.map(String.init) ?? ""
+        return name.isEmpty ? nil : name
+    }
+
     /// The names the user gave the Speakers, from the frontmatter list `speakers`
     /// (`- Speaker 1 = Mario Rossi`). Entries in another form are ignored; for a number given
     /// twice, the first one counts.
@@ -175,14 +186,14 @@ public struct MeetingNote: Equatable, Sendable {
     }
 
     /// Whether the Managed section holds a completed Summary or Transcript, rather than the
-    /// recording placeholder, an error or no result. A failed Retry must leave that result intact.
+    /// recording or import placeholder, an error or no result. A failed Retry must leave that result intact.
     public var hasSuccessfulOutcome: Bool {
         let markdown = MarkdownLines(content)
         guard let managed = Self.managedRange(in: markdown) else { return false }
         let body = markdown.lines[(managed.lowerBound + 1)..<managed.upperBound]
             .joined(separator: "\n")
             .trimmingCharacters(in: .whitespacesAndNewlines)
-        return !body.isEmpty && !body.hasPrefix("⚠️") && !body.hasPrefix("⏺")
+        return !body.isEmpty && !["⚠️", "⏺", "⏳"].contains { body.hasPrefix($0) }
     }
 
     /// Records the outcome of Processing: Takku's frontmatter keys (restoring `takku_id` if the
