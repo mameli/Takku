@@ -231,6 +231,16 @@
         }
       }
     },
+    "Cannot play the audio: %@": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossibile riprodurre l'audio: %@"
+          }
+        }
+      }
+    },
     "Cannot read the audio of %@.": {
       "localizations": {
         "it": {
@@ -904,6 +914,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nota della Riunione non trovata nel Vault."
+          }
+        }
+      }
+    },
+    "Play a few seconds of this voice. Play again for another passage.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ascolta qualche secondo di questa voce. Premi di nuovo per un altro passaggio."
+          }
+        }
+      }
+    },
+    "Play Speaker %lld": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ascolta Speaker %lld"
+          }
+        }
+      }
+    },
+    "Stop": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Interrompi"
           }
         }
       }

@@ -386,9 +386,11 @@ final class MeetingController {
     /// Opens the naming window only when both the Meeting note and a Transcript with Speakers exist.
     func prepareSpeakerNaming(for meeting: MeetingProcessor.RecentMeeting) -> Bool {
         guard let context = processor.speakerNamingContext(meeting.id) else { return false }
+        speakerNaming?.player?.stop()
         speakerNaming = SpeakerNamingDraft(
             takkuID: meeting.id, meetingTitle: meeting.title, speakers: context.speakers,
-            names: context.names, participants: context.participants
+            names: context.names, participants: context.participants,
+            samples: context.samples, player: context.player
         )
         return true
     }

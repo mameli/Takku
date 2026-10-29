@@ -62,6 +62,9 @@ final class MeetingProcessor {
         let speakers: [Int]
         let names: [Int: String]
         let participants: [String]
+        let samples: [Int: [SpeakerSample]]
+        /// `nil` once the audio is deleted: the samples are then only quotes.
+        let player: SpeakerSamplePlayer?
     }
 
     private let transcriber: LocalTranscriber
@@ -221,7 +224,13 @@ final class MeetingProcessor {
                 lastError = String(localized: "No Speakers found in the Transcript.")
                 return nil
             }
-            return SpeakerNamingContext(speakers: speakers, names: note.speakerNames, participants: note.participants)
+            let directory = Self.directory(for: takkuID)
+            let recording = hasRecording(takkuID) ? try? Recording.load(fromFolder: directory) : nil
+            return SpeakerNamingContext(
+                speakers: speakers, names: note.speakerNames, participants: note.participants,
+                samples: SpeakerSample.samples(in: transcript),
+                player: recording.map { SpeakerSamplePlayer(recording: $0, directory: directory) }
+            )
         } catch {
             lastError = error.localizedDescription
             return nil

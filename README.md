@@ -98,7 +98,7 @@ Turn on *Settings → General → Use the calendar* and allow access: when a mee
 
 ### Speaker names
 
-If the Summary cannot tell who a Speaker is, choose *Recent meetings → Name speakers…*. Takku offers a field for each Speaker and suggestions from the calendar participants; *Save and Regenerate* applies the names and writes a new Summary from the current Transcript. You can also edit the names in the note's frontmatter and choose *Regenerate Summary*:
+If the Summary cannot tell who a Speaker is, choose *Recent meetings → Name speakers…*. Takku offers a field for each Speaker, with the first words of what they say and suggestions from the calendar participants; while the audio is kept, ▶ plays a few seconds of their voice (again for another passage); *Save and Regenerate* applies the names and writes a new Summary from the current Transcript. You can also edit the names in the note's frontmatter and choose *Regenerate Summary*:
 
 ```yaml
 speakers:

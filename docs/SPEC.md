@@ -281,7 +281,7 @@ A Track that records nothing is noticed during the Meeting, not after it.
 
 When the Summary cannot tell who a Speaker is, the user can say it:
 
-- *Recent meetings → Name speakers…* opens a small window with one field for each Speaker found in the current Transcript, the existing names and the calendar's invited participants as suggestions. *Save and Regenerate* writes the names and regenerates from the current Transcript, without using the audio.
+- *Recent meetings → Name speakers…* opens a small window with one field for each Speaker found in the current Transcript, the existing names and the calendar's invited participants as suggestions. To recognise each Speaker it shows the first 12 words of their longest paragraph with its time and, while the audio is kept, a play button: a few seconds of the Others Track from the start of that paragraph, until the next paragraph of someone else, between 2 and 8 seconds (`SpeakerSample`). Playing the same Speaker again moves to their next longest paragraph, up to 3, and the quote follows; the Segment holding a time is the last of the Track starting before it. Nothing is analysed again: the times and Speakers come from the Transcript in the Vault, so a Transcript edited by hand still works. *Save and Regenerate* writes the names and regenerates from the current Transcript, without using the audio.
 - The same names live in the Meeting note's frontmatter, in a `speakers` list owned by the user (editable there too), one entry per Speaker, with the Vocabulary's `=`:
   ```yaml
   speakers:

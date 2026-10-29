@@ -1,22 +1,40 @@
 import Foundation
 import Observation
 import SwiftUI
+import TakkuCore
 
+@MainActor
 @Observable
 final class SpeakerNamingDraft {
     let takkuID: UUID
     let meetingTitle: String
     let speakers: [Int]
     let participants: [String]
+    /// What each Speaker says, to recognise them: quotes, and their voice while the audio exists.
+    let samples: [Int: [SpeakerSample]]
+    let player: SpeakerSamplePlayer?
     var names: [Int: String]
     var error: String?
 
-    init(takkuID: UUID, meetingTitle: String, speakers: [Int], names: [Int: String], participants: [String]) {
+    init(
+        takkuID: UUID, meetingTitle: String, speakers: [Int], names: [Int: String], participants: [String],
+        samples: [Int: [SpeakerSample]], player: SpeakerSamplePlayer?
+    ) {
         self.takkuID = takkuID
         self.meetingTitle = meetingTitle
         self.speakers = speakers
         self.names = names
-        self.participants = participants
+        // Alphabetical, to find a name quickly; the note keeps the calendar's order.
+        self.participants = participants.sorted { $0.localizedStandardCompare($1) == .orderedAscending }
+        self.samples = samples
+        self.player = player
+    }
+
+    /// The sample whose quote is shown: the one played last, otherwise the longest.
+    func shownSample(of speaker: Int) -> SpeakerSample? {
+        guard let samples = samples[speaker], !samples.isEmpty else { return nil }
+        let index = player?.selected[speaker] ?? 0
+        return samples[min(index, samples.count - 1)]
     }
 }
 
@@ -36,14 +54,37 @@ struct SpeakerNamesView: View {
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                         .truncationMode(.middle)
+                        // Fixed, like the error below: the window is as wide as the Speaker rows.
+                        .frame(width: 400, alignment: .leading)
                 }
 
                 ForEach(draft.speakers, id: \.self) { speaker in
-                    HStack(spacing: 10) {
+                    HStack(alignment: .firstTextBaseline, spacing: 10) {
                         Text("Speaker \(speaker)")
                             .frame(width: 80, alignment: .leading)
-                        TextField("Name", text: nameBinding(for: speaker, in: draft))
-                            .frame(width: 220)
+                        if let player = draft.player {
+                            Button {
+                                player.toggle(speaker, samples: draft.samples[speaker] ?? [])
+                            } label: {
+                                Image(systemName: player.playing == speaker ? "stop.fill" : "play.fill")
+                                    .frame(width: 14)
+                            }
+                            .buttonStyle(.borderless)
+                            .disabled(draft.samples[speaker]?.isEmpty ?? true)
+                            .help("Play a few seconds of this voice. Play again for another passage.")
+                            .accessibilityLabel(player.playing == speaker ? "Stop" : "Play Speaker \(speaker)")
+                        }
+                        VStack(alignment: .leading, spacing: 3) {
+                            TextField("Name", text: nameBinding(for: speaker, in: draft))
+                            if let sample = draft.shownSample(of: speaker) {
+                                Text(verbatim: "[\(elapsedLabel(sample.start))] “\(sample.quote)”")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(2)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
+                        .frame(width: 260)
                         if !draft.participants.isEmpty {
                             Menu("Participants") {
                                 ForEach(draft.participants, id: \.self) { participant in
@@ -60,11 +101,12 @@ struct SpeakerNamesView: View {
                         .foregroundStyle(.secondary)
                 }
 
-                if let error = draft.error {
+                if let error = draft.error ?? draft.player?.error {
                     Text(error)
                         .font(.caption)
                         .foregroundStyle(.red)
                         .fixedSize(horizontal: false, vertical: true)
+                        .frame(width: 400, alignment: .leading)
                 }
 
                 HStack {
@@ -84,7 +126,9 @@ struct SpeakerNamesView: View {
                 }
             }
             .padding(20)
-            .frame(minWidth: 500)
+            // The window takes the width of the Speaker rows, so the buttons end under the last column.
+            .fixedSize()
+            .onDisappear { draft.player?.stop() }
         }
     }
 
@@ -96,6 +140,7 @@ struct SpeakerNamesView: View {
     }
 
     private func close() {
+        controller.speakerNaming?.player?.stop()
         controller.speakerNaming = nil
         dismiss()
     }
