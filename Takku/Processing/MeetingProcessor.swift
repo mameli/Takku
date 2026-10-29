@@ -65,6 +65,8 @@ final class MeetingProcessor {
         let samples: [Int: [SpeakerSample]]
         /// `nil` once the audio is deleted: the samples are then only quotes.
         let player: SpeakerSamplePlayer?
+        /// `nil` once the audio is deleted: the voices can then no longer be recognised.
+        let recording: Recording?
     }
 
     private let transcriber: LocalTranscriber
@@ -229,7 +231,8 @@ final class MeetingProcessor {
             return SpeakerNamingContext(
                 speakers: speakers, names: note.speakerNames, participants: note.participants,
                 samples: SpeakerSample.samples(in: transcript),
-                player: recording.map { SpeakerSamplePlayer(recording: $0, directory: directory) }
+                player: recording.map { SpeakerSamplePlayer(recording: $0, directory: directory) },
+                recording: recording
             )
         } catch {
             lastError = error.localizedDescription

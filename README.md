@@ -108,6 +108,8 @@ speakers:
 
 The Transcript then shows *Mario Rossi (Speaker 1)* and the Summary uses the name.
 
+With *Settings → Transcription → Recognise voices* on (off by default), Takku remembers the voices you name, on your Mac only, and in the next meetings fills in the name of a voice it recognises, for you to check. A voice is biometric data: turn it on only for people who agreed. Settings lists the voices and forgets them.
+
 ### Templates
 
 A Template is a Markdown file in `~/.takku/templates/`: its text tells the model what to write and how. Takku creates a default *Notes* Template there at launch. Create others from *Settings → Notes → New Template…*, then edit them from their ⋯ → *Edit With*, in any text editor; ⋯ also makes one the default. Add `summary_language: en` (or `it`, `fr`, …) to its frontmatter to always get the Summary in that language; otherwise it follows the language of the meeting.

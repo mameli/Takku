@@ -18,6 +18,7 @@ final class MeetingController {
     let models = TranscriptionModels()
     private let transcriber: LocalTranscriber
     private let diarizer = SpeakerDiarizer()
+    private let voiceRecognizer = VoiceRecognizer()
     let processor: MeetingProcessor
     private var currentTakkuID: UUID?
     private var now = Date()
@@ -386,13 +387,61 @@ final class MeetingController {
     /// Opens the naming window only when both the Meeting note and a Transcript with Speakers exist.
     func prepareSpeakerNaming(for meeting: MeetingProcessor.RecentMeeting) -> Bool {
         guard let context = processor.speakerNamingContext(meeting.id) else { return false }
-        speakerNaming?.player?.stop()
-        speakerNaming = SpeakerNamingDraft(
+        speakerNaming?.stop()
+        let draft = SpeakerNamingDraft(
             takkuID: meeting.id, meetingTitle: meeting.title, speakers: context.speakers,
             names: context.names, participants: context.participants,
             samples: context.samples, player: context.player
         )
+        speakerNaming = draft
+        if AppSettings.recognizeVoices, let recording = context.recording {
+            recognizeVoices(in: draft, recording: recording)
+        }
         return true
+    }
+
+    /// Hears each Speaker's samples while the window is open, then suggests the names of the
+    /// voices already known. Without the voices the window works as before: it only says so.
+    private func recognizeVoices(in draft: SpeakerNamingDraft, recording: Recording) {
+        let directory = MeetingProcessor.directory(for: draft.takkuID)
+        let recognizer = voiceRecognizer
+        draft.isRecognizingVoices = true
+        draft.recognition = Task {
+            defer { draft.isRecognizingVoices = false }
+            let started = ContinuousClock.now
+            do {
+                for speaker in draft.speakers {
+                    let samples = draft.samples[speaker] ?? []
+                    guard !samples.isEmpty else { continue }
+                    let embedding = try await recognizer.embedding(of: samples, in: recording, directory: directory)
+                    try Task.checkCancellation()
+                    draft.voices[speaker] = embedding
+                }
+            } catch is CancellationError {
+                return
+            } catch {
+                logger.error("Voices not recognised: \(error, privacy: .public)")
+                draft.error = String(localized: "Voices not recognised: \(error.localizedDescription)")
+                return
+            }
+            logger.notice("Voices of \(draft.voices.count, privacy: .public) Speakers heard in \(secondsSince(started), privacy: .public)")
+            draft.suggest(from: VoiceStorage.load())
+        }
+    }
+
+    /// Remembers the voices of the Speakers just named, if voice recognition is on. Called once
+    /// the names are saved, which a failure here leaves alone: it returns what to tell the user.
+    func rememberVoices(of draft: SpeakerNamingDraft) -> String? {
+        guard AppSettings.recognizeVoices, !draft.voices.isEmpty else { return nil }
+        var library = VoiceStorage.load()
+        library.remember(names: draft.names, embeddings: draft.voices, meeting: draft.takkuID)
+        do {
+            try VoiceStorage.save(library)
+            return nil
+        } catch {
+            logger.error("Voices not remembered: \(error, privacy: .public)")
+            return String(localized: "Names saved, but voices not remembered: \(error.localizedDescription)")
+        }
     }
 
     /// Confirms the only Retry that can replace edits made to the Transcript in the Vault. By

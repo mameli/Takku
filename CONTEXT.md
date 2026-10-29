@@ -48,6 +48,10 @@ _Avoid_: segment (that is something else), sentence, chunk
 One of the voices told apart in the Others Track, shown as *Speaker 1*, *Speaker 2*… in the order they first speak. The same number is the same voice within one Meeting only; it says nothing about who the person is. An Others Utterance that cannot be given a Speaker stays *Others*. The user can name a Speaker in the Meeting note (`speakers`): the Transcript then shows *Name (Speaker N)*.
 _Avoid_: participant (the people in the Meeting, Me included), voice
 
+**Known voice** (`VoiceLibrary.Voice`):
+The voice of a person the user named as a Speaker, remembered on the Mac to suggest the same name for a Speaker of a later Meeting. Only with voice recognition on, which is off by default: a voice is biometric data. Each name keeps its voice from its 5 latest Meetings; it can be forgotten in Settings.
+_Avoid_: voiceprint, enrollment, profile (that is the Provider's)
+
 **Invited participants** (`participants`):
 The people invited to the calendar event of a Meeting, written in the Meeting note at the start. Who was invited, not who spoke: they help the Summary name the Speakers.
 _Avoid_: attendees, guests

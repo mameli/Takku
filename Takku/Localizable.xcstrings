@@ -564,6 +564,66 @@
         }
       }
     },
+    "Forget": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dimentica"
+          }
+        }
+      }
+    },
+    "Forget all voices": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dimentica tutte le voci"
+          }
+        }
+      }
+    },
+    "Forget all voices?": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dimenticare tutte le voci?"
+          }
+        }
+      }
+    },
+    "Forget all voices…": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dimentica tutte le voci…"
+          }
+        }
+      }
+    },
+    "Heard in %lld Meetings": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sentita in %lld riunioni"
+          }
+        }
+      }
+    },
+    "Heard in 1 Meeting": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sentita in 1 riunione"
+          }
+        }
+      }
+    },
     "High": {
       "extractionState": "manual",
       "localizations": {
@@ -601,6 +661,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Importazione di %@…"
+          }
+        }
+      }
+    },
+    "It cannot be undone. Names already in the notes are not touched.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non si può annullare. I nomi già nelle note non vengono toccati."
           }
         }
       }
@@ -645,6 +715,16 @@
         }
       }
     },
+    "Listening for voices you have already named…": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cerco le voci a cui hai già dato un nome…"
+          }
+        }
+      }
+    },
     "Low": {
       "extractionState": "manual",
       "localizations": {
@@ -652,6 +732,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Basso"
+          }
+        }
+      }
+    },
+    "Manage…": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gestisci…"
           }
         }
       }
@@ -693,6 +783,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sposta nel Cestino…"
+          }
+        }
+      }
+    },
+    "Names saved, but voices not remembered: %@": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nomi salvati, ma voci non memorizzate: %@"
           }
         }
       }
@@ -938,12 +1038,72 @@
         }
       }
     },
+    "Recognise voices": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Riconosci le voci"
+          }
+        }
+      }
+    },
+    "Recognise voices?": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Riconoscere le voci?"
+          }
+        }
+      }
+    },
+    "Recognised by voice: check it": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Riconosciuto dalla voce: controlla"
+          }
+        }
+      }
+    },
+    "Remembered voices": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voci memorizzate"
+          }
+        }
+      }
+    },
+    "Search": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cerca"
+          }
+        }
+      }
+    },
     "Stop": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
             "value": "Interrompi"
+          }
+        }
+      }
+    },
+    "Takku will keep the voices of the Speakers you name, on this Mac only. Under the GDPR a voice is biometric data: you need the consent of the people you name.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku terrà le voci degli Speaker a cui dai un nome, solo su questo Mac. Per il GDPR una voce è un dato biometrico: serve il consenso delle persone a cui dai un nome."
           }
         }
       }
@@ -2113,6 +2273,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vocabolario"
+          }
+        }
+      }
+    },
+    "Voice not forgotten: %@": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voce non dimenticata: %@"
+          }
+        }
+      }
+    },
+    "Voices not forgotten: %@": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voci non dimenticate: %@"
+          }
+        }
+      }
+    },
+    "Voices not recognised: %@": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voci non riconosciute: %@"
+          }
+        }
+      }
+    },
+    "When you name the Speakers, Takku remembers their voices on this Mac and suggests the names in the next Meetings, while the audio is kept. A voice is biometric data: keep it only for people who agreed. Turning it off keeps the voices already remembered until you forget them.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quando dai un nome agli Speaker, Takku ne memorizza la voce su questo Mac e suggerisce i nomi nelle riunioni successive, finché l'audio è conservato. Una voce è un dato biometrico: tienila solo per chi è d'accordo. Disattivando, le voci già memorizzate restano finché non le dimentichi."
           }
         }
       }

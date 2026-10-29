@@ -66,8 +66,10 @@ actor SpeakerDiarizer {
         let models = try await Nemotron3Models.loadFromHuggingFace(config: .offline, cacheDirectory: folder)
         let diarizer = Nemotron3Diarizer(config: .offline, models: models)
         logger.notice("Diarization model loaded in \(secondsSince(started), privacy: .public)")
-        // The models of the pyannote pipeline used up to 1.10.0, no longer needed.
-        try? FileManager.default.removeItem(at: folder.appending(path: "speaker-diarization", directoryHint: .isDirectory))
+        // The models of the pyannote pipeline used up to 1.10.0: only voice recognition still needs them.
+        if !AppSettings.recognizeVoices {
+            try? FileManager.default.removeItem(at: folder.appending(path: "speaker-diarization", directoryHint: .isDirectory))
+        }
         self.diarizer = diarizer
         return diarizer
     }

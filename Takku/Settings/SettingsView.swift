@@ -35,14 +35,17 @@ struct SettingsView: View {
                 .fittingContent()
                 .tabItem { Label("Notes", systemImage: "note.text") }
                 .tag(SettingsTab.notes)
-            Form { TranscriptionSection(models: models) }
-                .formStyle(.grouped)
-                .fittingContent()
-                .tabItem { Label("Transcription", systemImage: "waveform") }
-                .tag(SettingsTab.transcription)
+            Form {
+                TranscriptionSection(models: models)
+                VoicesSection()
+            }
+            .formStyle(.grouped)
+            .fittingContent()
+            .tabItem { Label("Transcription", systemImage: "waveform") }
+            .tag(SettingsTab.transcription)
             // The Profile editor is long: this tab keeps a fixed height and scrolls.
             SummaryTab()
-                .frame(width: Self.width, height: 640)
+                .frame(width: Self.width, height: Self.maxHeight)
                 .tabItem { Label("Summary", systemImage: "sparkles") }
                 .tag(SettingsTab.summary)
             Form { RecordingsSection() }
@@ -56,6 +59,7 @@ struct SettingsView: View {
     }
 
     static let width: CGFloat = 560
+    static let maxHeight: CGFloat = 640
 
     /// The Summary tab, with a new Profile open in the editor if there are none yet (see `SummaryTab`).
     private func showProfilesIfRequested() {
@@ -68,9 +72,31 @@ struct SettingsView: View {
 
 private extension View {
     /// A tab as tall as what it shows: the window grows and shrinks with the tab, with no empty
-    /// space under a short one.
+    /// space under a short one. Up to the Summary tab's height: a longer one (many voices
+    /// remembered) scrolls instead of growing past the screen.
     func fittingContent() -> some View {
-        frame(width: SettingsView.width).fixedSize(horizontal: false, vertical: true).scrollDisabled(true)
+        modifier(FittingContent())
+    }
+}
+
+/// Only a tab cut at the maximum height scrolls and shows a scroll bar: a short one stays still,
+/// even with *Show scroll bars: Always*.
+private struct FittingContent: ViewModifier {
+    @State private var overflows = false
+
+    func body(content: Content) -> some View {
+        content
+            .frame(width: SettingsView.width)
+            .frame(maxHeight: SettingsView.maxHeight)
+            .fixedSize(horizontal: false, vertical: true)
+            .scrollDisabled(!overflows)
+            .scrollIndicators(overflows ? .automatic : .never)
+            // A point of margin: the ideal height and the content can differ by a rounding.
+            .onScrollGeometryChange(for: Bool.self) {
+                $0.contentSize.height > $0.containerSize.height + 1
+            } action: { _, overflows in
+                self.overflows = overflows
+            }
     }
 }
 

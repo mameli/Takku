@@ -15,6 +15,12 @@ final class SpeakerNamingDraft {
     let player: SpeakerSamplePlayer?
     var names: [Int: String]
     var error: String?
+    /// The voice of each Speaker, to recognise it (`VoiceLibrary`) and to remember it on saving.
+    var voices: [Int: [Float]] = [:]
+    var isRecognizingVoices = false
+    /// The Speakers whose name was suggested from their voice, until the user changes it.
+    var recognized: Set<Int> = []
+    @ObservationIgnored var recognition: Task<Void, Never>?
 
     init(
         takkuID: UUID, meetingTitle: String, speakers: [Int], names: [Int: String], participants: [String],
@@ -35,6 +41,27 @@ final class SpeakerNamingDraft {
         guard let samples = samples[speaker], !samples.isEmpty else { return nil }
         let index = player?.selected[speaker] ?? 0
         return samples[min(index, samples.count - 1)]
+    }
+
+    /// Gives an unnamed Speaker the name of the known voice closest to theirs, if there is one
+    /// and no other Speaker has it yet.
+    func suggest(from library: VoiceLibrary) {
+        let unnamed = voices.filter { (names[$0.key] ?? "").trimmingCharacters(in: .whitespaces).isEmpty }
+        let taken = Set(names.values.map { $0.trimmingCharacters(in: .whitespaces).lowercased() })
+        for (speaker, name) in library.suggestions(for: unnamed) where !taken.contains(name.lowercased()) {
+            names[speaker] = name
+            recognized.insert(speaker)
+        }
+    }
+
+    func setName(_ name: String, for speaker: Int) {
+        names[speaker] = name
+        recognized.remove(speaker)
+    }
+
+    func stop() {
+        player?.stop()
+        recognition?.cancel()
     }
 }
 
@@ -76,6 +103,11 @@ struct SpeakerNamesView: View {
                         }
                         VStack(alignment: .leading, spacing: 3) {
                             TextField("Name", text: nameBinding(for: speaker, in: draft))
+                            if draft.recognized.contains(speaker) {
+                                Label("Recognised by voice: check it", systemImage: "waveform")
+                                    .font(.caption)
+                                    .foregroundStyle(.tint)
+                            }
                             if let sample = draft.shownSample(of: speaker) {
                                 Text(verbatim: "[\(elapsedLabel(sample.start))] “\(sample.quote)”")
                                     .font(.caption)
@@ -88,11 +120,20 @@ struct SpeakerNamesView: View {
                         if !draft.participants.isEmpty {
                             Menu("Participants") {
                                 ForEach(draft.participants, id: \.self) { participant in
-                                    Button(participant) { draft.names[speaker] = participant }
+                                    Button(participant) { draft.setName(participant, for: speaker) }
                                 }
                             }
                         }
                     }
+                }
+
+                if draft.isRecognizingVoices {
+                    HStack(spacing: 6) {
+                        ProgressView().controlSize(.small)
+                        Text("Listening for voices you have already named…")
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                 }
 
                 if !draft.participants.isEmpty {
@@ -120,6 +161,10 @@ struct SpeakerNamesView: View {
                             draft.error = controller.processor.lastError
                             return
                         }
+                        if let problem = controller.rememberVoices(of: draft) {
+                            draft.error = problem
+                            return
+                        }
                         close()
                     }
                     .keyboardShortcut(.defaultAction)
@@ -128,19 +173,19 @@ struct SpeakerNamesView: View {
             .padding(20)
             // The window takes the width of the Speaker rows, so the buttons end under the last column.
             .fixedSize()
-            .onDisappear { draft.player?.stop() }
+            .onDisappear { draft.stop() }
         }
     }
 
     private func nameBinding(for speaker: Int, in draft: SpeakerNamingDraft) -> Binding<String> {
         Binding(
             get: { draft.names[speaker] ?? "" },
-            set: { draft.names[speaker] = $0 }
+            set: { draft.setName($0, for: speaker) }
         )
     }
 
     private func close() {
-        controller.speakerNaming?.player?.stop()
+        controller.speakerNaming?.stop()
         controller.speakerNaming = nil
         dismiss()
     }

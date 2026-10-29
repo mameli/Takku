@@ -29,6 +29,8 @@ enum AppSettings {
     static let transcriptionModelKey = "transcriptionModel"
     /// Also used by `@AppStorage` in the menu and in Settings, so the two stay in sync.
     static let activeProviderProfileKey = "activeProviderProfile"
+    /// Also used by `@AppStorage` in Settings.
+    static let recognizeVoicesKey = "recognizeVoices"
 
     static func registerDefaults() {
         UserDefaults.standard.register(defaults: [
@@ -64,6 +66,12 @@ enum AppSettings {
     /// Copy every Summary's requests and replies to the Summary log.
     static var keepSummaryLog: Bool {
         UserDefaults.standard.bool(forKey: keepSummaryLogKey)
+    }
+
+    /// Remember the voices of named Speakers to suggest their names in later Meetings (ADR 0006).
+    /// Off unless the user turns it on: voices are biometric data.
+    static var recognizeVoices: Bool {
+        UserDefaults.standard.bool(forKey: recognizeVoicesKey)
     }
 
     #if DEBUG
