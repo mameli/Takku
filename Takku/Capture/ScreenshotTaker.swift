@@ -3,8 +3,10 @@ import ImageIO
 import ScreenCaptureKit
 import UniformTypeIdentifiers
 
-/// Takes a Screenshot: the whole display showing the frontmost window, at its native resolution,
-/// as JPEG. Needs the Screen Recording permission, which the system audio does not give.
+/// Takes a Screenshot: the frontmost window, at its native resolution, as JPEG; a window in full
+/// screen fills the display, so it is the whole screen without the menu bar. Without a window
+/// (the desktop, an app with none open) it is the whole main display. Needs the Screen Recording
+/// permission, which the system audio does not give.
 enum ScreenshotTaker {
     enum Failure: LocalizedError {
         case noDisplay
@@ -26,37 +28,55 @@ enum ScreenshotTaker {
 
     static func jpeg() async throws -> Data {
         let content = try await SCShareableContent.excludingDesktopWindows(true, onScreenWindowsOnly: true)
-        let displayID = frontmostWindowDisplay() ?? CGMainDisplayID()
-        guard let display = content.displays.first(where: { $0.displayID == displayID }) ?? content.displays.first else {
-            throw Failure.noDisplay
+        let front = frontmostWindow()
+        let filter: SCContentFilter
+        if let front, let window = content.windows.first(where: { $0.windowID == front.id }) {
+            filter = SCContentFilter(desktopIndependentWindow: window)
+        } else {
+            let displayID = front.flatMap { display(at: CGPoint(x: $0.bounds.midX, y: $0.bounds.midY)) }
+                ?? CGMainDisplayID()
+            guard let display = content.displays.first(where: { $0.displayID == displayID }) ?? content.displays.first else {
+                throw Failure.noDisplay
+            }
+            filter = SCContentFilter(display: display, excludingWindows: [])
         }
-        let filter = SCContentFilter(display: display, excludingWindows: [])
         let configuration = SCStreamConfiguration()
         let scale = CGFloat(filter.pointPixelScale)
         configuration.width = Int(filter.contentRect.width * scale)
         configuration.height = Int(filter.contentRect.height * scale)
         configuration.showsCursor = false
+        configuration.ignoreShadowsSingleWindow = true
         let image = try await SCScreenshotManager.captureImage(contentFilter: filter, configuration: configuration)
         return try jpegData(image)
     }
 
-    /// The display under the middle of the frontmost app's front window; `nil` without one.
-    /// The window list is in front-to-back order and gives bounds without the permission.
-    private static func frontmostWindowDisplay() -> CGDirectDisplayID? {
+    /// The frontmost app's front window; `nil` without one. The window list is in front-to-back
+    /// order and gives bounds without the permission. Skipped: invisible windows, like the title
+    /// bar of a window in full screen, a separate window shown only under the pointer, and strips
+    /// too small to be what the user is looking at, like that title bar once shown.
+    private static func frontmostWindow() -> (id: CGWindowID, bounds: CGRect)? {
         guard let pid = NSWorkspace.shared.frontmostApplication?.processIdentifier,
               let windows = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID)
-                as? [[CFString: Any]],
-              let window = windows.first(where: {
-                  ($0[kCGWindowOwnerPID] as? pid_t) == pid && ($0[kCGWindowLayer] as? Int) == 0
-              }),
-              let boundsInfo = window[kCGWindowBounds] as? NSDictionary,
-              let bounds = CGRect(dictionaryRepresentation: boundsInfo)
+                as? [[CFString: Any]]
         else { return nil }
+        for window in windows {
+            guard (window[kCGWindowOwnerPID] as? pid_t) == pid,
+                  (window[kCGWindowLayer] as? Int) == 0,
+                  (window[kCGWindowAlpha] as? Double ?? 0) > 0,
+                  let id = window[kCGWindowNumber] as? CGWindowID,
+                  let boundsInfo = window[kCGWindowBounds] as? NSDictionary,
+                  let bounds = CGRect(dictionaryRepresentation: boundsInfo),
+                  bounds.width >= 100, bounds.height >= 100
+            else { continue }
+            return (id, bounds)
+        }
+        return nil
+    }
+
+    private static func display(at point: CGPoint) -> CGDirectDisplayID? {
         var displayID = CGDirectDisplayID()
         var count: UInt32 = 0
-        guard CGGetDisplaysWithPoint(CGPoint(x: bounds.midX, y: bounds.midY), 1, &displayID, &count) == .success,
-              count > 0
-        else { return nil }
+        guard CGGetDisplaysWithPoint(point, 1, &displayID, &count) == .success, count > 0 else { return nil }
         return displayID
     }
 

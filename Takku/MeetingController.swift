@@ -254,7 +254,8 @@ final class MeetingController {
         }
         let capture = Task {
             do {
-                // Before the indicator changes: the menu bar is in the image.
+                // Before the indicator changes: without a window the image is the whole display,
+                // menu bar included.
                 let jpeg = try await ScreenshotTaker.jpeg()
                 let folder = currentDirectory.appending(path: Screenshot.folderName, directoryHint: .isDirectory)
                 try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)

@@ -27,7 +27,7 @@ A moment the user marks as important while recording (⌃⌥⌘M). It stars the 
 _Avoid_: bookmark, highlight
 
 **Screenshot** (`Screenshot`):
-An image of the screen the user takes while recording (⌃⌥⌘S). Taking one also makes a Mark at the same moment. It is kept in the Vault and shown in the Transcript and the Meeting note; the Summary model never sees it.
+An image of the active window the user takes while recording (⌃⌥⌘S); the whole screen when that window is in full screen or there is none. Taking one also makes a Mark at the same moment. It is kept in the Vault and shown in the Transcript and the Meeting note; the Summary model never sees it.
 _Avoid_: capture (that is the audio), snapshot, image
 
 **Processing** (`Processing`):
