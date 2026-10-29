@@ -62,6 +62,9 @@ struct SummarizerTests {
             - Rollout in two steps ([03:10], [1:02:45])
             - Long discussion [04:00-06:30]
             - Meeting at 10:30 on Friday, see [[Budget 2026]] and [the offer](https://x.example/offer)
+            - **[04:20]** Solved with a yearly plan **[04:30]**
+
+            **[05:10]** A paragraph opened by its time.
 
             ### Next steps
             - [ ] Send the offer (Me) [00:05]
@@ -79,6 +82,9 @@ struct SummarizerTests {
             - Rollout in two steps
             - Long discussion
             - Meeting at 10:30 on Friday, see [[Budget 2026]] and [the offer](https://x.example/offer)
+            - Solved with a yearly plan
+
+            A paragraph opened by its time.
 
             ### Next steps
             - [ ] Send the offer (Me)
@@ -176,6 +182,26 @@ struct SummarizerTests {
         #expect(stub.message(0, "user")?.contains("previous part ended") == false)
         #expect(stub.message(1, "user")?.contains("`### Public debt`") == true)
         #expect(stub.message(2, "user")?.contains("`### Ricardian equivalence`") == true)
+    }
+
+    @Test("after a full-text block with no heading, the next one still goes on under the last heading written")
+    func fullTextHeadingCarriesOverAPartWithout() async throws {
+        let replies = [
+            "### Public debt\nFirst part. [00:10]",
+            "Still debt. [10:05]",
+            "Debt again. [20:30]",
+            "Last words. [30:10]",
+        ]
+        let stub = StubTransport { replies[$0] }
+        let template = Template(fileName: "Sbobina", content: "---\nfull_text: true\n---\nWrite it all.")
+        let prompt = SummaryPrompt(template: template, personalNotes: "", transcript: transcript(paragraphs: 100), meetingLanguage: "it")
+
+        _ = try await Summarizer(client: client(stub), maxContextTokens: 128_000).summarize(prompt)
+
+        #expect(stub.requests.count == 4)
+        for index in 1..<4 {
+            #expect(stub.message(index, "user")?.contains("`### Public debt`") == true)
+        }
     }
 
     @Test("a full-text block leaves room for a reply as long as itself: with a small context the blocks are shorter")

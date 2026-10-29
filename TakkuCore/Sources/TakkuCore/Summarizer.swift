@@ -70,18 +70,21 @@ public struct Summarizer: Sendable {
 
     /// A full-text Template: even a Transcript that would fit in one request is rewritten block by
     /// block, since a model asked for a very long text in one reply shortens it more and more as it
-    /// goes. Each block is told the heading the previous one ended under; the parts are joined, not merged.
+    /// goes. Each block is told the last heading written so far, also when the block before it wrote
+    /// none; the parts are joined, not merged.
     private func fullText(_ prompt: SummaryPrompt) async throws -> String {
         let blocks = prompt.fullTextBlocks(maxContextTokens: maxContextTokens)
         let client = client(.block)
         var parts: [String] = []
+        var lastHeading: String?
         for (index, block) in blocks.enumerated() {
             onProgress(.writing(part: index + 1, total: blocks.count))
             let request = prompt.fullTextRequest(
-                part: index + 1, of: blocks.count, paragraphs: block,
-                previousHeading: parts.last.flatMap(SummaryPrompt.lastHeading)
+                part: index + 1, of: blocks.count, paragraphs: block, previousHeading: lastHeading
             )
-            parts.append(try await client.complete(request))
+            let part = try await client.complete(request)
+            parts.append(part)
+            lastHeading = SummaryPrompt.lastHeading(in: part) ?? lastHeading
         }
         return SummaryPrompt.joiningFullTextParts(parts)
     }
