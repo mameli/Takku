@@ -7,15 +7,26 @@ public struct Summarizer: Sendable {
     private let client: ChatClient
     private let maxContextTokens: Int
     private let log: SummaryLog.Recorder?
+    private let onProgress: @Sendable (Progress) -> Void
+
+    /// The request being written, so the app can show meaningful Processing progress.
+    public enum Progress: Equatable, Sendable {
+        case writing(part: Int, total: Int)
+        case merging
+    }
 
     /// Below this context there is no useful room left for the Transcript after rules and reply.
     public static let minimumContextTokens = 8_192
 
     /// With `log`, every request and reply is also copied there.
-    public init(client: ChatClient, maxContextTokens: Int, log: SummaryLog.Recorder? = nil) {
+    public init(
+        client: ChatClient, maxContextTokens: Int, log: SummaryLog.Recorder? = nil,
+        onProgress: (@Sendable (Progress) -> Void)? = nil
+    ) {
         self.client = client
         self.maxContextTokens = max(maxContextTokens, Self.minimumContextTokens)
         self.log = log
+        self.onProgress = onProgress ?? { _ in }
     }
 
     /// The Summary, as the title is asked on and as the Meeting note shows it.
@@ -43,6 +54,7 @@ public struct Summarizer: Sendable {
             return try await fullText(prompt)
         }
         if prompt.fits(maxContextTokens: maxContextTokens) {
+            onProgress(.writing(part: 1, total: 1))
             return try await client(.single).complete(prompt.singleRequest())
         }
         var partials = try await complete(prompt.partialRequests(maxContextTokens: maxContextTokens), as: .partial)
@@ -52,6 +64,7 @@ public struct Summarizer: Sendable {
             guard groups.count < partials.count else { break }
             partials = try await complete(groups, as: .group)
         }
+        onProgress(.merging)
         return try await client(.merge).complete(prompt.mergeRequest(partials: partials))
     }
 
@@ -63,6 +76,7 @@ public struct Summarizer: Sendable {
         let client = client(.block)
         var parts: [String] = []
         for (index, block) in blocks.enumerated() {
+            onProgress(.writing(part: index + 1, total: blocks.count))
             let request = prompt.fullTextRequest(
                 part: index + 1, of: blocks.count, paragraphs: block,
                 previousHeading: parts.last.flatMap(SummaryPrompt.lastHeading)
@@ -75,7 +89,8 @@ public struct Summarizer: Sendable {
     private func complete(_ requests: [[ChatMessage]], as kind: SummaryLog.Call.Kind) async throws -> [String] {
         let client = client(kind)
         var replies: [String] = []
-        for request in requests {
+        for (index, request) in requests.enumerated() {
+            onProgress(.writing(part: index + 1, total: requests.count))
             replies.append(try await client.complete(request))
         }
         return replies

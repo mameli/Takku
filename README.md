@@ -87,9 +87,9 @@ At the first launch a *Welcome to Takku* window walks you through these steps (u
 - **Take a screenshot** with **⌃⌥⌘S** while recording: Takku keeps the display you are looking at and marks the moment, like ⌃⌥⌘M (the dot turns into a camera for a second). The picture goes under the point of the Summary that covers that moment and under its passage in the Transcript; those no point covers are listed after the Summary. The model writing the Summary never sees them: Takku places them by the Transcript times the Summary cites.
 - If Takku hears nothing from the microphone or from the call for 2 minutes, the menu says so; if it has heard nothing since the start, a notification tells you what to check.
 - The meeting note opens in Obsidian: write your own notes under **Personal notes**. Takku never touches them.
-- After the stop Takku finishes the transcription, writes the Summary at the top of the note, links the Transcript and renames the note with a short title (unless it is named after a calendar event). A notification tells you when it is ready.
+- After the stop Takku finishes the transcription, writes the Summary at the top of the note, links the Transcript and renames the note with a short title (unless it is named after a calendar event). While it works, the menu shows the Meeting and the current phase, including the part of a long Summary. A notification tells you when it is ready.
 - **Template** and **Summary Profile** are chosen in the menu. Choose *Transcript* as Profile to get only the Transcript, with no Summary.
-- **Recent meetings → Open Transcript** opens the Transcript directly. **Retry** redoes a meeting with the Template and Profile currently selected: use it after an error, or to get a Summary with another Template. If the new attempt fails, a previously successful Summary and Transcript stay unchanged. *Show all in Obsidian…* lists every meeting note.
+- **Recent meetings → Open Transcript** opens the Transcript directly. **Regenerate Summary** uses the current Transcript in the Vault, with the Template and Profile selected in the menu; **Reprocess Recording…** instead rebuilds the Transcript from the audio after asking for confirmation, ignoring the previous transcription and Speaker caches. If the new attempt fails, a previously successful Summary and Transcript stay unchanged. *Show all in Obsidian…* lists every meeting note.
 - **Report a problem…** writes a report with Takku's version, your Mac, the transcription model, the Summary model and Takku's logs of the last 3 days, shows it in Finder and opens a bug report on GitHub with those fields filled in. Nothing is sent by itself: check the file, then drag it into the issue.
 
 ### Calendar
@@ -98,7 +98,7 @@ Turn on *Settings → General → Use the calendar* and allow access: when a mee
 
 ### Speaker names
 
-If the Summary cannot tell who a Speaker is, read the Transcript and say it in the note's frontmatter, then *Retry*:
+If the Summary cannot tell who a Speaker is, choose *Recent meetings → Name speakers…*. Takku offers a field for each Speaker and suggestions from the calendar participants; *Save and Regenerate* applies the names and writes a new Summary from the current Transcript. You can also edit the names in the note's frontmatter and choose *Regenerate Summary*:
 
 ```yaml
 speakers:

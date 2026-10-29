@@ -1,8 +1,8 @@
 import AppKit
 
 /// Takku lives in the menu bar (`LSUIElement`), but while one of its windows is open (Settings,
-/// Welcome) it becomes a regular app: icon in the Dock and Cmd-Tab, and in Mission Control under its
-/// windows. When the last one closes it goes back to the menu bar only.
+/// Welcome, Speaker names) it becomes a regular app: icon in the Dock and Cmd-Tab, and in Mission
+/// Control under its windows. When the last one closes it goes back to the menu bar only.
 @MainActor
 enum DockPresence {
     private static var observers: [NSObjectProtocol] = []

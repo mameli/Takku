@@ -11,10 +11,56 @@ private let logger = Logger(subsystem: "app.takku.takku", category: "processing"
 @MainActor
 @Observable
 final class MeetingProcessor {
+    enum RetryMode {
+        /// Full Processing while the audio exists, Regeneration otherwise (automated tests).
+        case automatic
+        /// Always from the current Transcript in the Vault, even when the audio exists.
+        case summary
+        /// Rebuild the Transcript from the Recording, then write the Summary.
+        case recording
+    }
+
+    enum Phase: Equatable {
+        case transcribing(part: Int, total: Int)
+        case preparingSpeakers
+        case identifyingSpeakers
+        case writingSummary(part: Int, total: Int)
+        case mergingSummary
+        case writingNote
+
+        var label: String {
+            switch self {
+            case .transcribing(let part, let total):
+                part > 0 && total > 0
+                    ? String(localized: "Transcribing · part \(part)/\(total)")
+                    : String(localized: "Transcribing…")
+            case .preparingSpeakers:
+                String(localized: "Preparing speaker recognition…")
+            case .identifyingSpeakers:
+                String(localized: "Identifying speakers…")
+            case .writingSummary(let part, let total):
+                part > 0 && total > 0
+                    ? String(localized: "Writing Summary · part \(part)/\(total)")
+                    : String(localized: "Writing Summary…")
+            case .mergingSummary:
+                String(localized: "Merging Summary…")
+            case .writingNote:
+                String(localized: "Writing note…")
+            }
+        }
+    }
+
     struct RecentMeeting: Identifiable, Equatable {
         let id: UUID
         let title: String
         let status: ProcessingRecord.Status
+        let failureReason: String?
+    }
+
+    struct SpeakerNamingContext {
+        let speakers: [Int]
+        let names: [Int: String]
+        let participants: [String]
     }
 
     private let transcriber: LocalTranscriber
@@ -27,6 +73,9 @@ final class MeetingProcessor {
     /// The last Processing in the queue: the next one starts when this one ends.
     private var queueTail: Task<Void, Never>?
     private(set) var pendingCount = 0
+    private(set) var currentTitle: String?
+    private(set) var currentPhase: Phase?
+    private var currentID: UUID?
     private(set) var lastError: String?
     private(set) var recent: [RecentMeeting] = []
     private(set) var lastNoteURL: URL?
@@ -139,6 +188,48 @@ final class MeetingProcessor {
         NSWorkspace.shared.open(local)
     }
 
+    /// The Speakers found in the current Transcript, with the names and calendar participants
+    /// already in the Meeting note.
+    func speakerNamingContext(_ takkuID: UUID) -> SpeakerNamingContext? {
+        guard let vault = Vault.configured,
+              let noteURL = vault.findMeetingNote(takkuID: takkuID, expected: record(takkuID)?.noteURL),
+              let transcriptURL = vault.findTranscript(takkuID: takkuID),
+              let transcriptFile = try? String(contentsOf: transcriptURL, encoding: .utf8),
+              let note = try? vault.meetingNote(at: noteURL)
+        else {
+            lastError = String(localized: "Meeting note or Transcript not found in the Vault.")
+            return nil
+        }
+        let (transcript, _) = Transcript.parse(vaultFile: transcriptFile)
+        let speakers = Array(Set(transcript.paragraphs.compactMap(\.speaker))).sorted()
+        guard !speakers.isEmpty else {
+            lastError = String(localized: "No Speakers found in the Transcript.")
+            return nil
+        }
+        return SpeakerNamingContext(speakers: speakers, names: note.speakerNames, participants: note.participants)
+    }
+
+    /// Saves the user-owned Speaker names, then regenerates from the current Transcript so the
+    /// audio and any corrections in the Vault are left alone.
+    func saveSpeakerNames(
+        _ names: [Int: String], for takkuID: UUID, templateName: String, profile: ProviderProfile?
+    ) -> Bool {
+        guard let vault = Vault.configured,
+              let noteURL = vault.findMeetingNote(takkuID: takkuID, expected: record(takkuID)?.noteURL)
+        else {
+            lastError = String(localized: "Meeting note not found in the Vault.")
+            return false
+        }
+        do {
+            try vault.update(noteURL) { $0.replaceSpeakerNames(with: names) }
+        } catch {
+            lastError = String(localized: "Speaker names not saved: \(error.localizedDescription)")
+            return false
+        }
+        retry(takkuID, templateName: templateName, profile: profile, mode: .summary)
+        return true
+    }
+
     /// In the Editor like the notes; the copy in the Recording folder (no Vault) with the default app.
     func openLastTranscript() {
         guard let url = lastTranscriptURL else { return }
@@ -149,28 +240,45 @@ final class MeetingProcessor {
         }
     }
 
+    func hasRecording(_ takkuID: UUID) -> Bool {
+        RecordingStorage.hasAudio(Self.directory(for: takkuID))
+    }
+
     /// Retry, with the Template and Profile chosen in the menu now: they become the Meeting's.
-    /// With the audio still there the whole Processing is redone (Segments already transcribed
-    /// come from the cache); once the audio is deleted, only the Summary is made again from the
-    /// Transcript in the Vault (a Regeneration). Only for concluded Meetings: one being recorded
-    /// or already queued is left alone.
-    func retry(_ takkuID: UUID, templateName: String, profile: ProviderProfile?) {
+    /// `.summary` always uses the current Transcript in the Vault; `.recording` rebuilds it from
+    /// the audio. Only for concluded Meetings: one being recorded or already queued is left alone.
+    func retry(_ takkuID: UUID, templateName: String, profile: ProviderProfile?, mode: RetryMode = .automatic) {
         guard var record = record(takkuID) else { return }
+        let hasAudio = hasRecording(takkuID)
+        let regenerating = switch mode {
+        case .automatic: !hasAudio
+        case .summary: true
+        case .recording: false
+        }
+        guard mode != .recording || hasAudio else {
+            lastError = String(localized: "Recording not found: regenerate the Summary from the current Transcript instead.")
+            return
+        }
         record.templateName = record.retryTemplate(chosen: templateName)
         record.summaryProfile = profile
-        let hasAudio = RecordingStorage.hasAudio(Self.directory(for: takkuID))
-        guard (try? hasAudio ? record.queueForRetry() : record.beginRegeneration()) != nil else { return }
+        record.ignoreTranscriptionCache = mode == .recording
+        do {
+            if regenerating { try record.beginRegeneration() } else { try record.queueForRetry() }
+        } catch {
+            return
+        }
+        lastError = nil
         // Once accepted and before enqueueing, so the count leaves this Retry out.
         logger.notice("""
-            Retry \(takkuID, privacy: .public): \(hasAudio ? "full Processing" : "Regeneration", privacy: .public), \
+            Retry \(takkuID, privacy: .public): \(regenerating ? "Regeneration" : "full Processing", privacy: .public), \
             Template \(record.templateName, privacy: .public), model \(profile?.model ?? "none", privacy: .public), \
             \(self.pendingCount) ahead in the queue
             """)
         save(record)
-        if hasAudio {
-            enqueueProcessing(record)
-        } else {
+        if regenerating {
             enqueue { await self.runRegeneration(record) }
+        } else {
+            enqueueProcessing(record)
         }
     }
 
@@ -205,6 +313,27 @@ final class MeetingProcessor {
 
     // MARK: - Queue
 
+    private func show(_ phase: Phase, for record: ProcessingRecord) {
+        currentID = record.takkuID
+        currentTitle = record.noteURL?.deletingPathExtension().lastPathComponent
+            ?? record.startedAt.formatted(date: .abbreviated, time: .shortened)
+        currentPhase = phase
+    }
+
+    private func update(_ phase: Phase, for takkuID: UUID) {
+        guard currentID == takkuID else { return }
+        currentPhase = phase
+    }
+
+    private func update(_ progress: Summarizer.Progress, for takkuID: UUID) {
+        switch progress {
+        case .writing(let part, let total):
+            update(.writingSummary(part: part, total: total), for: takkuID)
+        case .merging:
+            update(.mergingSummary, for: takkuID)
+        }
+    }
+
     private func enqueueProcessing(_ record: ProcessingRecord) {
         enqueue { await self.process(record) }
     }
@@ -223,6 +352,7 @@ final class MeetingProcessor {
         // The state on disk may be newer (e.g. Template changed), otherwise the queued one applies.
         var record = record(queued.takkuID) ?? queued
         record.status = .processing
+        show(.transcribing(part: 0, total: 0), for: record)
         save(record)
         let started = ContinuousClock.now
         logger.notice("Processing \(record.takkuID, privacy: .public) started")
@@ -240,6 +370,21 @@ final class MeetingProcessor {
             return
         }
 
+        update(.transcribing(part: 0, total: recording.segments.count), for: record.takkuID)
+        let takkuID = record.takkuID
+        await transcription.setPhaseHandler { [weak self] phase in
+            Task { @MainActor in
+                switch phase {
+                case .transcribing(let part, let total):
+                    self?.update(.transcribing(part: part, total: total), for: takkuID)
+                case .preparingSpeakers:
+                    self?.update(.preparingSpeakers, for: takkuID)
+                case .identifyingSpeakers:
+                    self?.update(.identifyingSpeakers, for: takkuID)
+                }
+            }
+        }
+
         // Read once per Processing: a change counts from the next Meeting, or from a Retry.
         let vocabulary = TakkuFolder.vocabulary()
         var problems: [String] = []
@@ -248,7 +393,9 @@ final class MeetingProcessor {
         var warnings: [String] = []
         let finished: MeetingTranscription.Finished?
         do {
-            finished = try await transcription.finish(recording, in: directory, vocabulary: vocabulary)
+            finished = try await transcription.finish(
+                recording, in: directory, vocabulary: vocabulary, ignoringCache: record.ignoreTranscriptionCache
+            )
             if let failedSegments = finished?.failedSegments, !failedSegments.isEmpty {
                 warnings.append(String(localized: "Incomplete transcript: \(failedSegments.joined(separator: "; "))"))
             }
@@ -263,6 +410,7 @@ final class MeetingProcessor {
         }
 
         if let vault = Vault.configured {
+            update(finished == nil ? .writingNote : .writingSummary(part: 0, total: 0), for: record.takkuID)
             do {
                 let (noteURL, summaryProblem) = try await writeToVault(
                     vault, finished, recording: recording, record: record, vocabulary: vocabulary
@@ -274,6 +422,7 @@ final class MeetingProcessor {
                 problems.append(String(localized: "Writing to the Vault failed: \(error.localizedDescription)"))
             }
         } else {
+            update(.writingNote, for: record.takkuID)
             warnings.append(String(localized: "No Vault configured: no Summary, the Transcript is only in the Recording folder."))
         }
         finish(&record, problems: problems, warnings: warnings, started: started)
@@ -283,6 +432,7 @@ final class MeetingProcessor {
         var record = queued
         let takkuID = record.takkuID
         let started = ContinuousClock.now
+        show(.writingSummary(part: 0, total: 0), for: record)
         logger.notice("Regeneration \(takkuID, privacy: .public) started")
         guard let vault = Vault.configured,
               var noteURL = vault.findMeetingNote(takkuID: takkuID, expected: record.noteURL),
@@ -304,13 +454,14 @@ final class MeetingProcessor {
                 // Read it again after the model wait, so edits made meanwhile are not restored
                 // to the older version used for the request.
                 let currentTranscriptFile = try String(contentsOf: transcriptURL, encoding: .utf8)
+                let currentTranscript = Transcript.parse(vaultFile: currentTranscriptFile).transcript
                 if let relabeled = Transcript.relabeling(vaultFile: currentTranscriptFile, names: speakerNames) {
                     try relabeled.write(to: transcriptURL, atomically: true, encoding: .utf8)
                 }
                 try vault.update(noteURL) {
                     $0.recordRegeneration(
                         takkuID: takkuID, transcriptName: transcriptURL.deletingPathExtension().lastPathComponent,
-                        summary: summary, screenshots: transcript.screenshots
+                        summary: summary, screenshots: currentTranscript.screenshots
                     )
                 }
             }
@@ -343,7 +494,11 @@ final class MeetingProcessor {
             noteName: noteName, note: record.noteURL ?? lastTranscriptURL, hasVault: Vault.configured != nil,
             hasSummary: record.summaryProfile != nil, problems: problems, warnings: warnings
         )
+        record.ignoreTranscriptionCache = false
         save(record)
+        currentID = nil
+        currentTitle = nil
+        currentPhase = nil
         // After every completed Processing, Retry included, so the Hook can update what it sent.
         if problems.isEmpty, HookRunner.isInstalled, let vault = Vault.configured, let noteURL = record.noteURL,
            let transcriptURL = vault.findTranscript(takkuID: record.takkuID) {
@@ -419,7 +574,10 @@ final class MeetingProcessor {
         let (summary, title, log) = await summarize(
             transcript.naming(speakerNames), language: language, personalNotes: note.personalNotes,
             participants: note.participants, wantsTitle: wantsTitle,
-            template: template, profile: record.summaryProfile, vocabulary: vocabulary
+            template: template, profile: record.summaryProfile, vocabulary: vocabulary,
+            onProgress: { [weak self] progress in
+                Task { @MainActor in self?.update(progress, for: record.takkuID) }
+            }
         )
         let rename = renameIfProvisional(noteURL, title: title, startedAt: record.startedAt, in: vault)
         if let log {
@@ -432,6 +590,7 @@ final class MeetingProcessor {
            (try? vault.meetingNote(at: rename.url))?.hasSuccessfulOutcome == true {
             return (rename.url, String(localized: "Summary not generated: \(reason)"))
         }
+        update(.writingNote, for: record.takkuID)
         try writeNote(rename.url, summary, speakerNames)
         if rename.follow { RenamedNoteFollower.follow(rename.url, in: vault) }
         if case .failed(let reason) = summary {
@@ -466,7 +625,8 @@ final class MeetingProcessor {
     /// A missing title is not an error: the note keeps its provisional name.
     private func summarize(
         _ transcript: Transcript, language: String?, personalNotes: String, participants: [String], wantsTitle: Bool,
-        template: Template, profile: ProviderProfile?, vocabulary: Vocabulary
+        template: Template, profile: ProviderProfile?, vocabulary: Vocabulary,
+        onProgress: @escaping @Sendable (Summarizer.Progress) -> Void = { _ in }
     ) async -> (MeetingNote.SummaryOutcome, String?, SummaryRequests?) {
         var profile = profile
         var isTestProfile = false
@@ -494,7 +654,9 @@ final class MeetingProcessor {
                 template: template, personalNotes: personalNotes, transcript: transcript, meetingLanguage: language,
                 vocabulary: vocabulary, userName: NSFullUserName(), participants: participants
             )
-            let summary = try await Summarizer(client: client, maxContextTokens: profile.maxContextTokens, log: log?.recorder)
+            let summary = try await Summarizer(
+                client: client, maxContextTokens: profile.maxContextTokens, log: log?.recorder, onProgress: onProgress
+            )
                 .summarize(prompt)
             logger.notice("Summary written in \(secondsSince(started), privacy: .public)")
             let titleClient = log.map { client.recording(into: $0.recorder, as: .title) } ?? client
@@ -575,7 +737,8 @@ final class MeetingProcessor {
             }
             let title = note?.deletingPathExtension().lastPathComponent
                 ?? record.startedAt.formatted(date: .abbreviated, time: .shortened)
-            meetings.append(RecentMeeting(id: record.takkuID, title: title, status: record.status))
+            let failureReason: String? = if case .failed(let reason) = record.status { reason } else { nil }
+            meetings.append(RecentMeeting(id: record.takkuID, title: title, status: record.status, failureReason: failureReason))
         }
         // Unchanged most of the time: assigning would rebuild the menu anyway.
         if meetings != recent { recent = meetings }

@@ -31,6 +31,13 @@ struct TakkuApp: App {
         .windowResizability(.contentSize)
         .restorationBehavior(.disabled)
         .defaultLaunchBehavior(WelcomeView.isNeededAtLaunch ? .presented : .suppressed)
+
+        Window("Name speakers", id: SpeakerNamesView.windowID) {
+            SpeakerNamesView(controller: controller)
+        }
+        .windowResizability(.contentSize)
+        .restorationBehavior(.disabled)
+        .defaultLaunchBehavior(.suppressed)
     }
 }
 
@@ -99,7 +106,11 @@ private struct MeetingMenu: View {
             }
         }
         if let importingFileName = controller.importingFileName {
-            Text("Importing \(importingFileName)…")
+            if controller.importingFileTotal > 1 {
+                Text("Importing file \(controller.importingFileIndex)/\(controller.importingFileTotal): \(importingFileName)…")
+            } else {
+                Text("Importing \(importingFileName)…")
+            }
         }
         if !controller.isHotKeyAvailable {
             Text("⌃⌥⌘R is already used by another app")
@@ -122,16 +133,22 @@ private struct MeetingMenu: View {
         }
         if controller.processor.pendingCount > 0 {
             Divider()
-            if controller.processor.pendingCount == 1 {
+            if let currentTitle = controller.processor.currentTitle {
+                Text(currentTitle).lineLimit(1)
+            }
+            if let currentPhase = controller.processor.currentPhase {
+                Text(currentPhase.label)
+            } else if controller.processor.currentTitle == nil {
                 Text("Processing…")
-            } else {
-                Text("Processing… (\(controller.processor.pendingCount - 1) more queued)")
+            }
+            if controller.processor.pendingCount > 1 {
+                Text("\(controller.processor.pendingCount - 1) more queued")
             }
         }
 
         if let lastError = controller.lastError {
             Divider()
-            Text("⚠️ \(lastError)")
+            ErrorMenuText(lastError)
         }
 
         if !controller.processor.recent.isEmpty {
@@ -190,6 +207,26 @@ private struct MeetingMenu: View {
     }
 }
 
+/// A readable error without letting a long provider or AVFoundation message widen the whole menu.
+/// The full text stays available in the tooltip and in the logs.
+private struct ErrorMenuText: View {
+    let text: String
+
+    init(_ text: String) { self.text = text }
+
+    private var shortText: String {
+        guard text.count > 40 else { return text }
+        return text.prefix(40).trimmingCharacters(in: .whitespaces) + "…"
+    }
+
+    var body: some View {
+        Text(verbatim: "⚠️ \(shortText)")
+            .lineLimit(1)
+            .frame(maxWidth: 240, alignment: .leading)
+            .help(text)
+    }
+}
+
 /// The calendar event the Meeting in progress is for: Takku's guess, or another event in progress
 /// at the start (the next call, one at the same time), or none.
 private struct CalendarEventMenu: View {
@@ -216,9 +253,10 @@ private struct CalendarEventMenu: View {
     }
 }
 
-/// The last five Meetings: open the note, Retry.
+/// The last five Meetings: open their files, name Speakers and choose how to process them again.
 private struct RecentMeetingsMenu: View {
     let controller: MeetingController
+    @Environment(\.openWindow) private var openWindow
     /// The *Show all* item names the Editor chosen in Settings.
     @AppStorage(AppSettings.editorKey) private var editor = ""
 
@@ -226,17 +264,30 @@ private struct RecentMeetingsMenu: View {
         Menu("Recent meetings") {
             ForEach(controller.processor.recent) { meeting in
                 Menu(label(meeting)) {
+                    if let failureReason = meeting.failureReason {
+                        ErrorMenuText(failureReason)
+                    }
                     Button("Open note") { controller.processor.openNote(meeting.id) }
                     Button("Open Transcript") { controller.processor.openTranscript(meeting.id) }
                     // Only for a concluded Meeting: one being recorded or queued is left alone.
-                    // It uses the Summary Profile chosen in this menu, and its Template too unless the
-                    // Meeting failed: then it keeps its own.
+                    // Regeneration always reads the current Transcript; only full Processing can replace it.
                     if meeting.status.canRetry {
-                        Button("Retry") {
-                            controller.processor.retry(
-                                meeting.id, templateName: controller.templateName,
-                                profile: AppSettings.activeProviderProfile
-                            )
+                        if Vault.configured != nil {
+                            Button("Name speakers…") {
+                                if controller.prepareSpeakerNaming(for: meeting) {
+                                    NSApplication.shared.activate()
+                                    openWindow(id: SpeakerNamesView.windowID)
+                                }
+                            }
+                            Button("Regenerate Summary") {
+                                controller.processor.retry(
+                                    meeting.id, templateName: controller.templateName,
+                                    profile: AppSettings.activeProviderProfile, mode: .summary
+                                )
+                            }
+                        }
+                        if controller.processor.hasRecording(meeting.id) {
+                            Button("Reprocess Recording…") { controller.confirmReprocessing(meeting.id) }
                         }
                     }
                 }

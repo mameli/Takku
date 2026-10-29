@@ -29,6 +29,14 @@ struct MeetingNoteTests {
             """)
     }
 
+    @Test("an imported Meeting starts queued for Processing, not recording")
+    func importedInitialContent() {
+        let note = MeetingNote.initial(takkuID: takkuID, startedAt: startedAt, timeZone: rome, isImport: true)
+
+        #expect(note.content.contains("⏳ Imported recording queued for Processing."))
+        #expect(!note.content.contains("Recording in progress"))
+    }
+
     @Test("rewriting the managed section leaves everything else untouched")
     func replaceManagedSection() {
         var note = MeetingNote(content: """
@@ -476,6 +484,23 @@ struct MeetingNoteTests {
 
         note.replaceParticipants(with: ["Mario Rossi"])
         #expect(note.content.contains("speakers:\n  - Speaker 1 = Mario Rossi\nparticipants:\n  - \"Mario Rossi\"\n---"))
+    }
+
+    @Test("Speaker names can be edited as a list and empty names are omitted")
+    func replaceSpeakerNames() {
+        var note = MeetingNote.initial(takkuID: takkuID, startedAt: startedAt, timeZone: rome)
+
+        note.replaceSpeakerNames(with: [2: " Anna Bianchi ", 1: "Mario Rossi", 3: " "])
+        #expect(note.speakerNames == [1: "Mario Rossi", 2: "Anna Bianchi"])
+        #expect(note.content.contains("speakers:\n  - Speaker 1 = Mario Rossi\n  - Speaker 2 = Anna Bianchi\n---"))
+
+        note.replaceSpeakerNames(with: [2: "Anna Verdi"])
+        #expect(note.speakerNames == [2: "Anna Verdi"])
+        #expect(!note.content.contains("Mario Rossi"))
+
+        note.replaceSpeakerNames(with: [:])
+        #expect(note.speakerNames.isEmpty)
+        #expect(!note.content.contains("speakers:"))
     }
 
     @Test("participants written at the start read back as they were")
