@@ -88,6 +88,17 @@ struct Vault {
         return notes
     }
 
+    /// Every Transcript by `takku_id`, duplicates included, in one pass.
+    func transcriptsByTakkuID() -> [UUID: [URL]] {
+        var transcripts: [UUID: [URL]] = [:]
+        for url in files(in: transcriptsFolder) {
+            if let takkuID = (try? String(contentsOf: url, encoding: .utf8)).flatMap({ MeetingNote(content: $0).takkuID }) {
+                transcripts[takkuID, default: []].append(url)
+            }
+        }
+        return transcripts
+    }
+
     /// The Transcript file of a Meeting. If Sync created several files with the same ID, the
     /// Meeting note's own Transcript link identifies the right one; otherwise this is a conflict.
     func findTranscript(takkuID: UUID, expectedNote: URL?) throws -> URL? {

@@ -70,18 +70,24 @@ final class Notifications: NSObject, UNUserNotificationCenterDelegate {
     }
 
     /// The outcome of a Processing: "Summary ready" or "Transcript ready" (with the warnings, if
-    /// any) opening the note, or "Processing failed" with the reason.
+    /// any) opening the note, or "Processing failed" with the reason. `rebuild` says how a
+    /// Reprocess rebuilt the Transcript, on its own line.
     func processingFinished(
-        noteName: String, note: URL?, hasVault: Bool, hasSummary: Bool, problems: [String], warnings: [String]
+        noteName: String, note: URL?, hasVault: Bool, hasSummary: Bool, problems: [String], warnings: [String],
+        rebuild: String? = nil
     ) {
+        let rebuildLine = rebuild.map { "\n\($0)" } ?? ""
         if !problems.isEmpty {
             notify(title: String(localized: "Processing failed"), body: "\(noteName): \(problems.joined(separator: " "))", note: note)
         } else if !hasVault {
             let detail = warnings.isEmpty ? String(localized: "Set up the Vault to get the Summary.") : warnings.joined(separator: " ")
-            notify(title: String(localized: "Transcript ready"), body: "\(noteName): \(detail)", note: note)
+            notify(title: String(localized: "Transcript ready"), body: "\(noteName): \(detail)\(rebuildLine)", note: note)
         } else {
             let body = warnings.isEmpty ? noteName : "\(noteName) (\(warnings.joined(separator: " ")))"
-            notify(title: hasSummary ? String(localized: "Summary ready") : String(localized: "Transcript ready"), body: body, note: note)
+            notify(
+                title: hasSummary ? String(localized: "Summary ready") : String(localized: "Transcript ready"),
+                body: body + rebuildLine, note: note
+            )
         }
     }
 

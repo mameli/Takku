@@ -34,7 +34,7 @@ struct ProcessingRecordTests {
         var saved = record(.failed(reason: "The provider answered with error 401"))
         saved.summaryProfile = ProviderProfile(name: "Mistral UE", baseURL: "https://api.mistral.ai/v1", model: "m", maxContextTokens: 32_000)
         saved.noteURL = URL(filePath: "/Vault/Meetings/2026-10-04 1430 - Meeting.md")
-        saved.ignoreTranscriptionCache = true
+        saved.reprocessing = .fromScratch
         saved.importedAt = start.addingTimeInterval(3_600)
         saved.importWarnings = ["Unreadable audio skipped from 1.000 s to 1.064 s."]
 
@@ -51,7 +51,7 @@ struct ProcessingRecordTests {
         try saved.save(inFolder: directory)
         let url = directory.appending(path: ProcessingRecord.fileName)
         var object = try #require(try JSONSerialization.jsonObject(with: Data(contentsOf: url)) as? [String: Any])
-        object.removeValue(forKey: "ignoreTranscriptionCache")
+        object.removeValue(forKey: "reprocessing")
         object.removeValue(forKey: "importedAt")
         object.removeValue(forKey: "importWarnings")
         let data = try JSONSerialization.data(withJSONObject: object)
@@ -59,10 +59,21 @@ struct ProcessingRecordTests {
         decoder.dateDecodingStrategy = .iso8601
 
         let decoded = try decoder.decode(ProcessingRecord.self, from: data)
-        #expect(decoded.ignoreTranscriptionCache == false)
+        #expect(decoded.reprocessing == nil)
+        #expect(!decoded.ignoresTranscriptionCache)
         #expect(decoded.importedAt == nil)
         #expect(decoded.importWarnings.isEmpty)
         #expect(decoded.recentAt == decoded.startedAt)
+    }
+
+    @Test("only a Reprocess from scratch ignores the transcription and Speaker caches")
+    func reprocessingCache() {
+        var reprocessed = record(.queued)
+
+        reprocessed.reprocessing = .reusingCache
+        #expect(!reprocessed.ignoresTranscriptionCache)
+        reprocessed.reprocessing = .fromScratch
+        #expect(reprocessed.ignoresTranscriptionCache)
     }
 
     @Test("an old Recording imported now is more recent than a newer recorded Meeting")

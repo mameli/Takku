@@ -393,17 +393,24 @@ final class MeetingController {
         return true
     }
 
-    /// Confirms the only Retry that can replace edits made to the Transcript in the Vault.
+    /// Confirms the only Retry that can replace edits made to the Transcript in the Vault. By
+    /// default the transcription already saved is reused where still valid; the checkbox redoes it all.
     func confirmReprocessing(_ takkuID: UUID) {
         let alert = NSAlert()
         alert.alertStyle = .warning
         alert.messageText = String(localized: "Reprocess Recording?")
-        alert.informativeText = String(localized: "Takku will rebuild the Transcript from the audio. If Processing succeeds, edits you made to the current Transcript will be replaced.")
+        alert.informativeText = String(localized: "Takku will rebuild the Transcript from the audio, with the current Vocabulary and Speaker names, reusing the transcription already saved where it is still valid. If Processing succeeds, edits you made to the current Transcript will be replaced.")
+        let fromScratch = NSButton(checkboxWithTitle: String(localized: "Transcribe again from scratch (slower: also tells the voices apart again)"), target: nil, action: nil)
+        fromScratch.state = .off
+        alert.accessoryView = fromScratch
         alert.addButton(withTitle: String(localized: "Reprocess Recording"))
         alert.addButton(withTitle: String(localized: "Cancel"))
         NSApplication.shared.activate()
         guard alert.runModal() == .alertFirstButtonReturn else { return }
-        processor.retry(takkuID, templateName: templateName, profile: AppSettings.activeProviderProfile, mode: .recording)
+        processor.retry(
+            takkuID, templateName: templateName, profile: AppSettings.activeProviderProfile,
+            mode: .recording(fromScratch: fromScratch.state == .on)
+        )
     }
 
     /// Creates the Meeting note in the Vault and opens it in the Editor. If that fails the Meeting
