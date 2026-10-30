@@ -1,4 +1,5 @@
 import AppKit
+import KeyboardShortcuts
 import SwiftUI
 import TakkuCore
 
@@ -74,16 +75,19 @@ private struct MeetingMenu: View {
         if controller.isInProgress {
             Text(verbatim: controller.recordingMenuTitle ?? "")
             ForEach(controller.silenceWarnings, id: \.self) { Text(verbatim: $0) }
-            // The shortcut is global (GlobalHotKey): shown here as a reminder only, not as a menu key.
-            Button("Stop meeting    ⌃⌥⌘R") { controller.stop() }
-            Button("Mark this moment    ⌃⌥⌘M") { controller.mark() }
-            Button("Take a screenshot    ⌃⌥⌘S") {
+            // The shortcuts are global: KeyboardShortcuts shows them as menu keys and runs them itself.
+            Button("Stop meeting") { controller.stop() }
+                .globalKeyboardShortcut(.startStopMeeting)
+            Button("Mark this moment") { controller.mark() }
+                .globalKeyboardShortcut(.markMoment)
+            Button("Take a screenshot") {
                 // Once the menu has closed, so it is not in the image.
                 Task {
                     try? await Task.sleep(for: .milliseconds(300))
                     controller.takeScreenshot()
                 }
             }
+            .globalKeyboardShortcut(.takeScreenshot)
             if controller.hasNote {
                 Button("Open note") { controller.openNote() }
             }
@@ -93,17 +97,12 @@ private struct MeetingMenu: View {
             if controller.screenshotCount > 0 {
                 Text("Screenshots: \(controller.screenshotCount)")
             }
-            if !controller.isMarkHotKeyAvailable {
-                Text("⌃⌥⌘M is already used by another app")
-            }
-            if !controller.isScreenshotHotKeyAvailable {
-                Text("⌃⌥⌘S is already used by another app")
-            }
             if !controller.calendarEvents.isEmpty {
                 CalendarEventMenu(controller: controller)
             }
         } else {
-            Button("Start meeting    ⌃⌥⌘R") { Task { await controller.start() } }
+            Button("Start meeting") { Task { await controller.start() } }
+                .globalKeyboardShortcut(.startStopMeeting)
             if controller.importingFileName == nil {
                 Button("Import audio…") { controller.chooseAudioToImport() }
             }
@@ -114,9 +113,6 @@ private struct MeetingMenu: View {
             } else {
                 Text("Importing \(importingFileName)…")
             }
-        }
-        if !controller.isHotKeyAvailable {
-            Text("⌃⌥⌘R is already used by another app")
         }
 
         // With the "Transcript" Profile there is no Summary, so no Template to choose.

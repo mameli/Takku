@@ -1,4 +1,5 @@
 import AppKit
+import KeyboardShortcuts
 import SwiftUI
 
 /// The window shown at launch while no Vault is chosen (the first launch, in practice): the steps
@@ -141,7 +142,7 @@ struct WelcomeView: View {
 
             // Last: the "Quit & Reopen" macOS offers would close this window, and with a Vault it does not come back.
             Section {
-                Text("Only for screenshots during a meeting (⌃⌥⌘S). If macOS offers to reopen Takku, choose Later: the permission works from the next launch.")
+                Text("Only for screenshots during a meeting. If macOS offers to reopen Takku, choose Later: the permission works from the next launch.")
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
                 HStack {
@@ -173,8 +174,14 @@ struct WelcomeView: View {
             Section {
                 HStack(alignment: .center) {
                     Image("MenuBarIcon").renderingMode(.template)
-                    Text("Takku lives in the menu bar: start a meeting from there or with ⌃⌥⌘R.")
-                        .fixedSize(horizontal: false, vertical: true)
+                    Group {
+                        if let label = KeyboardShortcuts.Name.startStopMeeting.shortcut?.description {
+                            Text("Takku lives in the menu bar: start a meeting from there or with \(label).")
+                        } else {
+                            Text("Takku lives in the menu bar: start a meeting from there.")
+                        }
+                    }
+                    .fixedSize(horizontal: false, vertical: true)
                     Spacer()
                     Button("Done") { dismissWindow(id: Self.windowID) }
                         .keyboardShortcut(.defaultAction)

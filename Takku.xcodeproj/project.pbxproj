@@ -10,6 +10,7 @@
 		A10000000000000000000022 /* TakkuCore in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000000021 /* TakkuCore */; };
 		A10000000000000000000025 /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000000024 /* WhisperKit */; };
 		A10000000000000000000028 /* FluidAudio in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000000027 /* FluidAudio */; };
+		A1000000000000000000002B /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = A1000000000000000000002A /* KeyboardShortcuts */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +31,7 @@
 				A10000000000000000000022 /* TakkuCore in Frameworks */,
 				A10000000000000000000025 /* WhisperKit in Frameworks */,
 				A10000000000000000000028 /* FluidAudio in Frameworks */,
+				A1000000000000000000002B /* KeyboardShortcuts in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -85,6 +87,7 @@
 				A10000000000000000000021 /* TakkuCore */,
 				A10000000000000000000024 /* WhisperKit */,
 				A10000000000000000000027 /* FluidAudio */,
+				A1000000000000000000002A /* KeyboardShortcuts */,
 			);
 			productName = Takku;
 			productReference = A10000000000000000000005 /* Takku.app */;
@@ -114,6 +117,7 @@
 				A10000000000000000000020 /* XCLocalSwiftPackageReference "TakkuCore" */,
 				A10000000000000000000023 /* XCRemoteSwiftPackageReference "WhisperKit" */,
 				A10000000000000000000026 /* XCRemoteSwiftPackageReference "FluidAudio" */,
+				A10000000000000000000029 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = A10000000000000000000002 /* Products */;
@@ -238,6 +242,14 @@
 				minimumVersion = 0.17.7;
 			};
 		};
+		A10000000000000000000029 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sindresorhus/KeyboardShortcuts";
+			requirement = {
+				kind = upToNextMinorVersion;
+				minimumVersion = 3.1.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -254,6 +266,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A10000000000000000000026 /* XCRemoteSwiftPackageReference "FluidAudio" */;
 			productName = FluidAudio;
+		};
+		A1000000000000000000002A /* KeyboardShortcuts */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A10000000000000000000029 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */;
+			productName = KeyboardShortcuts;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

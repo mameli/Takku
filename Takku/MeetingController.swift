@@ -1,6 +1,6 @@
 import AVFoundation
 import AppKit
-import Carbon.HIToolbox
+import KeyboardShortcuts
 import Observation
 import TakkuCore
 import os
@@ -29,17 +29,8 @@ final class MeetingController {
     /// its colour): it changes the title of the timer item in place instead.
     @ObservationIgnored private var openMenus = 0
     @ObservationIgnored private weak var openMenu: NSMenu?
-    private var hotKey: GlobalHotKey?
     private let callDetector = CallDetector()
     let updates = UpdateChecker()
-    private var markHotKey: GlobalHotKey?
-    private var screenshotHotKey: GlobalHotKey?
-    /// False if another app already uses ⌃⌥⌘R.
-    var isHotKeyAvailable: Bool { hotKey?.isRegistered ?? false }
-    /// False if another app already uses ⌃⌥⌘M.
-    var isMarkHotKeyAvailable: Bool { markHotKey?.isRegistered ?? false }
-    /// False if another app already uses ⌃⌥⌘S.
-    var isScreenshotHotKeyAvailable: Bool { screenshotHotKey?.isRegistered ?? false }
     /// The Recording folder of the Meeting in progress, where its Marks and Screenshots are saved.
     private var currentDirectory: URL?
     /// Captures that Processing must await so a Screenshot taken just before Stop is not lost.
@@ -102,9 +93,9 @@ final class MeetingController {
         processor = MeetingProcessor(transcriber: transcriber, diarizer: diarizer)
         templateName = AppSettings.defaultTemplate
         Notifications.shared.configure()
-        hotKey = GlobalHotKey(id: 1, keyCode: kVK_ANSI_R) { [weak self] in self?.toggle() }
-        markHotKey = GlobalHotKey(id: 2, keyCode: kVK_ANSI_M) { [weak self] in self?.mark() }
-        screenshotHotKey = GlobalHotKey(id: 3, keyCode: kVK_ANSI_S) { [weak self] in self?.takeScreenshot() }
+        KeyboardShortcuts.onKeyDown(for: .startStopMeeting) { [weak self] in self?.toggle() }
+        KeyboardShortcuts.onKeyDown(for: .markMoment) { [weak self] in self?.mark() }
+        KeyboardShortcuts.onKeyDown(for: .takeScreenshot) { [weak self] in self?.takeScreenshot() }
         Notifications.shared.onAction = { [weak self] action in
             guard let self else { return }
             // A button on an old notification does nothing when its action no longer makes sense.
@@ -210,7 +201,7 @@ final class MeetingController {
         }
     }
 
-    /// ⌃⌥⌘M or the menu: marks the current moment of the Meeting in progress as important. Saved at
+    /// The shortcut or the menu: marks the current moment of the Meeting in progress as important. Saved at
     /// once, so a crash does not lose it; it stars the Transcript paragraph it falls in.
     func mark() {
         guard let startedAt else { return }
@@ -239,7 +230,7 @@ final class MeetingController {
         }
     }
 
-    /// ⌃⌥⌘S or the menu: a Screenshot of the Meeting in progress, saved at once in the Recording
+    /// The shortcut or the menu: a Screenshot of the Meeting in progress, saved at once in the Recording
     /// folder, and a Mark at the same moment, made even when the Screenshot is not.
     func takeScreenshot() {
         guard let takkuID = currentTakkuID, let startedAt, let currentDirectory else { return }
@@ -299,7 +290,7 @@ final class MeetingController {
         }
     }
 
-    /// ⌃⌥⌘R: starts or stops the Meeting from any app.
+    /// The global shortcut: starts or stops the Meeting from any app.
     func toggle() {
         if isInProgress {
             stop()

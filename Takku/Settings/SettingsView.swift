@@ -18,7 +18,7 @@ enum SettingsTab: Hashable {
 }
 
 /// Settings window, one tab per subject: General (start at login, calendar, call suggestions,
-/// updates), Notes (Vault, Templates, Vocabulary), Transcription (Meeting languages and models),
+/// updates, keyboard shortcuts), Notes (Vault, Templates, Vocabulary), Transcription (Meeting languages and models),
 /// Summary (Provider Profiles) and Recordings (audio and Summary log kept on this Mac).
 struct SettingsView: View {
     let models: TranscriptionModels
@@ -111,6 +111,8 @@ private struct GeneralTab: View {
             } header: {
                 AppIdentity().frame(maxWidth: .infinity).padding(.bottom, 8)
             }
+
+            ShortcutsSection()
 
             // At the bottom, in grey: seen by those who look, not first thing.
             Section {

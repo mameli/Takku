@@ -1860,26 +1860,6 @@
         }
       }
     },
-    "Start meeting    ⌃⌥⌘R": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Avvia riunione    ⌃⌥⌘R"
-          }
-        }
-      }
-    },
-    "Stop meeting    ⌃⌥⌘R": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ferma riunione    ⌃⌥⌘R"
-          }
-        }
-      }
-    },
     "Summary": {
       "localizations": {
         "it": {
@@ -2427,16 +2407,6 @@
         }
       }
     },
-    "⌃⌥⌘R is already used by another app": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "⌃⌥⌘R è già usata da un'altra app"
-          }
-        }
-      }
-    },
     "⚠️ %@": {
       "localizations": {
         "it": {
@@ -2537,12 +2507,12 @@
         }
       }
     },
-    "Mark this moment    ⌃⌥⌘M": {
+    "Mark this moment": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Segna questo momento    ⌃⌥⌘M"
+            "value": "Segna questo momento"
           }
         }
       }
@@ -2553,16 +2523,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Momenti segnati: %lld"
-          }
-        }
-      }
-    },
-    "⌃⌥⌘M is already used by another app": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "⌃⌥⌘M è già usata da un'altra app"
           }
         }
       }
@@ -2927,12 +2887,12 @@
         }
       }
     },
-    "Takku lives in the menu bar: start a meeting from there or with ⌃⌥⌘R.": {
+    "Takku lives in the menu bar: start a meeting from there or with %@.": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Takku sta nella barra dei menu: avvia una riunione da lì o con ⌃⌥⌘R."
+            "value": "Takku sta nella barra dei menu: avvia una riunione da lì o con %@."
           }
         }
       }
@@ -2977,12 +2937,12 @@
         }
       }
     },
-    "Take a screenshot    ⌃⌥⌘S": {
+    "Take a screenshot": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fai uno screenshot    ⌃⌥⌘S"
+            "value": "Fai uno screenshot"
           }
         }
       }
@@ -2993,16 +2953,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Screenshot: %lld"
-          }
-        }
-      }
-    },
-    "⌃⌥⌘S is already used by another app": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "⌃⌥⌘S è già usata da un'altra app"
           }
         }
       }
@@ -3057,12 +3007,12 @@
         }
       }
     },
-    "Only for screenshots during a meeting (⌃⌥⌘S). If macOS offers to reopen Takku, choose Later: the permission works from the next launch.": {
+    "Only for screenshots during a meeting. If macOS offers to reopen Takku, choose Later: the permission works from the next launch.": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Serve solo per gli screenshot durante un meeting (⌃⌥⌘S). Se macOS propone di riaprire Takku, scegli Più tardi: il permesso vale dal prossimo avvio."
+            "value": "Serve solo per gli screenshot durante un meeting. Se macOS propone di riaprire Takku, scegli Più tardi: il permesso vale dal prossimo avvio."
           }
         }
       }
@@ -3323,6 +3273,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "Screenshot (facoltativo)"
+          }
+        }
+      }
+    },
+    "Takku lives in the menu bar: start a meeting from there.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku sta nella barra dei menu: avvia una riunione da lì."
+          }
+        }
+      }
+    },
+    "Keyboard shortcuts": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scorciatoie da tastiera"
+          }
+        }
+      }
+    },
+    "Start or stop a meeting": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avvia o ferma una riunione"
+          }
+        }
+      }
+    },
+    "Another of Takku's shortcuts already uses these keys.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un'altra scorciatoia di Takku usa già questi tasti."
           }
         }
       }

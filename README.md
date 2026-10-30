@@ -82,7 +82,7 @@ At the first launch a *Welcome to Takku* window walks you through these steps (u
 
 ## Use
 
-- **Start and stop** a meeting from the menu bar or with **⌃⌥⌘R** from any app. While recording the icon is a red dot and the menu shows the duration. With *Suggest recording when a call starts* on (*Settings → General*, off by default), a notification offers to start when a call app keeps the microphone for 15 seconds, and another offers to stop when it lets the microphone go.
+- **Start and stop** a meeting from the menu bar or with **⌃⌥⌘R** from any app. All three shortcuts can be changed in *Settings → General → Keyboard shortcuts*. While recording the icon is a red dot and the menu shows the duration. With *Suggest recording when a call starts* on (*Settings → General*, off by default), a notification offers to start when a call app keeps the microphone for 15 seconds, and another offers to stop when it lets the microphone go.
 - **Mark a moment** with **⌃⌥⌘M** while recording: the dot turns into a star for a second, the passage gets a ⭐ in the Transcript and the Summary gives it priority.
 - **Take a screenshot** with **⌃⌥⌘S** while recording: Takku keeps the window you are looking at (the whole screen if it is in full screen) and marks the moment, like ⌃⌥⌘M (the dot turns into a camera for a second). The picture goes under the point of the Summary that covers that moment and under its passage in the Transcript; those no point covers are listed after the Summary. The model writing the Summary never sees them: Takku places them by the Transcript times the Summary cites.
 - If Takku hears nothing from the microphone or from the call for 2 minutes, the menu says so; if it has heard nothing since the start, a notification tells you what to check.

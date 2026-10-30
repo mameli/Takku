@@ -1,4 +1,5 @@
 import AppKit
+import KeyboardShortcuts
 import ServiceManagement
 import SwiftUI
 
@@ -131,5 +132,37 @@ struct CalendarToggle: View {
             isAuthorized = granted
             isDenied = !granted
         }
+    }
+}
+
+/// The global keyboard shortcuts, each one changed or removed by the user.
+struct ShortcutsSection: View {
+    var body: some View {
+        Section("Keyboard shortcuts") {
+            ShortcutRow("Start or stop a meeting", name: .startStopMeeting)
+            ShortcutRow("Mark this moment", name: .markMoment)
+            ShortcutRow("Take a screenshot", name: .takeScreenshot)
+        }
+    }
+}
+
+private struct ShortcutRow: View {
+    private let title: LocalizedStringKey
+    private let name: KeyboardShortcuts.Name
+
+    init(_ title: LocalizedStringKey, name: KeyboardShortcuts.Name) {
+        self.title = title
+        self.name = name
+    }
+
+    var body: some View {
+        KeyboardShortcuts.Recorder(title, name: name)
+            .shortcutValidation(validate)
+    }
+
+    /// Two of Takku's shortcuts on the same keys would both run.
+    private func validate(_ shortcut: KeyboardShortcuts.Shortcut) -> KeyboardShortcuts.ValidationResult {
+        guard KeyboardShortcuts.Name.takku.contains(where: { $0 != name && $0.shortcut == shortcut }) else { return .allow }
+        return .disallow(reason: String(localized: "Another of Takku's shortcuts already uses these keys."))
     }
 }
