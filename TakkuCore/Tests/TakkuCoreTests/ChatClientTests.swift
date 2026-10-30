@@ -71,6 +71,18 @@ struct ChatClientTests {
         #expect(body["max_output_tokens"] as? Int == 4000)
     }
 
+    @Test("Responses API sets a usable output budget by default")
+    func responsesDefaultOutputBudget() async throws {
+        let stub = StubTransport(body: #"{"status":"completed","output":[{"type":"message","role":"assistant","content":[{"type":"output_text","text":"OK"}]}]}"#)
+        let client = ChatClient(
+            baseURL: URL(string: "https://api.example/v1")!, apiKey: nil, model: "m", api: .responses, transport: stub.send
+        )
+
+        #expect(try await client.complete(messages) == "OK")
+        let body = try #require(JSONSerialization.jsonObject(with: stub.requests.first?.httpBody ?? Data()) as? [String: Any])
+        #expect(body["max_output_tokens"] as? Int == 4_096)
+    }
+
     @Test("Responses API rejects incomplete, failed and empty replies", arguments: [
         (#"{"status":"incomplete","incomplete_details":{"reason":"max_output_tokens"},"output":[]}"#, ChatClient.Failure.truncated),
         (#"{"status":"failed","error":{"message":"Model failed"}}"#, .responseFailed(message: "Model failed")),

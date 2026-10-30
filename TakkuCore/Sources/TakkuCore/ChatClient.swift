@@ -209,7 +209,13 @@ public struct ChatClient: Sendable {
         let model: String
         let input: [ChatMessage]
         let reasoning: RequestBody.Reasoning?
+        let maxOutputTokens = 4_096
         let store = false
+
+        enum CodingKeys: String, CodingKey {
+            case model, input, reasoning, store
+            case maxOutputTokens = "max_output_tokens"
+        }
     }
 
     private struct ResponsesResponse: Decodable {
