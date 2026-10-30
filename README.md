@@ -74,6 +74,8 @@ At the first launch a *Welcome to Takku* window walks you through these steps (u
 
    Set *max context* to the model's real limit (for a local server, the `-c` it was started with). Plain `http://` is accepted only for servers on your Mac.
 
+   *API* defaults to *Chat Completions* (`POST {baseURL}/chat/completions`). Choose *Responses API* for providers that use `POST {baseURL}/responses`, keeping the base URL without the endpoint suffix (for example `https://api.openai.com/v1`). This sends the conversation as `input`, reasoning as `reasoning.effort`, and `store: false`; only completed text responses are used. Existing Profiles keep Chat Completions.
+
    *Reasoning* sets how much the model thinks before answering: *Model default* sends nothing. OpenRouter gets it in its own format and adapts it to each model; every other provider gets OpenAI's `reasoning_effort`, which not every model accepts. Whatever a model needs beyond that goes in *Extra parameters*, a JSON object added to every request as written, each key in place of what Takku would send: the provider's documentation says what to write. For example, on [TensorX](https://docs.tensorx.ai/api-reference/reasoning) DeepSeek V4 reasons only with `{"chat_template_kwargs": {"thinking": true}}`, and Qwen 3.8 takes `{"reasoning_effort": "xhigh"}` but refuses *Off* and *High*. If the provider refuses a request, the error says what the Profile sets. *Test connection* sends a short request with the same reasoning and Extra parameters as a Summary, so a value the model refuses shows while you set up the Profile.
 
    OpenRouter is outside the EU and passes your requests on to the model's provider: Takku does not stop you from using it, but know where your meetings go.

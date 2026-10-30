@@ -21,7 +21,7 @@ extension ChatClient {
         let place = profile.runsOnThisMac ? "on this Mac" : "remote"
         self.init(
             baseURL: url, apiKey: Keychain.apiKey(for: profile.id), model: model,
-            reasoning: profile.reasoning, extraParameters: profile.extraParameters
+            reasoning: profile.reasoning, extraParameters: profile.extraParameters, api: profile.api
         ) { request in
             // Every request with its timing: compare it with the provider's own logs.
             let sent = request.httpBody?.count ?? 0

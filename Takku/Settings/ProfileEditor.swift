@@ -173,6 +173,10 @@ struct ProfileEditor: View {
         LabeledContent("Base URL") {
             PasteableTextField(placeholder: String(localized: "e.g. https://api.mistral.ai/v1"), text: $profile.baseURL)
         }
+        Picker("API", selection: $profile.api) {
+            Text("Chat Completions").tag(ProviderProfile.API.chatCompletions)
+            Text("Responses API").tag(ProviderProfile.API.responses)
+        }
         LabeledContent("Model") {
             PasteableTextField(placeholder: String(localized: "e.g. mistral-medium-latest"), text: $profile.model)
         }

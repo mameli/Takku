@@ -1,36 +1,65 @@
 {
-  "sourceLanguage": "en",
-  "strings": {
-    "NSAudioCaptureUsageDescription": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Takku registra l'audio degli altri partecipanti alle riunioni per trascriverlo."
+  "sourceLanguage" : "en",
+  "strings" : {
+    "CFBundleName" : {
+      "comment" : "Bundle name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Takku"
           }
         }
       }
     },
-    "NSCalendarsFullAccessUsageDescription": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Takku dà alla nota della riunione il nome dell'evento in corso ed elenca chi è stato invitato."
+    "NSAudioCaptureUsageDescription" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Takku registra l'audio degli altri partecipanti alle riunioni per trascriverlo."
           }
         }
       }
     },
-    "NSMicrophoneUsageDescription": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Takku registra la tua voce durante le riunioni per trascriverla."
+    "NSCalendarsFullAccessUsageDescription" : {
+      "comment" : "Privacy - Calendars Full Access Usage Description",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Takku names the meeting note after the event in progress and lists who was invited."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Takku dà alla nota della riunione il nome dell'evento in corso ed elenca chi è stato invitato."
+          }
+        }
+      }
+    },
+    "NSMicrophoneUsageDescription" : {
+      "comment" : "Privacy - Microphone Usage Description",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Takku records your voice during meetings to transcribe it."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Takku registra la tua voce durante le riunioni per trascriverla."
           }
         }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }

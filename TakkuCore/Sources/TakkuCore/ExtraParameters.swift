@@ -5,7 +5,7 @@ import Foundation
 /// what the user writes is what goes out (ADR 0009).
 public enum ExtraParameters {
     /// Written by Takku in every request: the user cannot replace them.
-    static let reservedKeys = ["model", "messages"]
+    static let reservedKeys = ["model", "messages", "input"]
 
     public enum Problem: LocalizedError, Equatable {
         case notJSON

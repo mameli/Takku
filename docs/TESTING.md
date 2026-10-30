@@ -125,6 +125,7 @@ Before starting: Takku running from the menu bar (notebook icon), Vault and a Su
 
 ## 5. When you set them up
 
+- [ ] **Responses API**: add a Profile with a provider's base URL (without `/responses`), choose *API → Responses API*, enter a supported model and key → *Test connection* returns text. Relaunch → the API selection is unchanged; generate and regenerate a test Meeting's Summary → Summary and title are written. Existing Profiles still show *Chat Completions* and work as before.
 - [ ] **EU Provider** (e.g. Mistral): new Profile with key → *Test connection* → a test Meeting → choose it in the menu and *Regenerate Summary* on an older Meeting to compare the Summaries.
 - [x] **Local server** (llama.cpp): new Profile without key, `http://localhost:8080/v1`, max context equal to the server's (`llama-server -c 32768`).
 

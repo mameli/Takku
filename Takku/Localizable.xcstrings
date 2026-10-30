@@ -1,3322 +1,3382 @@
 {
-  "sourceLanguage": "en",
-  "strings": {
-    "\"%@\" is not a valid file name.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "\"%@\" non è un nome di file valido."
+  "sourceLanguage" : "en",
+  "strings" : {
+    "\"%@\" is not a valid file name." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "\"%@\" non è un nome di file valido."
           }
         }
       }
     },
-    "%@ contains no audio.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ non contiene audio."
+    "%@ (default)" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (predefinito)"
           }
         }
       }
     },
-    "%@ pack": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pacchetto da %@"
+    "%@ and %lld more" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ e altri %lld"
           }
         }
       }
     },
-    "%@ pack · Recommended": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pacchetto da %@ · Consigliato"
+    "%@ contains no audio." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ non contiene audio."
           }
         }
       }
     },
-    "%@ The note will be created at the end of Processing.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ La nota verrà creata a fine Elaborazione."
+    "%@ keeps changing while Takku tries to update it." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ continua a cambiare mentre Takku prova ad aggiornarla."
           }
         }
       }
     },
-    "%@ Track: %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Traccia %1$@: %2$@"
+    "%@ pack" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pacchetto da %@"
           }
         }
       }
     },
-    "%@ keeps changing while Takku tries to update it.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ continua a cambiare mentre Takku prova ad aggiornarla."
+    "%@ pack · Recommended" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pacchetto da %@ · Consigliato"
           }
         }
       }
     },
-    "%lld days": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld giorni"
+    "%@ The note will be created at the end of Processing." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ La nota verrà creata a fine Elaborazione."
           }
         }
       }
     },
-    "1 day": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "1 giorno"
+    "%@ Track: %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Traccia %1$@: %2$@"
           }
         }
       }
     },
-    "< %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "< %@"
+    "%@, %lld MB, downloaded once and prepared for this Mac. It takes a few minutes: you can go on meanwhile." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$lld MB, scaricato una volta e preparato per questo Mac. Ci vogliono alcuni minuti: intanto puoi andare avanti."
           }
         }
       }
     },
-    "Add credit…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aggiungi credito…"
+    "%@: see ~/.takku/hooks/after-processing.log" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: vedi ~/.takku/hooks/after-processing.log"
           }
         }
       }
     },
-    "Add Takku Credit": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aggiungi Takku Credit"
+    "%lld days" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld giorni"
           }
         }
       }
     },
-    "Added to every request as written; each key replaces what Takku sends for it. For what a model needs beyond the Reasoning menu: see the provider's documentation.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aggiunti a ogni richiesta così come sono; ogni chiave sostituisce quella che manda Takku. Per quello che serve a un modello oltre al menu Ragionamento, vedi la documentazione del provider."
+    "%lld more queued" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld in coda"
           }
         }
       }
     },
-    "API key": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chiave API"
+    "%lld terms" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld termini"
           }
         }
       }
     },
-    "About 20 MB per hour of Meeting. Notes and Transcripts stay in the Vault: without the audio, Retry makes only the Summary again. The Summary log keeps what was sent to the model and its replies, in ~/.takku/summary-log, to improve the Templates: up to 5 MB, the oldest go first.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Circa 20 MB per ora di riunione. Note e trascrizioni restano nel Vault: senza l'audio, Riprova rifà solo il riepilogo. Il log dei Riepiloghi tiene ciò che è stato mandato al modello e le sue risposte, in ~/.takku/summary-log, per migliorare i Template: fino a 5 MB, i più vecchi se ne vanno per primi."
+    "< %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "< %@"
           }
         }
       }
     },
-    "Add Profile": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aggiungi Profilo"
+    "⚠️ %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⚠️ %@"
           }
         }
       }
     },
-    "Allow Takku in System Settings → Login Items.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Consenti Takku in Impostazioni di Sistema → Elementi login."
+    "⚠️ No sound from the microphone for %lld min" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⚠️ Nessun suono dal microfono da %lld min"
           }
         }
       }
     },
-    "Any server with an OpenAI-compatible API. For work meetings use only local Providers or Providers based and hosting data in the EU.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Qualsiasi server con API compatibile OpenAI. Per le riunioni di lavoro usa solo Provider locali o con sede e dati in UE."
+    "⚠️ No sound from the system audio for %lld min" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⚠️ Nessun suono dall'audio di sistema da %lld min"
           }
         }
       }
     },
-    "Audio on this Mac": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Audio su questo Mac"
+    "1 day" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 giorno"
           }
         }
       }
     },
-    "Base URL": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "URL base"
+    "1 term" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 termine"
           }
         }
       }
     },
-    "Buy a pack, then paste the key from the email below.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Compra un pacchetto, poi incolla qui sotto la chiave che arriva per email."
+    "A notification when an app uses the microphone for a while, and another when it stops. Takku never starts or stops by itself." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una notifica quando un'app usa il microfono per un po', e un'altra quando smette. Takku non avvia né ferma mai da solo."
           }
         }
       }
     },
-    "Buy credit…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Compra credito…"
+    "About 20 MB per hour of Meeting. Notes and Transcripts stay in the Vault: without the audio, Retry makes only the Summary again. The Summary log keeps what was sent to the model and its replies, in ~/.takku/summary-log, to improve the Templates: up to 5 MB, the oldest go first." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Circa 20 MB per ora di riunione. Note e trascrizioni restano nel Vault: senza l'audio, Riprova rifà solo il riepilogo. Il log dei Riepiloghi tiene ciò che è stato mandato al modello e le sue risposte, in ~/.takku/summary-log, per migliorare i Template: fino a 5 MB, i più vecchi se ne vanno per primi."
           }
         }
       }
     },
-    "Cancel": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Annulla"
+    "Add credit…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aggiungi credito…"
           }
         }
       }
     },
-    "Cannot play the audio: %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Impossibile riprodurre l'audio: %@"
+    "Add Profile" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aggiungi Profilo"
           }
         }
       }
     },
-    "Cannot read the audio of %@.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Impossibile leggere l'audio di %@."
+    "Add Takku Credit" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aggiungi Takku Credit"
           }
         }
       }
     },
-    "Changes are saved as you type. The key goes to the Keychain when you press Return or Save key.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Le modifiche si salvano mentre scrivi. La chiave va nel Portachiavi quando premi Invio o Salva chiave."
+    "Added to every request as written; each key replaces what Takku sends for it. For what a model needs beyond the Reasoning menu: see the provider's documentation." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aggiunti a ogni richiesta così come sono; ogni chiave sostituisce quella che manda Takku. Per quello che serve a un modello oltre al menu Ragionamento, vedi la documentazione del provider."
           }
         }
       }
     },
-    "Choose the recording of a meeting, a lecture or a voice memo, audio or video.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Scegli la registrazione di una riunione, di una lezione o un memo vocale, audio o video."
+    "Allow microphone and system audio" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Consenti microfono e audio di sistema"
           }
         }
       }
     },
-    "Choose…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Scegli…"
+    "Allow screen recording" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Consenti registrazione schermo"
           }
         }
       }
     },
-    "Core Audio could not complete \"%@\" (code %d).": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Core Audio non riesce a completare \"%@\" (codice %d)."
+    "Allow Takku in System Settings → Login Items." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Consenti Takku in Impostazioni di Sistema → Elementi login."
           }
         }
       }
     },
-    "Could not read the credit: %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Impossibile leggere il credito: %@"
+    "Allow Takku in System Settings → Privacy & Security → Calendars." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Consenti Takku in Impostazioni di Sistema → Privacy e sicurezza → Calendari."
           }
         }
       }
     },
-    "Create": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Crea"
+    "another app" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "un'altra app"
           }
         }
       }
     },
-    "%@: see ~/.takku/hooks/after-processing.log": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@: vedi ~/.takku/hooks/after-processing.log"
+    "Another of Takku's shortcuts already uses these keys." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un'altra scorciatoia di Takku usa già questi tasti."
           }
         }
       }
     },
-    "%@ (default)": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ (predefinito)"
+    "Any server with an OpenAI-compatible API. For work meetings use only local Providers or Providers based and hosting data in the EU." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qualsiasi server con API compatibile OpenAI. Per le riunioni di lavoro usa solo Provider locali o con sede e dati in UE."
           }
         }
       }
     },
-    "Credit": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Credito"
+    "API" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "API"
           }
         }
       }
     },
-    "Default": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Default"
+    "API key" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chiave API"
           }
         }
       }
     },
-    "Default app": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "App predefinita"
+    "Audio on this Mac" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio su questo Mac"
           }
         }
       }
     },
-    "Delete": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Elimina"
+    "Base URL" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL base"
           }
         }
       }
     },
-    "Delete audio": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cancella audio"
+    "Buy a pack, then paste the key from the email below." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compra un pacchetto, poi incolla qui sotto la chiave che arriva per email."
           }
         }
       }
     },
-    "Delete audio…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cancella audio…"
+    "Buy credit…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compra credito…"
           }
         }
       }
     },
-    "Delete log": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cancella log"
+    "Cache not saved; this Processing's result is preserved: %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cache non salvata; il risultato di questa elaborazione è al sicuro: %@"
           }
         }
       }
     },
-    "Delete log…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cancella log…"
+    "Calendar event" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Evento del calendario"
           }
         }
       }
     },
-    "Delete Profile": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Elimina Profilo"
+    "Cancel" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annulla"
           }
         }
       }
     },
-    "Delete the audio of all concluded Meetings?": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cancellare l'audio di tutte le riunioni concluse?"
+    "Cannot play the audio: %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossibile riprodurre l'audio: %@"
           }
         }
       }
     },
-    "Delete the Summary log?": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cancellare il log dei Riepiloghi?"
+    "Cannot read the audio of %@." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossibile leggere l'audio di %@."
           }
         }
       }
     },
-    "Delete the Takku Credit Profile?": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Eliminare il Profilo Takku Credit?"
+    "Cannot recover the Recording: %@ is missing although its Track has audio." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossibile recuperare la Registrazione: manca %@ anche se la sua Traccia contiene audio."
           }
         }
       }
     },
-    "Download": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Scarica"
+    "Cannot recover the Recording: %@ is unreadable (%@)." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossibile recuperare la Registrazione: %@ è illeggibile (%@)."
           }
         }
       }
     },
-    "Download of %@ failed: %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Download di %@ non riuscito: %@"
+    "Changes are saved as you type. The key goes to the Keychain when you press Return or Save key." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le modifiche si salvano mentre scrivi. La chiave va nel Portachiavi quando premi Invio o Salva chiave."
           }
         }
       }
     },
-    "Downloading transcription model… %lld%%": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Scaricamento del modello di trascrizione… %lld%%"
+    "Chat Completions" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chat Completions"
           }
         }
       }
     },
-    "1 term": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "1 termine"
+    "Check for updates" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Controlla gli aggiornamenti"
           }
         }
       }
     },
-    "Editor": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Editor"
+    "Choose a Profile in Settings…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scegli un Profilo nelle Impostazioni…"
           }
         }
       }
     },
-    "Extra parameters": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Parametri extra"
+    "Choose an invited participant or enter a name. Empty fields stay unnamed." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scegli un partecipante invitato o inserisci un nome. I campi vuoti restano senza nome."
           }
         }
       }
     },
-    "Extra parameters: \"%@\" is set by Takku and cannot be replaced.": {
-      "extractionState": "manual",
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Parametri extra: \"%@\" lo imposta Takku e non si può sostituire."
+    "Choose the recording of a meeting, a lecture or a voice memo, audio or video." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scegli la registrazione di una riunione, di una lezione o un memo vocale, audio o video."
           }
         }
       }
     },
-    "Extra parameters: this is not valid JSON.": {
-      "extractionState": "manual",
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Parametri extra: non è un JSON valido."
+    "Choose…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scegli…"
           }
         }
       }
     },
-    "Extra parameters: write a JSON object, between { and }.": {
-      "extractionState": "manual",
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Parametri extra: scrivi un oggetto JSON, tra { e }."
+    "code %d" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "codice %d"
           }
         }
       }
     },
-    "Fast and accurate; always in the Meeting language.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Veloce e preciso; sempre nella lingua della riunione."
+    "Core Audio could not complete \"%@\" (code %d)." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Core Audio non riesce a completare \"%@\" (codice %d)."
           }
         }
       }
     },
-    "Forever": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Per sempre"
+    "Could not read the credit: %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossibile leggere il credito: %@"
           }
         }
       }
     },
-    "Forget": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dimentica"
+    "Create" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crea"
           }
         }
       }
     },
-    "Forget all voices": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dimentica tutte le voci"
+    "Credit" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Credito"
           }
         }
       }
     },
-    "Forget all voices?": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dimenticare tutte le voci?"
+    "Default" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Default"
           }
         }
       }
     },
-    "Forget all voices…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dimentica tutte le voci…"
+    "Default app" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App predefinita"
           }
         }
       }
     },
-    "Heard in %lld Meetings": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sentita in %lld riunioni"
+    "Delete" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elimina"
           }
         }
       }
     },
-    "Heard in 1 Meeting": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sentita in 1 riunione"
+    "Delete audio" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancella audio"
           }
         }
       }
     },
-    "High": {
-      "extractionState": "manual",
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Alto"
+    "Delete audio…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancella audio…"
           }
         }
       }
     },
-    "Import": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Importa"
+    "Delete log" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancella log"
           }
         }
       }
     },
-    "Import audio…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Importa audio…"
+    "Delete log…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancella log…"
           }
         }
       }
     },
-    "Importing %@…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Importazione di %@…"
+    "Delete Profile" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elimina Profilo"
           }
         }
       }
     },
-    "It cannot be undone. Names already in the notes are not touched.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Non si può annullare. I nomi già nelle note non vengono toccati."
+    "Delete the audio of all concluded Meetings?" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancellare l'audio di tutte le riunioni concluse?"
           }
         }
       }
     },
-    "It cannot be undone. Notes and Transcripts in the Vault are not touched.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Non si può annullare. Note e trascrizioni nel Vault non vengono toccate."
+    "Delete the Summary log?" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancellare il log dei Riepiloghi?"
           }
         }
       }
     },
-    "JSON, e.g. {\"reasoning_effort\": \"xhigh\"}": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "JSON, es. {\"reasoning_effort\": \"xhigh\"}"
+    "Delete the Takku Credit Profile?" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminare il Profilo Takku Credit?"
           }
         }
       }
     },
-    "Keep a Summary log": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tieni un log dei Riepiloghi"
+    "Done" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fine"
           }
         }
       }
     },
-    "Keep audio for": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Conserva l'audio per"
+    "Download" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scarica"
           }
         }
       }
     },
-    "Listening for voices you have already named…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cerco le voci a cui hai già dato un nome…"
+    "Download and prepare" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scarica e prepara"
           }
         }
       }
     },
-    "Low": {
-      "extractionState": "manual",
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Basso"
+    "Download of %@ failed: %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Download di %@ non riuscito: %@"
           }
         }
       }
     },
-    "Manage…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gestisci…"
+    "Downloading transcription model… %lld%%" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scaricamento del modello di trascrizione… %lld%%"
           }
         }
       }
     },
-    "Medium": {
-      "extractionState": "manual",
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Medio"
+    "Duplicate takku_id %@. Takku cannot safely choose between: %@. Fix the duplicate notes or Transcript links in the Vault." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "takku_id %@ duplicato. Takku non può scegliere in sicurezza tra: %@. Correggi le note duplicate o i link al Transcript nel Vault."
           }
         }
       }
     },
-    "Model default": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Predefinito del modello"
+    "e.g. https://api.mistral.ai/v1" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "es. https://api.mistral.ai/v1"
           }
         }
       }
     },
-    "More": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Altro"
+    "e.g. Mistral EU" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "es. Mistral UE"
           }
         }
       }
     },
-    "Move to Trash…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sposta nel Cestino…"
+    "e.g. mistral-medium-latest" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "es. mistral-medium-latest"
           }
         }
       }
     },
-    "Names saved, but voices not remembered: %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nomi salvati, ma voci non memorizzate: %@"
+    "e.g. Weekly 1:1" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "es. 1:1 settimanale"
           }
         }
       }
     },
-    "New Profile": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nuovo Profilo"
+    "Edit Vocabulary With" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modifica il Vocabolario con"
           }
         }
       }
     },
-    "New Template…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nuovo Template…"
+    "Edit With" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modifica con"
           }
         }
       }
     },
-    "No terms yet": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ancora nessun termine"
+    "Editor" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editor"
           }
         }
       }
     },
-    "%lld terms": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld termini"
+    "Every Meeting is transcribed in this language." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ogni riunione viene trascritta in questa lingua."
           }
         }
       }
     },
-    "%@ and %lld more": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ e altri %lld"
+    "Examples" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esempi"
           }
         }
       }
     },
-    "Folder": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cartella"
+    "Extra parameters" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parametri extra"
           }
         }
       }
     },
-    "General": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Generali"
+    "Extra parameters: \"%@\" is set by Takku and cannot be replaced." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parametri extra: \"%@\" lo imposta Takku e non si può sostituire."
           }
         }
       }
     },
-    "In use": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "In uso"
+    "Extra parameters: this is not valid JSON." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parametri extra: non è un JSON valido."
           }
         }
       }
     },
-    "Incomplete recording: %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Registrazione incompleta: %@"
+    "Extra parameters: write a JSON object, between { and }." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parametri extra: scrivi un oggetto JSON, tra { e }."
           }
         }
       }
     },
-    "Incomplete transcript: %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Trascrizione incompleta: %@"
+    "Fast and accurate; always in the Meeting language." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veloce e preciso; sempre nella lingua della riunione."
           }
         }
       }
     },
-    "Invalid Profile URL: \"%@\" (http:// or https:// and an address are needed).": {
-      "extractionState": "manual",
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "URL del Profilo non valido: \"%@\" (servono http:// o https:// e un indirizzo)."
+    "Folder" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cartella"
           }
         }
       }
     },
-    "It cannot be undone. Meetings being recorded or processed are not touched.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Non si può annullare. Le riunioni in registrazione o in elaborazione non vengono toccate."
+    "Forever" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Per sempre"
           }
         }
       }
     },
-    "It works. Reply: %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Funziona. Risposta: %@"
+    "Forget" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dimentica"
           }
         }
       }
     },
-    "Key removed.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chiave rimossa."
+    "Forget all voices" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dimentica tutte le voci"
           }
         }
       }
     },
-    "Key saved in the Keychain.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chiave salvata nel Portachiavi."
+    "Forget all voices?" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dimenticare tutte le voci?"
           }
         }
       }
     },
-    "Keychain: %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Portachiavi: %@"
+    "Forget all voices…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dimentica tutte le voci…"
           }
         }
       }
     },
-    "Light and fast; more mistakes, especially in Italian.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Leggero e veloce; più errori, soprattutto in italiano."
+    "General" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generali"
           }
         }
       }
     },
-    "Loading transcription model…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Caricamento del modello di trascrizione…"
+    "Heard in %lld Meetings" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sentita in %lld riunioni"
           }
         }
       }
     },
-    "Max context (tokens)": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Contesto massimo (token)"
+    "Heard in 1 Meeting" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sentita in 1 riunione"
           }
         }
       }
     },
-    "Meeting": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Riunione"
+    "High" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alto"
           }
         }
       }
     },
-    "Meeting in progress": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Riunione in corso"
+    "Hook failed" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hook non riuscito"
           }
         }
       }
     },
-    "Meeting note not found in the Vault.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nota della Riunione non trovata nel Vault."
+    "Hook not run: %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hook non eseguito: %@"
           }
         }
       }
     },
-    "Open the note when a meeting starts": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Apri la nota quando inizia una riunione"
+    "Identifying speakers…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Identificazione speaker…"
           }
         }
       }
     },
-    "Play a few seconds of this voice. Play again for another passage.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ascolta qualche secondo di questa voce. Premi di nuovo per un altro passaggio."
+    "If you chose Don't Allow for the system audio, turn Takku on in Screen & System Audio Recording." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se per l'audio di sistema hai scelto Non consentire, attiva Takku in Registrazione schermo e audio di sistema."
           }
         }
       }
     },
-    "Play Speaker %lld": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ascolta Speaker %lld"
+    "Import" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importa"
           }
         }
       }
     },
-    "Recognise voices": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Riconosci le voci"
+    "Import audio…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importa audio…"
           }
         }
       }
     },
-    "Recognise voices?": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Riconoscere le voci?"
+    "Importing %@…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importazione di %@…"
           }
         }
       }
     },
-    "Recognised by voice: check it": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Riconosciuto dalla voce: controlla"
+    "Importing file %lld/%lld: %@…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importazione file %lld/%lld: %@…"
           }
         }
       }
     },
-    "Remembered voices": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Voci memorizzate"
+    "In ~/.takku/vocabulary.md, one per line: `- Scaleway = scale uai | our EU cloud provider`. The Summary uses them; the variants you list are fixed in the Transcript." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In ~/.takku/vocabulary.md, uno per riga: `- Scaleway = scale uai | il nostro cloud provider europeo`. Il Summary li usa; le varianti che elenchi vengono corrette nel Transcript."
           }
         }
       }
     },
-    "Search": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cerca"
+    "In use" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In uso"
           }
         }
       }
     },
-    "Stop": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Interrompi"
+    "Incomplete recording: %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrazione incompleta: %@"
           }
         }
       }
     },
-    "Takku will keep the voices of the Speakers you name, on this Mac only. Under the GDPR a voice is biometric data: you need the consent of the people you name.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Takku terrà le voci degli Speaker a cui dai un nome, solo su questo Mac. Per il GDPR una voce è un dato biometrico: serve il consenso delle persone a cui dai un nome."
+    "Incomplete transcript: %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trascrizione incompleta: %@"
           }
         }
       }
     },
-    "Takku will rebuild the Transcript from the audio, with the current Vocabulary and Speaker names, reusing the transcription already saved where it is still valid. If Processing succeeds, edits you made to the current Transcript will be replaced.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Takku ricostruirà il Transcript dall'audio, con il Vocabolario e i nomi degli speaker attuali, riusando la trascrizione già salvata dove è ancora valida. Se l'elaborazione riesce, le modifiche che hai fatto al Transcript attuale saranno sostituite."
+    "Invalid Profile URL: \"%@\" (http:// or https:// and an address are needed)." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL del Profilo non valido: \"%@\" (servono http:// o https:// e un indirizzo)."
           }
         }
       }
     },
-    "To write Personal notes during the meeting. When off, open it with Open note in the menu.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Per scrivere le note personali durante la riunione. Se è spento, aprila con Apri nota nel menu."
+    "It cannot be undone. Meetings being recorded or processed are not touched." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non si può annullare. Le riunioni in registrazione o in elaborazione non vengono toccate."
           }
         }
       }
     },
-    "Transcribe again from scratch (slower: also tells the voices apart again)": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Trascrivi di nuovo da zero (più lento: distingue di nuovo anche le voci)"
+    "It cannot be undone. Names already in the notes are not touched." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non si può annullare. I nomi già nelle note non vengono toccati."
           }
         }
       }
     },
-    "Transcribed again from scratch, voices included.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Trascritto di nuovo da zero, voci comprese."
+    "It cannot be undone. Notes and Transcripts in the Vault are not touched." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non si può annullare. Note e trascrizioni nel Vault non vengono toccate."
           }
         }
       }
     },
-    "Transcript not found.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Transcript non trovato."
+    "It works. Reply: %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Funziona. Risposta: %@"
           }
         }
       }
     },
-    "Meeting state not saved to disk: a restart now would not resume it. %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stato della Riunione non salvato su disco: un riavvio ora non la riprenderebbe. %@"
+    "JSON, e.g. {\"reasoning_effort\": \"xhigh\"}" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "JSON, es. {\"reasoning_effort\": \"xhigh\"}"
           }
         }
       }
     },
-    "Meetings that used it switch to the Notes Template.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Le Riunioni che lo usavano passano al Template Notes."
+    "Keep a Summary log" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tieni un log dei Riepiloghi"
           }
         }
       }
     },
-    "Microphone not authorized: open System Settings…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Microfono non autorizzato: apri Impostazioni di Sistema…"
+    "Keep audio for" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conserva l'audio per"
           }
         }
       }
     },
-    "Model": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Modello"
+    "Key removed." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chiave rimossa."
           }
         }
       }
     },
-    "Models run on this Mac. Each is downloaded once from Hugging Face: only the model is downloaded, no audio or text is sent. The model in use applies to new Meetings and to Retry.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "I modelli girano su questo Mac. Ognuno si scarica una volta sola da Hugging Face: viene scaricato solo il modello, nessun audio o testo viene inviato. Il modello in uso vale per le nuove riunioni e per Riprova."
+    "Key saved in the Keychain." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chiave salvata nel Portachiavi."
           }
         }
       }
     },
-    "Move the Template \"%@\" to the Trash?": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Spostare il Template \"%@\" nel Cestino?"
+    "Keyboard shortcuts" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scorciatoie da tastiera"
           }
         }
       }
     },
-    "Move to Trash": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sposta nel Cestino"
+    "Keychain: %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Portachiavi: %@"
           }
         }
       }
     },
-    "Name": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nome"
+    "Light and fast; more mistakes, especially in Italian." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leggero e veloce; più errori, soprattutto in italiano."
           }
         }
       }
     },
-    "Hook failed": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hook non riuscito"
+    "Listening for voices you have already named…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cerco le voci a cui hai già dato un nome…"
           }
         }
       }
     },
-    "In ~/.takku/vocabulary.md, one per line: `- Scaleway = scale uai | our EU cloud provider`. The Summary uses them; the variants you list are fixed in the Transcript.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "In ~/.takku/vocabulary.md, uno per riga: `- Scaleway = scale uai | il nostro cloud provider europeo`. Il Summary li usa; le varianti che elenchi vengono corrette nel Transcript."
+    "Loading transcription model…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Caricamento del modello di trascrizione…"
           }
         }
       }
     },
-    "New Template": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nuovo Template"
+    "Looks like a call in %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sembra una chiamata su %@"
           }
         }
       }
     },
-    "No Profile yet. Add one to generate Summaries.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nessun Profilo. Aggiungine uno per generare i Riepiloghi."
+    "Low" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Basso"
           }
         }
       }
     },
-    "No Vault configured: no Summary, the Transcript is only in the Recording folder.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nessun Vault configurato: niente Riepilogo, la Trascrizione è solo nella cartella della Registrazione."
+    "Manage…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gestisci…"
           }
         }
       }
     },
-    "None": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nessuno"
+    "Mark this moment" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Segna questo momento"
           }
         }
       }
     },
-    "Not imported: %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Non importato: %@"
+    "Marked moments: %lld" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Momenti segnati: %lld"
           }
         }
       }
     },
-    "Notes": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Note"
+    "Max context (tokens)" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contesto massimo (token)"
           }
         }
       }
     },
-    "Obsidian Vault": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vault Obsidian"
+    "Medium" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Medio"
           }
         }
       }
     },
-    "Off": {
-      "extractionState": "manual",
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Disattivato"
+    "Meeting" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riunione"
           }
         }
       }
     },
-    "Open Login Items": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Apri Elementi login"
+    "Meeting in progress" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riunione in corso"
           }
         }
       }
     },
-    "Open at login": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Apri all'avvio del Mac"
+    "Meeting languages" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lingue delle riunioni"
           }
         }
       }
     },
-    "Edit With": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Modifica con"
+    "Meeting note not found in the Vault." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nota della Riunione non trovata nel Vault."
           }
         }
       }
     },
-    "Open note": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Apri nota"
+    "Meeting note or Transcript not found in the Vault." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nota della Riunione o Transcript non trovati nel Vault."
           }
         }
       }
     },
-    "Open Transcript": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Apri Transcript"
+    "Meeting state not saved to disk: a restart now would not resume it. %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stato della Riunione non salvato su disco: un riavvio ora non la riprenderebbe. %@"
           }
         }
       }
     },
-    "Edit Vocabulary With": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Modifica il Vocabolario con"
+    "Meetings that used it switch to the Notes Template." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le Riunioni che lo usavano passano al Template Notes."
           }
         }
       }
     },
-    "Open Vault in %@…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Apri il Vault in %@…"
+    "Merging Summary…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unione Riepilogo…"
           }
         }
       }
     },
-    "Paste the key here": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Incolla qui la chiave"
+    "Microphone and system audio" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Microfono e audio di sistema"
           }
         }
       }
     },
-    "Plain-text Profile URL: \"%@\". Use https://; http:// is allowed only for servers on this Mac.": {
-      "extractionState": "manual",
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "URL del Profilo in chiaro: \"%@\". Usa https://; http:// è ammesso solo per i server su questo Mac."
+    "Microphone not authorized: open System Settings…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Microfono non autorizzato: apri Impostazioni di Sistema…"
           }
         }
       }
     },
-    "Prepaid credit": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Credito prepagato"
+    "Model" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modello"
           }
         }
       }
     },
-    "Prepaid credit for Summaries, sold by Takku's author: no account to create, only the key that arrives by email. The Transcript and your notes go to api.takku.app and on to a model hosted in the EU; nothing of the Meeting is kept.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Credito prepagato per i Riepiloghi, venduto dall'autore di Takku: nessun account da creare, solo la chiave che arriva per email. La Trascrizione e le tue note vanno ad api.takku.app e da lì a un modello ospitato nell'UE; nulla della riunione viene conservato."
+    "Model default" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Predefinito del modello"
           }
         }
       }
     },
-    "Preparing transcription model, first time only: a few minutes…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Preparazione del modello di trascrizione, solo la prima volta: qualche minuto…"
+    "Models run on this Mac. Each is downloaded once from Hugging Face: only the model is downloaded, no audio or text is sent. The model in use applies to new Meetings and to Retry." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I modelli girano su questo Mac. Ognuno si scarica una volta sola da Hugging Face: viene scaricato solo il modello, nessun audio o testo viene inviato. Il modello in uso vale per le nuove riunioni e per Riprova."
           }
         }
       }
     },
-    "Preparing…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Preparazione…"
+    "Moment marked" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Momento segnato"
           }
         }
       }
     },
-    "Processing failed": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Elaborazione non riuscita"
+    "More" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Altro"
           }
         }
       }
     },
-    "Processing…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Elaborazione in corso…"
+    "Move the Template \"%@\" to the Trash?" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spostare il Template \"%@\" nel Cestino?"
           }
         }
       }
     },
-    "Processing… (%lld more queued)": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Elaborazione in corso… (altre %lld in coda)"
+    "Move to Trash" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sposta nel Cestino"
           }
         }
       }
     },
-    "Profile: %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Profilo: %@"
+    "Move to Trash…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sposta nel Cestino…"
           }
         }
       }
     },
-    "Quit Takku": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Esci da Takku"
+    "Name" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nome"
           }
         }
       }
     },
-    "Reasoning": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ragionamento"
+    "Name speakers" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Assegna nomi agli Speaker"
           }
         }
       }
     },
-    "Recent meetings": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Riunioni recenti"
+    "Name speakers…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Assegna nomi agli Speaker…"
           }
         }
       }
     },
-    "Recommended: the most accurate, and fast; on short replies it can switch language.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Consigliato: il più preciso, e veloce; sulle risposte brevi può cambiare lingua."
+    "Names saved, but voices not remembered: %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nomi salvati, ma voci non memorizzate: %@"
           }
         }
       }
     },
-    "Cache not saved; this Processing's result is preserved: %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cache non salvata; il risultato di questa elaborazione è al sicuro: %@"
+    "New Profile" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nuovo Profilo"
           }
         }
       }
     },
-    "Cannot recover the Recording: %@ is missing although its Track has audio.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Impossibile recuperare la Registrazione: manca %@ anche se la sua Traccia contiene audio."
+    "New Template" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nuovo Template"
           }
         }
       }
     },
-    "Cannot recover the Recording: %@ is unreadable (%@).": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Impossibile recuperare la Registrazione: %@ è illeggibile (%@)."
+    "New Template…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nuovo Template…"
           }
         }
       }
     },
-    "Duplicate takku_id %@. Takku cannot safely choose between: %@. Fix the duplicate notes or Transcript links in the Vault.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "takku_id %@ duplicato. Takku non può scegliere in sicurezza tra: %@. Correggi le note duplicate o i link al Transcript nel Vault."
+    "No display to take it from." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nessuno schermo da cui farlo."
           }
         }
       }
     },
-    "Hook not run: %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hook non eseguito: %@"
+    "No Profile yet. Add one to generate Summaries." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nessun Profilo. Aggiungine uno per generare i Riepiloghi."
           }
         }
       }
     },
-    "Processing state is missing in %@. Audio kept.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stato del Processing mancante in %@. Audio conservato."
+    "No sound from the microphone" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nessun suono dal microfono"
           }
         }
       }
     },
-    "Processing state is unreadable in %@: %@ Audio kept.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stato del Processing illeggibile in %@: %@ Audio conservato."
+    "No sound from the system audio" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nessun suono dall'audio di sistema"
           }
         }
       }
     },
-    "Recording manifest is unreadable in %@: %@ Audio kept.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Manifest della Registrazione illeggibile in %@: %@ Audio conservato."
+    "No Speakers found in the Transcript." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nessuno Speaker trovato nel Transcript."
           }
         }
       }
     },
-    "Transcript rebuilt from the audio. Segments transcribed again: %lld; from the saved transcription: %lld.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Transcript ricostruito dall'audio. Segmenti trascritti di nuovo: %lld; dalla trascrizione salvata: %lld."
+    "No terms yet" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ancora nessun termine"
           }
         }
       }
     },
-    "Unreadable audio skipped from %@ s to %@ s; the Transcript and Summary may be incomplete.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Audio illeggibile saltato da %@ s a %@ s; Trascrizione e Riepilogo potrebbero essere incompleti."
+    "No Vault configured: no Summary, the Transcript is only in the Recording folder." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nessun Vault configurato: niente Riepilogo, la Trascrizione è solo nella cartella della Registrazione."
           }
         }
       }
     },
-    "Processing state belongs to another Meeting in %@. Audio kept.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lo stato del Processing appartiene a un'altra riunione in %@. Audio conservato."
+    "None" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nessuno"
           }
         }
       }
     },
-    "Recording manifest belongs to another Meeting in %@. Audio kept.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Il manifest della Registrazione appartiene a un'altra riunione in %@. Audio conservato."
+    "Not imported: %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non importato: %@"
           }
         }
       }
     },
-    "Recording interrupted and not recoverable: %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Registrazione interrotta e non recuperabile: %@"
+    "Notes" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Note"
           }
         }
       }
     },
-    "Recording unreadable: %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Registrazione illeggibile: %@"
+    "Obsidian vault" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vault Obsidian"
           }
         }
       }
     },
-    "Recording · %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "In registrazione · %@"
+    "Obsidian Vault" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vault Obsidian"
           }
         }
       }
     },
-    "Recordings": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Registrazioni"
+    "Off" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disattivato"
           }
         }
       }
     },
-    "Refresh": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aggiorna"
+    "Once a day Takku asks GitHub for the latest version; nothing about you or your Meetings is sent." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una volta al giorno Takku chiede a GitHub l'ultima versione; non invia niente su di te o sulle tue riunioni."
           }
         }
       }
     },
-    "Remove": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rimuovi"
+    "One note per meeting goes into its Meetings folder. Any folder works." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una nota per riunione, nella sua cartella Meetings. Va bene qualsiasi cartella."
           }
         }
       }
     },
-    "Report a problem…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Segnala un problema…"
+    "Only for screenshots during a meeting. If macOS offers to reopen Takku, choose Later: the permission works from the next launch." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serve solo per gli screenshot durante un meeting. Se macOS propone di riaprire Takku, scegli Più tardi: il permesso vale dal prossimo avvio."
           }
         }
       }
     },
-    "Retry": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Riprova"
+    "Open at login" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apri all'avvio del Mac"
           }
         }
       }
     },
-    "Retry failed: %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Riprova non riuscita: %@"
+    "Open Calendars" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apri Calendari"
           }
         }
       }
     },
-    "Retry not possible: the audio is deleted and the Meeting note or Transcript is not in the Vault.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Impossibile riprovare: l'audio è stato cancellato e la nota della riunione o la trascrizione non sono nel Vault."
+    "Open last Transcript" : {
+      "comment" : "A button that opens the last transcript of a meeting.",
+      "isCommentAutoGenerated" : true
+    },
+    "Open Login Items" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apri Elementi login"
+          }
+        }
+      }
+    },
+    "Open note" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apri nota"
+          }
+        }
+      }
+    },
+    "Open System Settings" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apri Impostazioni di Sistema"
           }
         }
       }
     },
-    "Save key": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Salva chiave"
+    "Open the note when a meeting starts" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apri la nota quando inizia una riunione"
           }
         }
       }
     },
-    "Saved in the Keychain (…%@) · paste here to replace it": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Salvata nel Portachiavi (…%@) · incolla qui per sostituirla"
+    "Open Transcript" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apri Transcript"
           }
         }
       }
     },
-    "Set up the Vault to get the Summary.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Configura il Vault per avere il Riepilogo."
+    "Open Vault in %@…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apri il Vault in %@…"
           }
         }
       }
     },
-    "Settings…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Impostazioni…"
+    "Optional" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Facoltativo"
           }
         }
       }
     },
-    "Show in Finder": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mostra nel Finder"
+    "Participants" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partecipanti"
           }
         }
       }
     },
-    "Show Vault in Finder…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mostra il Vault nel Finder…"
+    "Paste the key here" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incolla qui la chiave"
           }
         }
       }
     },
-    "Slightly more accurate; more memory, slower to prepare.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Un po' più preciso; più memoria, più lento da preparare."
+    "Plain-text Profile URL: \"%@\". Use https://; http:// is allowed only for servers on this Mac." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL del Profilo in chiaro: \"%@\". Usa https://; http:// è ammesso solo per i server su questo Mac."
           }
         }
       }
     },
-    "Speakers not told apart: %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Partecipanti non distinti: %@"
+    "Play a few seconds of this voice. Play again for another passage." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ascolta qualche secondo di questa voce. Premi di nuovo per un altro passaggio."
           }
         }
       }
     },
-    "Summary": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Riepilogo"
+    "Play Speaker %lld" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ascolta Speaker %lld"
           }
         }
       }
     },
-    "Summary log": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Log dei Riepiloghi"
+    "Prepaid credit" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Credito prepagato"
           }
         }
       }
     },
-    "Summary Profile": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Profilo Riepilogo"
+    "Prepaid credit for Summaries, sold by Takku's author: no account to create, only the key that arrives by email. The Transcript and your notes go to api.takku.app and on to a model hosted in the EU; nothing of the Meeting is kept." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Credito prepagato per i Riepiloghi, venduto dall'autore di Takku: nessun account da creare, solo la chiave che arriva per email. La Trascrizione e le tue note vanno ad api.takku.app e da lì a un modello ospitato nell'UE; nulla della riunione viene conservato."
           }
         }
       }
     },
-    "Summary Profiles": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Profili per il Riepilogo"
+    "Preparing speaker recognition…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preparazione riconoscimento speaker…"
           }
         }
       }
     },
-    "Summary not generated: %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Riepilogo non generato: %@"
+    "Preparing transcription model, first time only: a few minutes…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preparazione del modello di trascrizione, solo la prima volta: qualche minuto…"
           }
         }
       }
     },
-    "Summary ready": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Riepilogo pronto"
+    "Preparing…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preparazione…"
           }
         }
       }
     },
-    "Takku Credit": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Takku Credit"
+    "Processing failed" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elaborazione non riuscita"
           }
         }
       }
     },
-    "Takku reads your Personal notes from disk: those not yet saved do not reach the Summary.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Takku legge le note personali dal disco: quelle non ancora salvate non arrivano al Riepilogo."
+    "Processing state belongs to another Meeting in %@. Audio kept." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lo stato del Processing appartiene a un'altra riunione in %@. Audio conservato."
           }
         }
       }
     },
-    "Template": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Template"
+    "Processing state is missing in %@. Audio kept." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stato del Processing mancante in %@. Audio conservato."
           }
         }
       }
     },
-    "Templates": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Template"
+    "Processing state is unreadable in %@: %@ Audio kept." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stato del Processing illeggibile in %@: %@ Audio conservato."
           }
         }
       }
     },
-    "Test connection": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Prova connessione"
+    "Processing…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elaborazione in corso…"
           }
         }
       }
     },
-    "The chosen editor is no longer installed: notes open with the one shown above.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "L'editor scelto non è più installato: le note si aprono con quello indicato sopra."
+    "Processing… (%lld more queued)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elaborazione in corso… (altre %lld in coda)"
           }
         }
       }
     },
-    "The default Template is used for new Meetings; ⋯ changes it. A new Template starts from Notes: change instructions and sections with Edit With. They live in ~/.takku/templates/.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Il Template di default vale per le nuove riunioni; lo cambi da ⋯. Un Template nuovo parte da Notes: istruzioni e sezioni le cambi con Modifica con. Sono in ~/.takku/templates/."
+    "Profile: %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profilo: %@"
           }
         }
       }
     },
-    "The key leaves this Mac, the credit stays with it: keep the email with the key to paste it again.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La chiave viene tolta da questo Mac, il credito resta legato alla chiave: conserva l'email che la contiene per incollarla di nuovo."
+    "Quit Takku" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esci da Takku"
           }
         }
       }
     },
-    "The microphone does not start (%@): %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Il microfono non parte (%1$@): %2$@"
+    "Reasoning" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ragionamento"
           }
         }
       }
     },
-    "The model's reply was cut off by the length limit.": {
-      "extractionState": "manual",
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La risposta del modello è stata troncata per il limite di lunghezza."
+    "Recent meetings" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riunioni recenti"
           }
         }
       }
     },
-    "The Profile sets Extra parameters.": {
-      "extractionState": "manual",
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Il Profilo imposta Parametri extra."
+    "Recognise voices" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riconosci le voci"
           }
         }
       }
     },
-    "The Profile sets Reasoning: %@ and Extra parameters.": {
-      "extractionState": "manual",
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Il Profilo imposta Ragionamento: %@ e Parametri extra."
+    "Recognise voices?" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riconoscere le voci?"
           }
         }
       }
     },
-    "The Profile sets Reasoning: %@.": {
-      "extractionState": "manual",
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Il Profilo imposta Ragionamento: %@."
+    "Recognised by voice: check it" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riconosciuto dalla voce: controlla"
           }
         }
       }
     },
-    "The provider answered with error %lld: %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Il provider ha risposto con l'errore %1$lld: %2$@"
+    "Recommended: the most accurate, and fast; on short replies it can switch language." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Consigliato: il più preciso, e veloce; sulle risposte brevi può cambiare lingua."
           }
         }
       }
     },
-    "The provider returned no text.": {
-      "extractionState": "manual",
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Il provider non ha restituito testo."
+    "Recording · %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In registrazione · %@"
           }
         }
       }
     },
-    "To be configured": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Da configurare"
+    "Recording interrupted and not recoverable: %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrazione interrotta e non recuperabile: %@"
           }
         }
       }
     },
-    "Transcript": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Trascrizione"
+    "Recording manifest belongs to another Meeting in %@. Audio kept." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il manifest della Registrazione appartiene a un'altra riunione in %@. Audio conservato."
           }
         }
       }
     },
-    "Transcript ready": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Trascrizione pronta"
+    "Recording manifest is unreadable in %@: %@ Audio kept." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manifest della Registrazione illeggibile in %@: %@ Audio conservato."
           }
         }
       }
     },
-    "Transcription": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Trascrizione"
+    "Recording not found: regenerate the Summary from the current Transcript instead." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrazione non trovata: rigenera invece il Riepilogo dal Transcript attuale."
           }
         }
       }
     },
-    "Transcription failed: %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Trascrizione non riuscita: %@"
+    "Recording unreadable: %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrazione illeggibile: %@"
           }
         }
       }
     },
-    "Transcription failed: the Recording is saved, you can retry.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Trascrizione non riuscita: la Registrazione è salvata, si potrà riprovare."
+    "Recordings" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrazioni"
           }
         }
       }
     },
-    "Turn on autosave in %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Attiva il salvataggio automatico in %@"
+    "Refresh" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aggiorna"
           }
         }
       }
     },
-    "Unsupported audio format: %@.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Formato audio non supportato: %@."
+    "Regenerate Summary" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rigenera Riepilogo"
           }
         }
       }
     },
-    "Until you choose a Summary Profile, Takku writes only the Transcript. The simplest is Takku Credit: prepaid credit, with nothing to set up but the key that arrives by email. Settings also has Ollama, a model on this Mac, and Mistral, TensorX and OpenRouter, which only need your API key. Any other OpenAI-compatible provider you trust works too.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Finché non scegli un Profilo per il Riepilogo, Takku scrive solo la Trascrizione. Il più semplice è Takku Credit: credito prepagato, senza niente da configurare oltre alla chiave che arriva per email. Nelle Impostazioni ci sono anche Ollama, un modello su questo Mac, e Mistral, TensorX e OpenRouter, a cui serve solo la tua chiave API. Va bene anche qualsiasi altro provider compatibile OpenAI di cui ti fidi."
+    "Remembered voices" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voci memorizzate"
           }
         }
       }
     },
-    "Untitled": {
-      "extractionState": "manual",
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Senza nome"
+    "Remove" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rimuovi"
           }
         }
       }
     },
-    "Use": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Usa"
+    "Report a problem…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Segnala un problema…"
           }
         }
       }
     },
-    "Use as Default": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Usa come default"
+    "Reprocess Recording" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rielabora Registrazione"
           }
         }
       }
     },
-    "Use for Summaries": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Usa per i Riepiloghi"
+    "Reprocess Recording?" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rielaborare la Registrazione?"
           }
         }
       }
     },
-    "Use this Vault": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Usa questo Vault"
+    "Reprocess Recording…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rielabora Registrazione…"
           }
         }
       }
     },
-    "Used for Summaries": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "In uso per i Riepiloghi"
+    "Responses API" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Responses API"
           }
         }
       }
     },
-    "Used up": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Esaurito"
+    "Retry" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riprova"
           }
         }
       }
     },
-    "Vault not reachable: %@.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vault non raggiungibile: %@."
+    "Retry failed: %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riprova non riuscita: %@"
           }
         }
       }
     },
-    "Version %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Versione %@"
+    "Retry not possible: the audio is deleted and the Meeting note or Transcript is not in the Vault." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossibile riprovare: l'audio è stato cancellato e la nota della riunione o la trascrizione non sono nel Vault."
           }
         }
       }
     },
-    "Very fast and accurate; on short replies it can switch language.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Molto veloce e preciso; sulle risposte brevi può cambiare lingua."
+    "Save and Regenerate" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salva e rigenera"
           }
         }
       }
     },
-    "Vocabulary": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vocabolario"
+    "Save key" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salva chiave"
           }
         }
       }
     },
-    "Voice not forgotten: %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Voce non dimenticata: %@"
+    "Saved in the Keychain (…%@) · paste here to replace it" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salvata nel Portachiavi (…%@) · incolla qui per sostituirla"
           }
         }
       }
     },
-    "Voices not forgotten: %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Voci non dimenticate: %@"
+    "Screenshot not taken: %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Screenshot non fatto: %@"
           }
         }
       }
     },
-    "Voices not recognised: %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Voci non riconosciute: %@"
+    "Screenshot not taken: allow Screen Recording in System Settings…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Screenshot non fatto: consenti la Registrazione schermo nelle Impostazioni di Sistema…"
           }
         }
       }
     },
-    "When you name the Speakers, Takku remembers their voices on this Mac and suggests the names in the next Meetings, while the audio is kept. A voice is biometric data: keep it only for people who agreed. Turning it off keeps the voices already remembered until you forget them.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quando dai un nome agli Speaker, Takku ne memorizza la voce su questo Mac e suggerisce i nomi nelle riunioni successive, finché l'audio è conservato. Una voce è un dato biometrico: tienila solo per chi è d'accordo. Disattivando, le voci già memorizzate restano finché non le dimentichi."
+    "Screenshot taken" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Screenshot fatto"
           }
         }
       }
     },
-    "Writing to the Vault failed: %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Scrittura nel Vault non riuscita: %@"
+    "Screenshots (optional)" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Screenshot (facoltativo)"
           }
         }
       }
     },
-    "code %d": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "codice %d"
+    "Screenshots: %lld" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Screenshot: %lld"
           }
         }
       }
     },
-    "e.g. Mistral EU": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "es. Mistral UE"
+    "Search" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cerca"
           }
         }
       }
     },
-    "e.g. Weekly 1:1": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "es. 1:1 settimanale"
+    "Set up Takku…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configura Takku…"
           }
         }
       }
     },
-    "e.g. https://api.mistral.ai/v1": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "es. https://api.mistral.ai/v1"
+    "Set up the Vault to get the Summary." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configura il Vault per avere il Riepilogo."
           }
         }
       }
     },
-    "e.g. mistral-medium-latest": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "es. mistral-medium-latest"
+    "Settings…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impostazioni…"
           }
         }
       }
     },
-    "the Profile \"%@\" was deleted: choose another one in the menu and Retry.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "il Profilo \"%@\" è stato eliminato: scegline un altro dal menu e premi Riprova."
+    "Show all in Obsidian…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra tutte in Obsidian…"
           }
         }
       }
     },
-    "there is no speech in the Recording.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "nella Registrazione non c'è parlato."
+    "Show in Finder" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra nel Finder"
           }
         }
       }
+    },
+    "Show last Recording in Finder" : {
+      "comment" : "A button that opens the last recording in the Finder.",
+      "isCommentAutoGenerated" : true
+    },
+    "Show Vault in Finder…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra il Vault nel Finder…"
+          }
+        }
+      }
+    },
+    "Slightly more accurate; more memory, slower to prepare." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un po' più preciso; più memoria, più lento da preparare."
+          }
+        }
+      }
+    },
+    "Speaker %lld" : {
+      "comment" : "A label showing the index of a speaker in the transcript, starting at 1.",
+      "isCommentAutoGenerated" : true
     },
-    "Your Takku Credit is used up. Add credit in Settings → Summary Profiles, then Retry the Meeting.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Il credito Takku Credit è finito. Aggiungi credito in Impostazioni → Profili per il Riepilogo, poi usa Riprova sulla riunione."
+    "Speaker names not saved: %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nomi degli Speaker non salvati: %@"
           }
         }
       }
     },
-    "⚠️ %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "⚠️ %@"
+    "Speakers not told apart: %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partecipanti non distinti: %@"
           }
         }
       }
     },
-    "⚠️ No sound from the microphone for %lld min": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "⚠️ Nessun suono dal microfono da %lld min"
+    "Start meeting" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avvia riunione"
           }
         }
       }
     },
-    "⚠️ No sound from the system audio for %lld min": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "⚠️ Nessun suono dall'audio di sistema da %lld min"
+    "Start or stop a meeting" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avvia o ferma una riunione"
           }
         }
       }
     },
-    "No sound from the microphone": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nessun suono dal microfono"
+    "Start recording?" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avviare la registrazione?"
           }
         }
       }
     },
-    "No sound from the system audio": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nessun suono dall'audio di sistema"
+    "Stop" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Interrompi"
           }
         }
       }
     },
-    "Takku has recorded nothing from your microphone for 2 minutes. Check System Settings → Privacy & Security → Microphone.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Da 2 minuti Takku non registra niente dal tuo microfono. Controlla Impostazioni di Sistema → Privacy e sicurezza → Microfono."
+    "Stop meeting" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ferma riunione"
           }
         }
       }
     },
-    "Takku has recorded nothing from the call for 2 minutes. Check System Settings → Privacy & Security → Screen & System Audio Recording.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Da 2 minuti Takku non registra niente dalla chiamata. Controlla Impostazioni di Sistema → Privacy e sicurezza → Registrazione schermo e audio di sistema."
+    "Stop recording?" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fermare la registrazione?"
           }
         }
       }
     },
-    "Meeting languages": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lingue delle riunioni"
+    "Suggest recording when a call starts" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suggerisci di registrare quando inizia una chiamata"
           }
         }
       }
     },
-    "Every Meeting is transcribed in this language.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ogni riunione viene trascritta in questa lingua."
+    "Summary" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riepilogo"
           }
         }
       }
     },
-    "Takku detects which of these languages each Meeting is in.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Takku riconosce in quale di queste lingue è ogni riunione."
+    "Summary (optional)" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riepilogo (facoltativo)"
           }
         }
       }
     },
-    "Mark this moment": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Segna questo momento"
+    "Summary log" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Log dei Riepiloghi"
           }
         }
       }
     },
-    "Marked moments: %lld": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Momenti segnati: %lld"
+    "Summary not generated: %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riepilogo non generato: %@"
           }
         }
       }
     },
-    "Moment marked": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Momento segnato"
+    "Summary Profile" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profilo Riepilogo"
           }
         }
       }
     },
-    "Use the calendar": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Usa il calendario"
+    "Summary Profiles" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profili per il Riepilogo"
           }
         }
       }
     },
-    "The Meeting note takes the name and the participants of the event in progress.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La nota della riunione prende il nome e i partecipanti dell'evento in corso."
+    "Summary ready" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riepilogo pronto"
           }
         }
       }
     },
-    "Allow Takku in System Settings → Privacy & Security → Calendars.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Consenti Takku in Impostazioni di Sistema → Privacy e sicurezza → Calendari."
+    "Take a screenshot" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fai uno screenshot"
           }
         }
       }
     },
-    "Open Calendars": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Apri Calendari"
+    "Takku %@ is available…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "È disponibile Takku %@…"
           }
         }
       }
     },
-    "another app": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "un'altra app"
+    "Takku Credit" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Takku Credit"
           }
         }
       }
     },
-    "Start meeting": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Avvia riunione"
+    "Takku detects which of these languages each Meeting is in." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Takku riconosce in quale di queste lingue è ogni riunione."
           }
         }
       }
     },
-    "Stop meeting": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ferma riunione"
+    "Takku has recorded nothing from the call for 2 minutes. Check System Settings → Privacy & Security → Screen & System Audio Recording." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Da 2 minuti Takku non registra niente dalla chiamata. Controlla Impostazioni di Sistema → Privacy e sicurezza → Registrazione schermo e audio di sistema."
           }
         }
       }
     },
-    "Looks like a call in %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sembra una chiamata su %@"
+    "Takku has recorded nothing from your microphone for 2 minutes. Check System Settings → Privacy & Security → Microphone." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Da 2 minuti Takku non registra niente dal tuo microfono. Controlla Impostazioni di Sistema → Privacy e sicurezza → Microfono."
           }
         }
       }
     },
-    "Start recording?": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Avviare la registrazione?"
+    "Takku is free. If it is useful to you, [buy me a coffee](https://buymeacoffee.com/mameli.dev)." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Takku è gratis. Se ti è utile, [offrimi un caffè](https://buymeacoffee.com/mameli.dev)."
           }
         }
       }
     },
-    "The call seems over": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La chiamata sembra finita"
+    "Takku lives in the menu bar: start a meeting from there or with %@." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Takku sta nella barra dei menu: avvia una riunione da lì o con %@."
           }
         }
       }
     },
-    "Stop recording?": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fermare la registrazione?"
+    "Takku lives in the menu bar: start a meeting from there." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Takku sta nella barra dei menu: avvia una riunione da lì."
           }
         }
       }
     },
-    "Suggest recording when a call starts": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Suggerisci di registrare quando inizia una chiamata"
+    "Takku reads your Personal notes from disk: those not yet saved do not reach the Summary." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Takku legge le note personali dal disco: quelle non ancora salvate non arrivano al Riepilogo."
           }
         }
       }
     },
-    "A notification when an app uses the microphone for a while, and another when it stops. Takku never starts or stops by itself.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Una notifica quando un'app usa il microfono per un po', e un'altra quando smette. Takku non avvia né ferma mai da solo."
+    "Takku records your meetings, transcribes them on this Mac and writes the notes into Obsidian. A few steps before the first one:" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Takku registra le tue riunioni, le trascrive su questo Mac e scrive le note in Obsidian. Qualche passo prima della prima:"
           }
         }
       }
     },
-    "Takku %@ is available…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "È disponibile Takku %@…"
+    "Takku records your voice and the call. macOS asks once for each: choose Allow." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Takku registra la tua voce e la chiamata. macOS chiede una volta per ciascuna: scegli Consenti."
           }
         }
       }
     },
-    "Check for updates": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Controlla gli aggiornamenti"
+    "Takku will keep the voices of the Speakers you name, on this Mac only. Under the GDPR a voice is biometric data: you need the consent of the people you name." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Takku terrà le voci degli Speaker a cui dai un nome, solo su questo Mac. Per il GDPR una voce è un dato biometrico: serve il consenso delle persone a cui dai un nome."
           }
         }
       }
     },
-    "Once a day Takku asks GitHub for the latest version; nothing about you or your Meetings is sent.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Una volta al giorno Takku chiede a GitHub l'ultima versione; non invia niente su di te o sulle tue riunioni."
+    "Takku will rebuild the Transcript from the audio, with the current Vocabulary and Speaker names, reusing the transcription already saved where it is still valid. If Processing succeeds, edits you made to the current Transcript will be replaced." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Takku ricostruirà il Transcript dall'audio, con il Vocabolario e i nomi degli speaker attuali, riusando la trascrizione già salvata dove è ancora valida. Se l'elaborazione riesce, le modifiche che hai fatto al Transcript attuale saranno sostituite."
           }
         }
       }
     },
-    "Show all in Obsidian…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mostra tutte in Obsidian…"
+    "Template" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Template"
           }
         }
       }
     },
-    "Welcome to Takku": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ti diamo il benvenuto in Takku"
+    "Templates" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Template"
           }
         }
       }
     },
-    "Takku records your meetings, transcribes them on this Mac and writes the notes into Obsidian. A few steps before the first one:": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Takku registra le tue riunioni, le trascrive su questo Mac e scrive le note in Obsidian. Qualche passo prima della prima:"
+    "Test connection" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prova connessione"
           }
         }
       }
     },
-    "Obsidian vault": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vault Obsidian"
+    "The call seems over" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La chiamata sembra finita"
           }
         }
       }
     },
-    "One note per meeting goes into its Meetings folder. Any folder works.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Una nota per riunione, nella sua cartella Meetings. Va bene qualsiasi cartella."
+    "The chosen editor is no longer installed: notes open with the one shown above." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'editor scelto non è più installato: le note si aprono con quello indicato sopra."
           }
         }
       }
     },
-    "Microphone and system audio": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Microfono e audio di sistema"
+    "The default Template is used for new Meetings; ⋯ changes it. A new Template starts from Notes: change instructions and sections with Edit With. They live in ~/.takku/templates/." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il Template di default vale per le nuove riunioni; lo cambi da ⋯. Un Template nuovo parte da Notes: istruzioni e sezioni le cambi con Modifica con. Sono in ~/.takku/templates/."
           }
         }
       }
     },
-    "Takku records your voice and the call. macOS asks once for each: choose Allow.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Takku registra la tua voce e la chiamata. macOS chiede una volta per ciascuna: scegli Consenti."
+    "The image could not be saved as JPEG." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non è stato possibile salvare l'immagine in JPEG."
           }
         }
       }
     },
-    "Allow microphone and system audio": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Consenti microfono e audio di sistema"
+    "The key leaves this Mac, the credit stays with it: keep the email with the key to paste it again." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La chiave viene tolta da questo Mac, il credito resta legato alla chiave: conserva l'email che la contiene per incollarla di nuovo."
           }
         }
       }
     },
-    "The microphone is not allowed.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Il microfono non è consentito."
+    "The Meeting note takes the name and the participants of the event in progress." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La nota della riunione prende il nome e i partecipanti dell'evento in corso."
           }
         }
       }
     },
-    "Open System Settings": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Apri Impostazioni di Sistema"
+    "The microphone does not start (%@): %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il microfono non parte (%1$@): %2$@"
           }
         }
       }
     },
-    "If you chose Don't Allow for the system audio, turn Takku on in Screen & System Audio Recording.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Se per l'audio di sistema hai scelto Non consentire, attiva Takku in Registrazione schermo e audio di sistema."
+    "The microphone is not allowed." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il microfono non è consentito."
           }
         }
       }
     },
-    "Transcription model": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Modello di trascrizione"
+    "The model's reply was cut off by the length limit." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La risposta del modello è stata troncata per il limite di lunghezza."
           }
         }
       }
     },
-    "%@, %lld MB, downloaded once and prepared for this Mac. It takes a few minutes: you can go on meanwhile.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@, %2$lld MB, scaricato una volta e preparato per questo Mac. Ci vogliono alcuni minuti: intanto puoi andare avanti."
+    "the Profile \"%@\" was deleted: choose another one in the menu and Retry." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "il Profilo \"%@\" è stato eliminato: scegline un altro dal menu e premi Riprova."
           }
         }
       }
     },
-    "Download and prepare": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Scarica e prepara"
+    "The Profile sets Extra parameters." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il Profilo imposta Parametri extra."
           }
         }
       }
     },
-    "Summary (optional)": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Riepilogo (facoltativo)"
+    "The Profile sets Reasoning: %@ and Extra parameters." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il Profilo imposta Ragionamento: %@ e Parametri extra."
           }
         }
       }
     },
-    "Choose a Profile in Settings…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Scegli un Profilo nelle Impostazioni…"
+    "The Profile sets Reasoning: %@." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il Profilo imposta Ragionamento: %@."
           }
         }
       }
     },
-    "Examples": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Esempi"
+    "The provider answered with error %lld: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il provider ha risposto con l'errore %1$lld: %2$@"
           }
         }
       }
     },
-    "Optional": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Facoltativo"
+    "The provider could not complete the response: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il provider non ha potuto completare la risposta: %@"
           }
         }
       }
     },
-    "Takku is free. If it is useful to you, [buy me a coffee](https://buymeacoffee.com/mameli.dev).": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Takku è gratis. Se ti è utile, [offrimi un caffè](https://buymeacoffee.com/mameli.dev)."
+    "The provider returned no text." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il provider non ha restituito testo."
           }
         }
       }
     },
-    "Takku lives in the menu bar: start a meeting from there or with %@.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Takku sta nella barra dei menu: avvia una riunione da lì o con %@."
+    "there is no speech in the Recording." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "nella Registrazione non c'è parlato."
           }
         }
       }
     },
-    "Done": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fine"
+    "To be configured" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Da configurare"
           }
         }
       }
     },
-    "Set up Takku…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Configura Takku…"
+    "To write Personal notes during the meeting. When off, open it with Open note in the menu." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Per scrivere le note personali durante la riunione. Se è spento, aprila con Apri nota nel menu."
           }
         }
       }
     },
-    "Calendar event": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Evento del calendario"
+    "Transcribe again from scratch (slower: also tells the voices apart again)" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trascrivi di nuovo da zero (più lento: distingue di nuovo anche le voci)"
           }
         }
       }
     },
-    "Untitled event": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Evento senza titolo"
+    "Transcribed again from scratch, voices included." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trascritto di nuovo da zero, voci comprese."
           }
         }
       }
     },
-    "Take a screenshot": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fai uno screenshot"
+    "Transcribing · part %lld/%lld" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trascrizione · parte %lld/%lld"
           }
         }
       }
     },
-    "Screenshots: %lld": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Screenshot: %lld"
+    "Transcribing…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trascrizione…"
           }
         }
       }
     },
-    "Screenshot not taken: allow Screen Recording in System Settings…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Screenshot non fatto: consenti la Registrazione schermo nelle Impostazioni di Sistema…"
+    "Transcript" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trascrizione"
           }
         }
       }
     },
-    "Screenshot not taken: %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Screenshot non fatto: %@"
+    "Transcript not found." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcript non trovato."
           }
         }
       }
     },
-    "Screenshot taken": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Screenshot fatto"
+    "Transcript ready" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trascrizione pronta"
           }
         }
       }
     },
-    "No display to take it from.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nessuno schermo da cui farlo."
+    "Transcript rebuilt from the audio. Segments transcribed again: %lld; from the saved transcription: %lld." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcript ricostruito dall'audio. Segmenti trascritti di nuovo: %lld; dalla trascrizione salvata: %lld."
           }
         }
       }
     },
-    "The image could not be saved as JPEG.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Non è stato possibile salvare l'immagine in JPEG."
+    "Transcription" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trascrizione"
           }
         }
       }
     },
-    "Only for screenshots during a meeting. If macOS offers to reopen Takku, choose Later: the permission works from the next launch.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Serve solo per gli screenshot durante un meeting. Se macOS propone di riaprire Takku, scegli Più tardi: il permesso vale dal prossimo avvio."
+    "Transcription failed: %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trascrizione non riuscita: %@"
           }
         }
       }
     },
-    "Allow screen recording": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Consenti registrazione schermo"
+    "Transcription failed: the Recording is saved, you can retry." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trascrizione non riuscita: la Registrazione è salvata, si potrà riprovare."
           }
         }
       }
     },
-    "Turn Takku on in Screen & System Audio Recording.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Attiva Takku in Registrazione schermo e audio di sistema."
+    "Transcription model" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modello di trascrizione"
           }
         }
       }
     },
-    "Regenerate Summary": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rigenera Riepilogo"
+    "Turn on autosave in %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Attiva il salvataggio automatico in %@"
           }
         }
       }
     },
-    "Reprocess Recording…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rielabora Registrazione…"
+    "Turn Takku on in Screen & System Audio Recording." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Attiva Takku in Registrazione schermo e audio di sistema."
           }
         }
       }
     },
-    "Reprocess Recording?": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rielaborare la Registrazione?"
+    "Unreadable audio skipped from %@ s to %@ s; the Transcript and Summary may be incomplete." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio illeggibile saltato da %@ s a %@ s; Trascrizione e Riepilogo potrebbero essere incompleti."
           }
         }
       }
     },
-    "Reprocess Recording": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rielabora Registrazione"
+    "Unsupported audio format: %@." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Formato audio non supportato: %@."
           }
         }
       }
     },
-    "Recording not found: regenerate the Summary from the current Transcript instead.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Registrazione non trovata: rigenera invece il Riepilogo dal Transcript attuale."
+    "Until you choose a Summary Profile, Takku writes only the Transcript. The simplest is Takku Credit: prepaid credit, with nothing to set up but the key that arrives by email. Settings also has Ollama, a model on this Mac, and Mistral, TensorX and OpenRouter, which only need your API key. Any other OpenAI-compatible provider you trust works too." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finché non scegli un Profilo per il Riepilogo, Takku scrive solo la Trascrizione. Il più semplice è Takku Credit: credito prepagato, senza niente da configurare oltre alla chiave che arriva per email. Nelle Impostazioni ci sono anche Ollama, un modello su questo Mac, e Mistral, TensorX e OpenRouter, a cui serve solo la tua chiave API. Va bene anche qualsiasi altro provider compatibile OpenAI di cui ti fidi."
           }
         }
       }
     },
-    "Name speakers…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Assegna nomi agli Speaker…"
+    "Untitled" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Senza nome"
           }
         }
       }
     },
-    "Name speakers": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Assegna nomi agli Speaker"
+    "Untitled event" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Evento senza titolo"
           }
         }
       }
     },
-    "Participants": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Partecipanti"
+    "Use" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usa"
           }
         }
       }
     },
-    "Choose an invited participant or enter a name. Empty fields stay unnamed.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Scegli un partecipante invitato o inserisci un nome. I campi vuoti restano senza nome."
+    "Use as Default" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usa come default"
           }
         }
       }
     },
-    "Save and Regenerate": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Salva e rigenera"
+    "Use for Summaries" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usa per i Riepiloghi"
           }
         }
       }
     },
-    "Meeting note or Transcript not found in the Vault.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nota della Riunione o Transcript non trovati nel Vault."
+    "Use the calendar" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usa il calendario"
           }
         }
       }
     },
-    "No Speakers found in the Transcript.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nessuno Speaker trovato nel Transcript."
+    "Use this Vault" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usa questo Vault"
           }
         }
       }
     },
-    "Speaker names not saved: %@": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nomi degli Speaker non salvati: %@"
+    "Used for Summaries" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In uso per i Riepiloghi"
           }
         }
       }
     },
-    "Transcribing…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Trascrizione…"
+    "Used up" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esaurito"
           }
         }
       }
     },
-    "Transcribing · part %lld/%lld": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Trascrizione · parte %lld/%lld"
+    "Vault not reachable: %@." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vault non raggiungibile: %@."
           }
         }
       }
     },
-    "Preparing speaker recognition…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Preparazione riconoscimento speaker…"
+    "Version %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versione %@"
           }
         }
       }
     },
-    "Identifying speakers…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Identificazione speaker…"
+    "Very fast and accurate; on short replies it can switch language." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Molto veloce e preciso; sulle risposte brevi può cambiare lingua."
           }
         }
       }
     },
-    "Writing Summary…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Scrittura Riepilogo…"
+    "Vocabulary" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vocabolario"
           }
         }
       }
     },
-    "Writing Summary · part %lld/%lld": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Scrittura Riepilogo · parte %lld/%lld"
+    "Voice not forgotten: %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voce non dimenticata: %@"
           }
         }
       }
     },
-    "Merging Summary…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unione Riepilogo…"
+    "Voices not forgotten: %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voci non dimenticate: %@"
           }
         }
       }
     },
-    "Writing note…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Scrittura nota…"
+    "Voices not recognised: %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voci non riconosciute: %@"
           }
         }
       }
     },
-    "%lld more queued": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld in coda"
+    "Welcome to Takku" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ti diamo il benvenuto in Takku"
           }
         }
       }
     },
-    "Importing file %lld/%lld: %@…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Importazione file %lld/%lld: %@…"
+    "When you name the Speakers, Takku remembers their voices on this Mac and suggests the names in the next Meetings, while the audio is kept. A voice is biometric data: keep it only for people who agreed. Turning it off keeps the voices already remembered until you forget them." : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quando dai un nome agli Speaker, Takku ne memorizza la voce su questo Mac e suggerisce i nomi nelle riunioni successive, finché l'audio è conservato. Una voce è un dato biometrico: tienila solo per chi è d'accordo. Disattivando, le voci già memorizzate restano finché non le dimentichi."
           }
         }
       }
     },
-    "Screenshots (optional)": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Screenshot (facoltativo)"
+    "Writing note…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scrittura nota…"
           }
         }
       }
     },
-    "Takku lives in the menu bar: start a meeting from there.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Takku sta nella barra dei menu: avvia una riunione da lì."
+    "Writing Summary · part %lld/%lld" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scrittura Riepilogo · parte %lld/%lld"
           }
         }
       }
     },
-    "Keyboard shortcuts": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Scorciatoie da tastiera"
+    "Writing Summary…" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scrittura Riepilogo…"
           }
         }
       }
     },
-    "Start or stop a meeting": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Avvia o ferma una riunione"
+    "Writing to the Vault failed: %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scrittura nel Vault non riuscita: %@"
           }
         }
       }
     },
-    "Another of Takku's shortcuts already uses these keys.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Un'altra scorciatoia di Takku usa già questi tasti."
+    "Your Takku Credit is used up. Add credit in Settings → Summary Profiles, then Retry the Meeting." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il credito Takku Credit è finito. Aggiungi credito in Impostazioni → Profili per il Riepilogo, poi usa Riprova sulla riunione."
           }
         }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.1"
 }
