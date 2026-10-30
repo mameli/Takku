@@ -4,7 +4,7 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
-## 1.12.0
+## 1.12.0 (2026-10-30)
 
 - **Recent meetings, clearer actions**: *Retry* is replaced by *Regenerate Summary*, which always writes the Summary again from the Transcript in your Vault (your corrections included, even while the audio is still there), and *Reprocess Recording…*, which rebuilds the Transcript from the audio after asking, because it replaces the edits you made to it. It reuses what was already transcribed when still valid, so a new Vocabulary word or Speaker name is applied in seconds; tick *Transcribe again from scratch* to redo it all, voices included. The notification says which of the two happened. *Open Transcript* opens it directly, and a failed meeting shows its error in its own submenu.
 - **Name speakers**: *Recent meetings → Name speakers…* opens a small window with a field for each Speaker of the Transcript and the calendar's invited participants as suggestions. To tell who is who, each Speaker shows the first words of what they say and, while the audio is kept, ▶ plays a few seconds of their voice; press it again for another passage. *Save and Regenerate* writes the names in the note and a new Summary. Editing `speakers` in the frontmatter still works.
