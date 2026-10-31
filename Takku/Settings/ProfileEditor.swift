@@ -242,11 +242,7 @@ struct ProfileEditor: View {
         isReadingCredit = true
         defer { isReadingCredit = false }
         do {
-            credit = try await TakkuCredit.balance(apiKey: key) { request in
-                let (data, response) = try await URLSession.shared.data(for: request)
-                guard let http = response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
-                return (data, http)
-            }
+            credit = try await TakkuCredit.balance(apiKey: key, transport: TakkuCredit.transport)
             creditProblem = nil
         } catch {
             credit = nil

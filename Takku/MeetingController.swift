@@ -204,7 +204,10 @@ final class MeetingController {
     /// The shortcut or the menu: marks the current moment of the Meeting in progress as important. Saved at
     /// once, so a crash does not lose it; it stars the Transcript paragraph it falls in.
     func mark() {
-        guard let startedAt else { return }
+        guard let startedAt else {
+            NotificationCenter.default.post(name: .markWithoutMeeting, object: nil)
+            return
+        }
         saveMark(at: Date().timeIntervalSince(startedAt))
         // No sound: the system audio capture would record it in the Others Track.
         flash(\.isShowingMark)
@@ -233,7 +236,10 @@ final class MeetingController {
     /// The shortcut or the menu: a Screenshot of the Meeting in progress, saved at once in the Recording
     /// folder, and a Mark at the same moment, made even when the Screenshot is not.
     func takeScreenshot() {
-        guard let takkuID = currentTakkuID, let startedAt, let currentDirectory else { return }
+        guard let takkuID = currentTakkuID, let startedAt, let currentDirectory else {
+            if !isInProgress { NotificationCenter.default.post(name: .screenshotWithoutMeeting, object: nil) }
+            return
+        }
         let time = Date().timeIntervalSince(startedAt)
         // A Screenshot is also a Mark, whether the asynchronous capture succeeds or not. Saving it
         // now keeps it even if Stop or a new Meeting changes the in-memory state meanwhile.

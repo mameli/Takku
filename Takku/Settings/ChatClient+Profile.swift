@@ -39,3 +39,12 @@ extension ChatClient {
         }
     }
 }
+
+extension TakkuCredit {
+    /// The gateway's balance and packs: short requests, on the shared session.
+    static let transport: ChatClient.Transport = { request in
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let http = response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+        return (data, http)
+    }
+}

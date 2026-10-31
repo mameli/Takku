@@ -58,6 +58,20 @@ struct TakkuCreditTests {
         #expect(gateway.request?.httpMethod == "GET")
     }
 
+    @Test("the packs for someone with no key are read without one, by price, with plain links")
+    func packsWithoutKey() async throws {
+        let body = #"{"packs":[{"price_eur":20,"url":"https://buy.stripe.com/twenty","recommended":false},{"price_eur":5,"url":"https://buy.stripe.com/five"},{"price_eur":10,"url":"https://buy.stripe.com/ten","recommended":true},{"price_eur":"x","url":"https://buy.stripe.com/broken"}]}"#
+        let gateway = Gateway(status: 200, body: body)
+        let packs = try await TakkuCredit.packs(transport: gateway.transport)
+        #expect(packs.map(\.priceEuros) == [5, 10, 20])
+        #expect(packs.filter(\.isRecommended).map(\.url) == [URL(string: "https://buy.stripe.com/ten")!])
+        #expect(gateway.request?.url == URL(string: "https://api.takku.app/v1/packs"))
+        #expect(gateway.request?.value(forHTTPHeaderField: "Authorization") == nil)
+
+        let old = Gateway(status: 404, body: #"{"error":{"message":"Not found."}}"#)
+        await #expect(throws: ChatClient.Failure.http(status: 404, message: "Not found.")) { try await TakkuCredit.packs(transport: old.transport) }
+    }
+
     @Test("without packs the balance is still read, and without a recommended one the first is used")
     func noPacks() async throws {
         let none = Gateway(status: 200, body: #"{"balance_micros":-1200,"account_id":"ta_x","packs":[],"top_up_url":null}"#)

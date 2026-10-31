@@ -11,6 +11,9 @@ struct TakkuApp: App {
         if CommandLine.arguments.contains(ScreenshotTaker.checkArgument) {
             exit(CGPreflightScreenCaptureAccess() ? 0 : 1)
         }
+        #if DEBUG
+        WelcomeRender.runIfRequested()
+        #endif
         _controller = State(initialValue: MeetingController())
         DockPresence.start()
     }
@@ -32,6 +35,7 @@ struct TakkuApp: App {
         Window("Welcome to Takku", id: WelcomeView.windowID) {
             WelcomeView(controller: controller)
         }
+        .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentSize)
         .restorationBehavior(.disabled)
         .defaultLaunchBehavior(WelcomeView.isNeededAtLaunch ? .presented : .suppressed)

@@ -21,6 +21,26 @@
         }
       }
     },
+    "%@ keeps the window you are looking at, under its point in the Summary.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ tiene la finestra che stai guardando, sotto il suo punto nel Riepilogo."
+          }
+        }
+      }
+    },
+    "%@ marks a moment: it gets a star, and the Summary gives it priority.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ segna un momento: prende una stella e il Riepilogo gli dà priorità."
+          }
+        }
+      }
+    },
     "%@ pack": {
       "localizations": {
         "it": {
@@ -81,6 +101,16 @@
         }
       }
     },
+    "*Name speakers…* plays a few seconds of each voice, so you know who is who.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "*Assegna nomi agli Speaker…* fa sentire qualche secondo di ogni voce, così sai chi è chi."
+          }
+        }
+      }
+    },
     "1 day": {
       "localizations": {
         "it": {
@@ -97,6 +127,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "< %@"
+          }
+        }
+      }
+    },
+    "A model hosted in the EU, and nothing is kept. No subscription: the credit never expires.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un modello ospitato in UE, e niente viene conservato. Nessun abbonamento: il credito non scade."
+          }
+        }
+      }
+    },
+    "about %lld meetings": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "circa %lld riunioni"
+          }
+        }
+      }
+    },
+    "Activate": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attiva"
           }
         }
       }
@@ -141,6 +201,26 @@
         }
       }
     },
+    "All set": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tutto pronto"
+          }
+        }
+      }
+    },
+    "Allow": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consenti"
+          }
+        }
+      }
+    },
     "Allowed: macOS applies it once Takku reopens.": {
       "localizations": {
         "it": {
@@ -151,12 +231,42 @@
         }
       }
     },
+    "Allowed: the screenshot shortcut works during a meeting.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consentito: la scorciatoia per gli screenshot funziona durante un meeting."
+          }
+        }
+      }
+    },
     "Allow…": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
             "value": "Consenti…"
+          }
+        }
+      }
+    },
+    "An AI model writes it: on your Mac, or an external one you choose.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lo scrive un modello AI: sul tuo Mac, oppure uno esterno che scegli tu."
+          }
+        }
+      }
+    },
+    "An external AI model": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un modello AI esterno"
           }
         }
       }
@@ -221,6 +331,16 @@
         }
       }
     },
+    "Back": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indietro"
+          }
+        }
+      }
+    },
     "Base URL": {
       "localizations": {
         "it": {
@@ -231,12 +351,32 @@
         }
       }
     },
+    "Before the first meeting": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prima del primo meeting"
+          }
+        }
+      }
+    },
     "Buy a pack, then paste the key from the email below.": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
             "value": "Compra un pacchetto, poi incolla qui sotto la chiave che arriva per email."
+          }
+        }
+      }
+    },
+    "Buy a pack: the key arrives by email.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compra un pacchetto: la chiave arriva per email."
           }
         }
       }
@@ -291,6 +431,16 @@
         }
       }
     },
+    "Change…": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cambia…"
+          }
+        }
+      }
+    },
     "Choose the recording of a meeting, a lecture or a voice memo, audio or video.": {
       "localizations": {
         "it": {
@@ -317,6 +467,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Chiudi"
+          }
+        }
+      }
+    },
+    "Continue": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continua"
           }
         }
       }
@@ -604,6 +764,16 @@
         }
       }
     },
+    "For the screenshots during a meeting. macOS applies it once Takku reopens.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Per gli screenshot durante un meeting. macOS lo applica quando Takku si riapre."
+          }
+        }
+      }
+    },
     "Forever": {
       "localizations": {
         "it": {
@@ -654,6 +824,16 @@
         }
       }
     },
+    "Get started": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iniziamo"
+          }
+        }
+      }
+    },
     "Heard in %lld Meetings": {
       "localizations": {
         "it": {
@@ -691,6 +871,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Importa"
+          }
+        }
+      }
+    },
+    "Import audio: a voice memo, a lecture, a meeting in person or a video becomes a note like the others.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importa audio: un memo vocale, una lezione, un meeting di persona o un video diventano una nota come le altre."
           }
         }
       }
@@ -735,6 +925,36 @@
         }
       }
     },
+    "It gets only the text of the Transcript and your notes, never the audio.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Riceve solo il testo della Trascrizione e delle tue note, mai l’audio."
+          }
+        }
+      }
+    },
+    "It suggests who was invited to the event, and recognises the voices you named before, only on this Mac.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suggerisce chi era invitato all’evento e riconosce le voci che hai già nominato, solo su questo Mac."
+          }
+        }
+      }
+    },
+    "It transcribes them on this Mac: the audio never leaves it.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Li trascrive su questo Mac: l’audio non esce mai da qui."
+          }
+        }
+      }
+    },
     "JSON, e.g. {\"reasoning_effort\": \"xhigh\"}": {
       "localizations": {
         "it": {
@@ -761,6 +981,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Conserva l'audio per"
+          }
+        }
+      }
+    },
+    "Key": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chiave"
           }
         }
       }
@@ -796,6 +1026,16 @@
         }
       }
     },
+    "Mark a moment, keep a slide": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Segna un momento, tieni una slide"
+          }
+        }
+      }
+    },
     "Medium": {
       "extractionState": "manual",
       "localizations": {
@@ -813,6 +1053,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Microfono"
+          }
+        }
+      }
+    },
+    "Microphone and system audio": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Microfono e audio di sistema"
+          }
+        }
+      }
+    },
+    "Mistral, OpenRouter or another provider?": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mistral, OpenRouter o un altro provider?"
           }
         }
       }
@@ -1078,6 +1338,46 @@
         }
       }
     },
+    "Not only calls": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non solo chiamate"
+          }
+        }
+      }
+    },
+    "Ollama or LM Studio, with a model on your Mac. Nothing leaves the Mac, but it takes a powerful Mac, and the Summaries are less precise.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ollama o LM Studio, con un modello sul tuo Mac. Niente esce dal Mac, ma serve un Mac potente, e i Riepiloghi sono meno precisi."
+          }
+        }
+      }
+    },
+    "On this Mac": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Su questo Mac"
+          }
+        }
+      }
+    },
+    "One shortcut, from any app": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una scorciatoia, da qualsiasi app"
+          }
+        }
+      }
+    },
     "Only for providers and models that need it, such as some OpenAI models.": {
       "localizations": {
         "it": {
@@ -1094,6 +1394,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Apri la nota quando inizia una riunione"
+          }
+        }
+      }
+    },
+    "Paste": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Incolla"
+          }
+        }
+      }
+    },
+    "Paste the key from the email.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Incolla la chiave dall’email."
           }
         }
       }
@@ -1128,6 +1448,36 @@
         }
       }
     },
+    "Press %@ from any app, or start from the menu bar.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Premi %@ da qualsiasi app, o avvia dalla barra dei menu."
+          }
+        }
+      }
+    },
+    "Press it again to stop: the Summary goes at the top of the note, which gets a short title.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Premila di nuovo per fermare: il Riepilogo va in cima alla nota, che prende un titolo breve."
+          }
+        }
+      }
+    },
+    "Q4 launch plan": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Piano di lancio Q4"
+          }
+        }
+      }
+    },
     "Recognise voices": {
       "localizations": {
         "it": {
@@ -1148,12 +1498,42 @@
         }
       }
     },
+    "recognised by voice": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "riconosciuto dalla voce"
+          }
+        }
+      }
+    },
     "Recognised by voice: check it": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
             "value": "Riconosciuto dalla voce: controlla"
+          }
+        }
+      }
+    },
+    "Recommended": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consigliato"
+          }
+        }
+      }
+    },
+    "recommended": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "consigliato"
           }
         }
       }
@@ -1178,6 +1558,16 @@
         }
       }
     },
+    "Save: the names go into the Transcript and the Summary.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salva: i nomi finiscono nella Trascrizione e nel Riepilogo."
+          }
+        }
+      }
+    },
     "Screen & System Audio Recording": {
       "localizations": {
         "it": {
@@ -1194,6 +1584,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Cerca"
+          }
+        }
+      }
+    },
+    "Set up in Settings…": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configura…"
           }
         }
       }
@@ -1238,6 +1638,16 @@
         }
       }
     },
+    "Takku": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku"
+          }
+        }
+      }
+    },
     "Takku did not hear its test sound. If you chose Don't Allow, add Takku to System Audio Recording Only, then Test again.": {
       "localizations": {
         "it": {
@@ -1248,12 +1658,32 @@
         }
       }
     },
-    "Takku plays a short sound and checks that it hears it.": {
+    "Takku hears your microphone and the call, apart, and transcribes them on this Mac.": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Takku riproduce un breve suono e controlla di sentirlo."
+            "value": "Takku sente il tuo microfono e la chiamata, separati, e li trascrive su questo Mac."
+          }
+        }
+      }
+    },
+    "Takku hears your microphone and the call, from Meet, Zoom, Teams or any other app.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku sente il tuo microfono e la chiamata, da Meet, Zoom, Teams o qualsiasi altra app."
+          }
+        }
+      }
+    },
+    "Takku lives in the menu bar. %@ starts and stops a meeting, from any app.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku vive nella barra dei menu. %@ avvia e ferma un meeting, da qualsiasi app."
           }
         }
       }
@@ -1278,12 +1708,42 @@
         }
       }
     },
-    "Test": {
+    "Templates are Markdown files you write: notes for a lecture, a 1to1, your team’s meetings.": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Prova"
+            "value": "I Template sono file Markdown scritti da te: appunti per una lezione, un 1to1, i meeting del tuo team."
+          }
+        }
+      }
+    },
+    "The key was not accepted: %@": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La chiave non è stata accettata: %@"
+          }
+        }
+      }
+    },
+    "The microphone is not allowed: turn Takku on in System Settings.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il microfono non è consentito: attiva Takku in Impostazioni di Sistema."
+          }
+        }
+      }
+    },
+    "The model that transcribes your meetings, on this Mac.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il modello che trascrive i tuoi meeting, su questo Mac."
           }
         }
       }
@@ -1294,6 +1754,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Il provider non è riuscito a completare la risposta: %@"
+          }
+        }
+      }
+    },
+    "The Vocabulary fixes names and jargon in the Transcript, and spells them right in the Summary.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il Vocabolario corregge nomi e gergo nella Trascrizione, e li scrive giusti nel Riepilogo."
+          }
+        }
+      }
+    },
+    "Then it writes the note in your Obsidian vault, with the Summary on top.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Poi scrive la nota nel tuo vault Obsidian, con il Riepilogo in cima."
+          }
+        }
+      }
+    },
+    "This is not a Takku Credit key: the one in the email starts with tk_.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Questa non è una chiave Takku Credit: quella nell’email inizia con tk_."
           }
         }
       }
@@ -1820,6 +2310,26 @@
         }
       }
     },
+    "Try again": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Riprova"
+          }
+        }
+      }
+    },
+    "Try them now: press %@ or %@.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Provale adesso: premi %1$@ o %2$@."
+          }
+        }
+      }
+    },
     "Turn Takku on in Screen & System Audio Recording: drag it there if it is not in the list.": {
       "localizations": {
         "it": {
@@ -2336,16 +2846,6 @@
         }
       }
     },
-    "Until you choose a Summary Profile, Takku writes only the Transcript. The simplest is Takku Credit: prepaid credit, with nothing to set up but the key that arrives by email. Settings also has Ollama, a model on this Mac, and Mistral, TensorX and OpenRouter, which only need your API key. Any other OpenAI-compatible provider you trust works too.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Finché non scegli un Profilo per il Riepilogo, Takku scrive solo la Trascrizione. Il più semplice è Takku Credit: credito prepagato, senza niente da configurare oltre alla chiave che arriva per email. Nelle Impostazioni ci sono anche Ollama, un modello su questo Mac, e Mistral, TensorX e OpenRouter, a cui serve solo la tua chiave API. Va bene anche qualsiasi altro provider compatibile OpenAI di cui ti fidi."
-          }
-        }
-      }
-    },
     "Untitled": {
       "extractionState": "manual",
       "localizations": {
@@ -2413,6 +2913,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "In uso per i Riepiloghi"
+          }
+        }
+      }
+    },
+    "Used for Summaries · credit %@": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usato per i Riepiloghi · credito %@"
           }
         }
       }
@@ -2507,6 +3017,46 @@
         }
       }
     },
+    "Where the notes go, and what macOS asks once.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dove vanno le note, e cosa chiede macOS una volta sola."
+          }
+        }
+      }
+    },
+    "Who said what": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chi ha detto cosa"
+          }
+        }
+      }
+    },
+    "Who writes the Summary": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chi scrive il Riepilogo"
+          }
+        }
+      }
+    },
+    "Without one, Takku writes only the Transcript.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Senza, Takku scrive solo la Trascrizione."
+          }
+        }
+      }
+    },
     "Writing to the Vault failed: %@": {
       "localizations": {
         "it": {
@@ -2593,6 +3143,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Il credito Takku Credit è finito. Aggiungi credito in Impostazioni → Profili per il Riepilogo, poi usa Riprova sulla riunione."
+          }
+        }
+      }
+    },
+    "“Let’s start from the numbers of the quarter…”": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“Partiamo dai numeri del trimestre…”"
+          }
+        }
+      }
+    },
+    "“Yes, I have them here: we are above target.”": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“Sì, li ho qui: siamo sopra l’obiettivo.”"
           }
         }
       }
@@ -2907,16 +3477,6 @@
         }
       }
     },
-    "Takku records your meetings, transcribes them on this Mac and writes the notes into Obsidian. A few steps before the first one:": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Takku registra le tue riunioni, le trascrive su questo Mac e scrive le note in Obsidian. Qualche passo prima della prima:"
-          }
-        }
-      }
-    },
     "Obsidian vault": {
       "localizations": {
         "it": {
@@ -2943,16 +3503,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Takku registra la tua voce e la chiamata. macOS chiede una volta per ciascuna: scegli Consenti."
-          }
-        }
-      }
-    },
-    "Allow microphone and system audio": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Consenti microfono e audio di sistema"
           }
         }
       }
@@ -2997,36 +3547,6 @@
         }
       }
     },
-    "Summary (optional)": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Riepilogo (facoltativo)"
-          }
-        }
-      }
-    },
-    "Choose a Profile in Settings…": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Scegli un Profilo nelle Impostazioni…"
-          }
-        }
-      }
-    },
-    "Examples": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Esempi"
-          }
-        }
-      }
-    },
     "Optional": {
       "localizations": {
         "it": {
@@ -3043,16 +3563,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Takku è gratis. Se ti è utile, [offrimi un caffè](https://buymeacoffee.com/mameli.dev)."
-          }
-        }
-      }
-    },
-    "Takku lives in the menu bar: start a meeting from there or with %@.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Takku sta nella barra dei menu: avvia una riunione da lì o con %@."
           }
         }
       }
@@ -3403,16 +3913,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Screenshot (facoltativo)"
-          }
-        }
-      }
-    },
-    "Takku lives in the menu bar: start a meeting from there.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Takku sta nella barra dei menu: avvia una riunione da lì."
           }
         }
       }

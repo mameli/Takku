@@ -3,13 +3,15 @@ import TakkuCore
 import SwiftUI
 
 /// Where the Settings window goes when it opens or comes to the front: the welcome window's
-/// *Choose a Profile in Settings…* sends it to the Summary Profiles.
+/// *Set up in Settings…* and *Settings…* send it to the Summary Profiles.
 @MainActor @Observable
 final class SettingsRequest {
     static let shared = SettingsRequest()
     var showsProfiles = false
     /// Set when the Summary tab is shown on request: it opens a new Profile if there are none yet.
     var opensNewProfile = false
+    /// The Profile to open in the editor when the Summary tab is shown on request.
+    var selectsProfile: UUID?
 }
 
 /// The tabs of the Settings window, in the toolbar as in the Mac's own apps.
@@ -246,6 +248,12 @@ private struct SummaryTab: View {
     private func addProfileIfRequested() {
         guard request.opensNewProfile else { return }
         request.opensNewProfile = false
+        // Read again: the welcome window may have added Takku Credit while this tab was open.
+        profiles = AppSettings.summaryProfiles
+        if let id = request.selectsProfile {
+            request.selectsProfile = nil
+            if profiles.contains(where: { $0.id == id }) { selectedProfileID = id }
+        }
         if profiles.isEmpty { addProfile() }
     }
 
