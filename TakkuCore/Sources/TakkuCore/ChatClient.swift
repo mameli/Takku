@@ -14,7 +14,7 @@ public struct ChatMessage: Codable, Equatable, Sendable {
     }
 }
 
-/// Client for any server with an OpenAI-compatible API (`POST {baseURL}/chat/completions`):
+/// Client for OpenAI-compatible Chat Completions and Responses APIs:
 /// remote providers and local servers such as llama.cpp or Ollama (ADR 0004).
 public struct ChatClient: Sendable {
     public enum Failure: LocalizedError, Equatable {
@@ -28,6 +28,7 @@ public struct ChatClient: Sendable {
         case emptyReply
         /// The model stopped at the length limit: the reply is cut in half.
         case truncated
+        case responseFailed(message: String)
         /// Takku Credit answered 402: the balance is used up.
         case noCredit
 
@@ -42,6 +43,8 @@ public struct ChatClient: Sendable {
                 String(localized: "The provider returned no text.")
             case .truncated:
                 String(localized: "The model's reply was cut off by the length limit.")
+            case .responseFailed(let message):
+                String(localized: "The provider could not complete the response: \(message)")
             case .noCredit:
                 String(localized: "Your Takku Credit is used up. Add credit in Settings → Summary Profiles, then Retry the Meeting.")
             }
@@ -74,17 +77,19 @@ public struct ChatClient: Sendable {
     private let baseURL: URL
     private let apiKey: String?
     private let model: String
+    private let api: ProviderProfile.API
     private let reasoning: ProviderProfile.ReasoningEffort?
     private let extraParameters: String?
     private var transport: Transport
 
     public init(
         baseURL: URL, apiKey: String?, model: String, reasoning: ProviderProfile.ReasoningEffort? = nil,
-        extraParameters: String? = nil, transport: @escaping Transport
+        extraParameters: String? = nil, api: ProviderProfile.API = .chatCompletions, transport: @escaping Transport
     ) {
         self.baseURL = baseURL
         self.apiKey = apiKey
         self.model = model
+        self.api = api
         self.reasoning = reasoning
         self.extraParameters = extraParameters
         self.transport = transport
@@ -116,30 +121,56 @@ public struct ChatClient: Sendable {
     }
 
     public func complete(_ messages: [ChatMessage]) async throws -> String {
-        let extra = try ExtraParameters.parse(extraParameters ?? "")
-        var request = URLRequest(url: baseURL.appending(path: "chat/completions"))
+        let extra = try ExtraParameters.parse(extraParameters ?? "", api: api)
+        var request = URLRequest(url: baseURL.appending(path: api == .responses ? "responses" : "chat/completions"))
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         if let apiKey {
             request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         }
-        let body = RequestBody(model: model, messages: messages, reasoning: reasoning, openRouter: Self.isOpenRouter(baseURL))
-        request.httpBody = try ExtraParameters.applying(extra, to: JSONEncoder().encode(body))
+        let body: Data
+        let reasoningKey: String
+        if api == .responses {
+            body = try JSONEncoder().encode(ResponsesRequest(model: model, input: messages, reasoning: reasoning.map(RequestBody.Reasoning.init)))
+            reasoningKey = "reasoning"
+        } else {
+            let chatBody = RequestBody(model: model, messages: messages, reasoning: reasoning, openRouter: Self.isOpenRouter(baseURL))
+            body = try JSONEncoder().encode(chatBody)
+            reasoningKey = chatBody.reasoningKey.stringValue
+        }
+        request.httpBody = try ExtraParameters.applying(extra, to: body)
 
         let (data, response) = try await transport(request)
         guard (200..<300).contains(response.statusCode) else {
             if response.statusCode == 402, baseURL.host()?.lowercased() == TakkuCredit.host { throw Failure.noCredit }
             let refused = [400, 422].contains(response.statusCode)
             // The menu's level is not named when the Extra parameters replaced it: it was not sent.
-            let sentReasoning = extra[body.reasoningKey.stringValue] == nil ? reasoning : nil
+            let sentReasoning = extra[reasoningKey] == nil ? reasoning : nil
             throw Failure.http(
                 status: response.statusCode, message: Self.errorMessage(in: data),
                 reasoning: refused ? sentReasoning : nil, hasExtraParameters: refused && !extra.isEmpty
             )
         }
-        let choice = (try? JSONDecoder().decode(ResponseBody.self, from: data))?.choices.first
-        guard choice?.finishReason != "length" else { throw Failure.truncated }
-        guard let content = choice?.message.content,
+        let content: String?
+        if api == .responses {
+            let result = try? JSONDecoder().decode(ResponsesResponse.self, from: data)
+            if result?.error != nil { throw Failure.responseFailed(message: Self.errorMessage(in: data)) }
+            if result?.status == "incomplete" {
+                let reason = result?.incompleteDetails?.reason ?? "incomplete"
+                throw reason == "max_output_tokens" ? Failure.truncated : Failure.responseFailed(message: reason)
+            }
+            guard result?.status == "completed" else { throw Failure.emptyReply }
+            content = result?.output?
+                .filter { $0.type == "message" && $0.role == "assistant" }
+                .flatMap { $0.content ?? [] }
+                .filter { $0.type == "output_text" }
+                .compactMap(\.text).joined()
+        } else {
+            let choice = (try? JSONDecoder().decode(ResponseBody.self, from: data))?.choices.first
+            guard choice?.finishReason != "length" else { throw Failure.truncated }
+            content = choice?.message.content
+        }
+        guard let content,
               case let reply = Self.removingThinking(content).trimmingCharacters(in: .whitespacesAndNewlines),
               !reply.isEmpty
         else {
@@ -173,6 +204,40 @@ public struct ChatClient: Sendable {
         let message = ((try? JSONDecoder().decode(ErrorBody.self, from: data))?.error.message ?? String(decoding: data, as: UTF8.self))
             .trimmingCharacters(in: .whitespacesAndNewlines)
         return message.count > 300 ? message.prefix(300).trimmingCharacters(in: .whitespacesAndNewlines) + "…" : message
+    }
+
+    private struct ResponsesRequest: Encodable {
+        let model: String
+        let input: [ChatMessage]
+        let reasoning: RequestBody.Reasoning?
+        let store = false
+    }
+
+    private struct ResponsesResponse: Decodable {
+        struct Output: Decodable {
+            struct Content: Decodable {
+                let type: String
+                let text: String?
+            }
+            let type: String
+            let role: String?
+            let content: [Content]?
+        }
+        struct IncompleteDetails: Decodable {
+            let reason: String?
+        }
+        struct ErrorDetail: Decodable {
+            let message: String
+        }
+        let status: String
+        let output: [Output]?
+        let incompleteDetails: IncompleteDetails?
+        let error: ErrorDetail?
+
+        enum CodingKeys: String, CodingKey {
+            case status, output, error
+            case incompleteDetails = "incomplete_details"
+        }
     }
 
     private struct RequestBody: Encodable {

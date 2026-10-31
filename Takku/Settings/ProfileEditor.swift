@@ -197,13 +197,22 @@ struct ProfileEditor: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
+        // An exception: almost every provider takes Chat Completions.
+        Toggle("Use the Responses API", isOn: Binding(
+            get: { profile.api == .responses },
+            set: { profile.api = $0 ? .responses : .chatCompletions; saveExtraParameters() }
+        ))
+        .controlSize(.small)
+        Text("Only for providers and models that need it, such as some OpenAI models.")
+            .font(.caption)
+            .foregroundStyle(.secondary)
     }
 
     /// Saved only when valid: otherwise the field shows the problem and the Profile keeps the
     /// last valid parameters.
     private func saveExtraParameters() {
         do {
-            profile.extraParameters = try ExtraParameters.parse(extraParameters).isEmpty ? nil : extraParameters
+            profile.extraParameters = try ExtraParameters.parse(extraParameters, api: profile.api).isEmpty ? nil : extraParameters
             extraParametersProblem = nil
         } catch {
             extraParametersProblem = error.localizedDescription

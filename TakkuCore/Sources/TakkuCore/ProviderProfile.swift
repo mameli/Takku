@@ -9,6 +9,7 @@ public struct ProviderProfile: Codable, Identifiable, Equatable, Hashable, Senda
     public var name: String
     public var baseURL: String
     public var model: String
+    public var api: API
     /// Tokens the model accepts in one request: beyond that the Transcript is split into blocks.
     public var maxContextTokens: Int
     /// How much the model reasons before answering; `nil` leaves it to the model.
@@ -19,15 +20,37 @@ public struct ProviderProfile: Codable, Identifiable, Equatable, Hashable, Senda
 
     public init(
         id: UUID = UUID(), name: String, baseURL: String, model: String, maxContextTokens: Int,
-        reasoning: ReasoningEffort? = nil, extraParameters: String? = nil
+        reasoning: ReasoningEffort? = nil, extraParameters: String? = nil, api: API = .chatCompletions
     ) {
         self.id = id
         self.name = name
         self.baseURL = baseURL
         self.model = model
+        self.api = api
         self.maxContextTokens = maxContextTokens
         self.reasoning = reasoning
         self.extraParameters = extraParameters
+    }
+
+    public enum API: String, Codable, CaseIterable, Hashable, Sendable {
+        case chatCompletions = "chat_completions"
+        case responses = "responses_api"
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, name, baseURL, model, api, maxContextTokens, reasoning, extraParameters
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        baseURL = try container.decode(String.self, forKey: .baseURL)
+        model = try container.decode(String.self, forKey: .model)
+        api = try container.decodeIfPresent(API.self, forKey: .api) ?? .chatCompletions
+        maxContextTokens = try container.decode(Int.self, forKey: .maxContextTokens)
+        reasoning = try container.decodeIfPresent(ReasoningEffort.self, forKey: .reasoning)
+        extraParameters = try container.decodeIfPresent(String.self, forKey: .extraParameters)
     }
 
     /// The Profiles a new user finds in Settings, ready once the API key is in (Ollama needs none):
@@ -54,7 +77,7 @@ public struct ProviderProfile: Codable, Identifiable, Equatable, Hashable, Senda
         ]
     }
 
-    /// Sent as `reasoning.effort` to OpenRouter and as `reasoning_effort` to every other provider.
+    /// Sent as `reasoning.effort` for Responses and OpenRouter, otherwise as `reasoning_effort`.
     /// Not every model accepts every level, and some cannot turn reasoning off.
     public enum ReasoningEffort: String, Codable, CaseIterable, Hashable, Sendable {
         case off = "none", low, medium, high

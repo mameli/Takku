@@ -34,7 +34,18 @@ struct ProviderProfileTests {
         let profile = try JSONDecoder().decode(ProviderProfile.self, from: Data(saved.utf8))
         #expect(profile.reasoning == nil)
         #expect(profile.extraParameters == nil)
+        #expect(profile.api == .chatCompletions)
         #expect(profile.maxContextTokens == 128_000)
+    }
+
+    @Test("the API selection survives saving and loading", arguments: ProviderProfile.API.allCases)
+    func savedAPI(api: ProviderProfile.API) throws {
+        var original = profile("https://api.openai.com/v1")
+        original.api = api
+        original.reasoning = .high
+        original.extraParameters = #"{"max_output_tokens":4000}"#
+        let saved = try JSONEncoder().encode(original)
+        #expect(try JSONDecoder().decode(ProviderProfile.self, from: saved) == original)
     }
 
     @Test("Extra parameters are a JSON object; blank means none", arguments: [
@@ -54,6 +65,13 @@ struct ProviderProfileTests {
     ])
     func invalidExtraParameters(text: String, problem: ExtraParameters.Problem) {
         #expect(throws: problem) { try ExtraParameters.parse(text) }
+    }
+
+    @Test("Responses reserves input instead of messages")
+    func responsesReservedKeys() throws {
+        #expect(throws: ExtraParameters.Problem.reserved("input")) { try ExtraParameters.parse(#"{"input": []}"#, api: .responses) }
+        #expect(try ExtraParameters.parse(#"{"messages": []}"#, api: .responses).count == 1)
+        #expect(try ExtraParameters.parse(#"{"input": []}"#).count == 1)
     }
 
     @Test("the ready-made Profiles: Takku Credit first, Ollama on this Mac, then Mistral, TensorX and OpenRouter over https")

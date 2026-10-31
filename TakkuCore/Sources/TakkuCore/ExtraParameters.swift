@@ -4,8 +4,10 @@ import Foundation
 /// as written. Each top-level key replaces what Takku would send for it, with no deep merge, so
 /// what the user writes is what goes out (ADR 0009).
 public enum ExtraParameters {
-    /// Written by Takku in every request: the user cannot replace them.
-    static let reservedKeys = ["model", "messages"]
+    /// Written by Takku in every request to `api`: the user cannot replace them.
+    static func reservedKeys(for api: ProviderProfile.API) -> [String] {
+        ["model", api == .responses ? "input" : "messages"]
+    }
 
     public enum Problem: LocalizedError, Equatable {
         case notJSON
@@ -26,14 +28,14 @@ public enum ExtraParameters {
     }
 
     /// The parameters written in `text`, checked; blank text has none.
-    public static func parse(_ text: String) throws -> [String: Any] {
+    public static func parse(_ text: String, api: ProviderProfile.API = .chatCompletions) throws -> [String: Any] {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return [:] }
         guard let value = try? JSONSerialization.jsonObject(with: Data(trimmed.utf8), options: .fragmentsAllowed) else {
             throw Problem.notJSON
         }
         guard let object = value as? [String: Any] else { throw Problem.notAnObject }
-        if let key = reservedKeys.first(where: { object[$0] != nil }) { throw Problem.reserved(key) }
+        if let key = reservedKeys(for: api).first(where: { object[$0] != nil }) { throw Problem.reserved(key) }
         return object
     }
 

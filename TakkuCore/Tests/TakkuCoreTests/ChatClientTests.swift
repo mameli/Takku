@@ -40,6 +40,64 @@ final class StubTransport: @unchecked Sendable {
 struct ChatClientTests {
     let messages = [ChatMessage(role: .system, content: "You are Takku."), ChatMessage(role: .user, content: "Summarise.")]
 
+    @Test("Responses API sends input and nested reasoning and reads only output text")
+    func responsesRequest() async throws {
+        let stub = StubTransport(body: #"""
+            {"status":"completed","output":[
+              {"type":"reasoning","summary":[]},
+              {"type":"message","role":"assistant","content":[
+                {"type":"output_text","text":"  ### Topics\n"},
+                {"type":"output_text","text":"All good.\n"}
+              ]}
+            ]}
+            """#)
+        let client = ChatClient(
+            baseURL: URL(string: "https://api.openai.com/v1/")!, apiKey: "sk-test", model: "m",
+            reasoning: .high, extraParameters: #"{"max_output_tokens":4000}"#, api: .responses, transport: stub.send
+        )
+
+        #expect(try await client.complete(messages) == "### Topics\nAll good.")
+        let request = try #require(stub.requests.first)
+        #expect(request.url?.absoluteString == "https://api.openai.com/v1/responses")
+        #expect(request.httpMethod == "POST")
+        #expect(request.value(forHTTPHeaderField: "Authorization") == "Bearer sk-test")
+        let body = try #require(JSONSerialization.jsonObject(with: request.httpBody ?? Data()) as? [String: Any])
+        #expect(body["model"] as? String == "m")
+        #expect(body["input"] as? [[String: String]] == messages.map { ["role": $0.role.rawValue, "content": $0.content] })
+        #expect(body["messages"] == nil)
+        #expect(body["store"] as? Bool == false)
+        #expect(body["reasoning"] as? [String: String] == ["effort": "high"])
+        #expect(body["reasoning_effort"] == nil)
+        #expect(body["max_output_tokens"] as? Int == 4000)
+    }
+
+    @Test("Responses API leaves the output budget to the provider")
+    func responsesNoOutputBudget() async throws {
+        let stub = StubTransport(body: #"{"status":"completed","output":[{"type":"message","role":"assistant","content":[{"type":"output_text","text":"OK"}]}]}"#)
+        let client = ChatClient(
+            baseURL: URL(string: "https://api.example/v1")!, apiKey: nil, model: "m", api: .responses, transport: stub.send
+        )
+
+        #expect(try await client.complete(messages) == "OK")
+        let body = try #require(JSONSerialization.jsonObject(with: stub.requests.first?.httpBody ?? Data()) as? [String: Any])
+        #expect(body["max_output_tokens"] == nil)
+    }
+
+    @Test("Responses API rejects incomplete, failed and empty replies", arguments: [
+        (#"{"status":"incomplete","incomplete_details":{"reason":"max_output_tokens"},"output":[]}"#, ChatClient.Failure.truncated),
+        (#"{"status":"failed","error":{"message":"Model failed"}}"#, .responseFailed(message: "Model failed")),
+        (#"{"status":"completed","output":[]}"#, .emptyReply),
+        (#"{"status":"completed","output":[{"type":"message","role":"assistant","content":[{"type":"refusal","refusal":"No"}]}]}"#, .emptyReply),
+        (#"{"status":"incomplete","incomplete_details":{"reason":"content_filter"},"output":[{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Partial"}]}]}"#, .responseFailed(message: "content_filter")),
+    ])
+    func responsesFailure(body: String, failure: ChatClient.Failure) async {
+        let stub = StubTransport(body: body)
+        let client = ChatClient(
+            baseURL: URL(string: "https://api.openai.com/v1")!, apiKey: nil, model: "m", api: .responses, transport: stub.send
+        )
+        await #expect(throws: failure) { try await client.complete(messages) }
+    }
+
     @Test("the request goes to chat/completions with model, messages and key")
     func request() async throws {
         let stub = StubTransport(body: #"{"choices":[{"message":{"role":"assistant","content":"Ok."}}]}"#)
