@@ -169,13 +169,13 @@ private struct MeetingMenu: View {
         if controller.microphoneDenied {
             Divider()
             Button("Microphone not authorized: open System Settings…") {
-                controller.openMicrophoneSettings()
+                PrivacyPane.microphone.open()
             }
         }
         if controller.screenshotNotAllowed {
             Divider()
             Button("Screenshot not taken: allow Screen Recording in System Settings…") {
-                controller.openScreenRecordingSettings()
+                PrivacyPane.screenRecording.open()
             }
         }
 
@@ -311,28 +311,18 @@ private struct RecentMeetingsMenu: View {
 
 private extension NSImage {
     /// Red dot: menu bar images are monochrome unless `isTemplate` is turned off.
-    static let recordingIndicator: NSImage = {
-        let image = NSImage(systemSymbolName: "record.circle.fill", accessibilityDescription: String(localized: "Meeting in progress"))!
-            .withSymbolConfiguration(.init(paletteColors: [.white, .systemRed]))!
-        image.isTemplate = false
-        return image
-    }()
-
+    static let recordingIndicator = indicator("record.circle.fill", String(localized: "Meeting in progress"))
     /// Shown for a second after a Mark, in the same red as the recording dot.
-    static let markIndicator: NSImage = {
-        let image = NSImage(systemSymbolName: "star.circle.fill", accessibilityDescription: String(localized: "Moment marked"))!
-            .withSymbolConfiguration(.init(paletteColors: [.white, .systemRed]))!
-        image.isTemplate = false
-        return image
-    }()
-
+    static let markIndicator = indicator("star.circle.fill", String(localized: "Moment marked"))
     /// Shown for a second after a Screenshot, like the star after a Mark.
-    static let screenshotIndicator: NSImage = {
-        let image = NSImage(systemSymbolName: "camera.circle.fill", accessibilityDescription: String(localized: "Screenshot taken"))!
+    static let screenshotIndicator = indicator("camera.circle.fill", String(localized: "Screenshot taken"))
+
+    private static func indicator(_ symbol: String, _ description: String) -> NSImage {
+        let image = NSImage(systemSymbolName: symbol, accessibilityDescription: description)!
             .withSymbolConfiguration(.init(paletteColors: [.white, .systemRed]))!
         image.isTemplate = false
         return image
-    }()
+    }
 }
 
 /// Quick switch of the Summary Profile (e.g. from a test one to an EU one).

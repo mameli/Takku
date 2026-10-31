@@ -62,7 +62,7 @@ struct ProcessingRecordTests {
         #expect(decoded.reprocessing == nil)
         #expect(!decoded.ignoresTranscriptionCache)
         #expect(decoded.importedAt == nil)
-        #expect(decoded.importWarnings.isEmpty)
+        #expect(decoded.importWarnings == nil)
         #expect(decoded.recentAt == decoded.startedAt)
     }
 

@@ -156,7 +156,10 @@ final class MeetingProcessor {
         for var record in plan.toProcess {
             if record.status == .recording {
                 do {
-                    try recoverRecording(record, in: Self.directory(for: record.takkuID))
+                    // Rebuilds recording.json without silently dropping a Track whose Segment list is damaged.
+                    try Recording.recover(
+                        fromFolder: Self.directory(for: record.takkuID), takkuID: record.takkuID, startedAt: record.startedAt
+                    )
                 } catch {
                     record.status = .failed(reason: String(localized: "Recording interrupted and not recoverable: \(error.localizedDescription)"))
                     save(record)
@@ -174,9 +177,7 @@ final class MeetingProcessor {
 
     func openNote(_ takkuID: UUID) {
         do {
-            guard let vault = Vault.configured,
-                  let note = try vault.findMeetingNote(takkuID: takkuID, expected: record(takkuID)?.noteURL)
-            else {
+            guard let note = try noteInVault(takkuID)?.note else {
                 lastError = String(localized: "Meeting note not found in the Vault.")
                 return
             }
@@ -211,8 +212,7 @@ final class MeetingProcessor {
     /// already in the Meeting note.
     func speakerNamingContext(_ takkuID: UUID) -> SpeakerNamingContext? {
         do {
-            guard let vault = Vault.configured,
-                  let noteURL = try vault.findMeetingNote(takkuID: takkuID, expected: record(takkuID)?.noteURL),
+            guard let (vault, noteURL) = try noteInVault(takkuID),
                   let transcriptURL = try vault.findTranscript(takkuID: takkuID, expectedNote: noteURL),
                   let transcriptFile = try? String(contentsOf: transcriptURL, encoding: .utf8),
                   let note = try? vault.meetingNote(at: noteURL)
@@ -246,9 +246,7 @@ final class MeetingProcessor {
         _ names: [Int: String], for takkuID: UUID, templateName: String, profile: ProviderProfile?
     ) -> Bool {
         do {
-            guard let vault = Vault.configured,
-                  let noteURL = try vault.findMeetingNote(takkuID: takkuID, expected: record(takkuID)?.noteURL)
-            else {
+            guard let (vault, noteURL) = try noteInVault(takkuID) else {
                 lastError = String(localized: "Meeting note not found in the Vault.")
                 return false
             }
@@ -427,7 +425,7 @@ final class MeetingProcessor {
         var problems: [String] = []
         // An unreadable Segment (e.g. the one open during a crash) leaves a gap in the
         // Transcript but does not prevent the Summary: it is a warning, not a failure.
-        var warnings = record.importWarnings
+        var warnings = record.importWarnings ?? []
         let finished: MeetingTranscription.Finished?
         do {
             finished = try await transcription.finish(
@@ -779,6 +777,15 @@ final class MeetingProcessor {
 
     // MARK: - State on disk
 
+    /// The Vault and the Meeting's note in it, also after the user renamed or moved it; `nil`
+    /// without a Vault or without the note.
+    private func noteInVault(_ takkuID: UUID) throws -> (vault: Vault, note: URL)? {
+        guard let vault = Vault.configured,
+              let note = try vault.findMeetingNote(takkuID: takkuID, expected: record(takkuID)?.noteURL)
+        else { return nil }
+        return (vault, note)
+    }
+
     private func record(_ takkuID: UUID) -> ProcessingRecord? {
         guard let record = try? ProcessingRecord.load(fromFolder: Self.directory(for: takkuID)),
               record.takkuID == takkuID
@@ -839,12 +846,6 @@ final class MeetingProcessor {
         }
         // Unchanged most of the time: assigning would rebuild the menu anyway.
         if meetings != recent { recent = meetings }
-    }
-
-    /// Rebuilds `recording.json` of a Recording interrupted by a crash, without silently
-    /// dropping a Track whose Segment list is damaged.
-    private func recoverRecording(_ record: ProcessingRecord, in directory: URL) throws {
-        try Recording.recover(fromFolder: directory, takkuID: record.takkuID, startedAt: record.startedAt)
     }
 
     /// Damaged Recording folders already shown in the menu by a previous cleanup.

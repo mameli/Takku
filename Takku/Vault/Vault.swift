@@ -72,37 +72,25 @@ struct Vault {
     /// same ID are an error unless the expected path identifies one; the first one is never chosen.
     func findMeetingNote(takkuID: UUID, expected: URL?) throws -> URL? {
         // Only inside this Vault: a note left in another Vault (or a test's copy of a real Meeting) is not touched.
-        if let expected, contains(expected), Self.belongs(expected, to: takkuID) { return expected }
-        let matches = files(in: meetingsFolder, excluding: transcriptsFolder).filter { Self.belongs($0, to: takkuID) }
+        if let expected, contains(expected), Self.takkuID(of: expected) == takkuID { return expected }
+        let matches = files(in: meetingsFolder, excluding: transcriptsFolder).filter { Self.takkuID(of: $0) == takkuID }
         return try uniqueMatch(matches, takkuID: takkuID)
     }
 
     /// Every Meeting note by `takku_id`, duplicates included, in one pass.
     func meetingNotesByTakkuID() -> [UUID: [URL]] {
-        var notes: [UUID: [URL]] = [:]
-        for url in files(in: meetingsFolder, excluding: transcriptsFolder) {
-            if let takkuID = (try? String(contentsOf: url, encoding: .utf8)).flatMap({ MeetingNote(content: $0).takkuID }) {
-                notes[takkuID, default: []].append(url)
-            }
-        }
-        return notes
+        Self.byTakkuID(files(in: meetingsFolder, excluding: transcriptsFolder))
     }
 
     /// Every Transcript by `takku_id`, duplicates included, in one pass.
     func transcriptsByTakkuID() -> [UUID: [URL]] {
-        var transcripts: [UUID: [URL]] = [:]
-        for url in files(in: transcriptsFolder) {
-            if let takkuID = (try? String(contentsOf: url, encoding: .utf8)).flatMap({ MeetingNote(content: $0).takkuID }) {
-                transcripts[takkuID, default: []].append(url)
-            }
-        }
-        return transcripts
+        Self.byTakkuID(files(in: transcriptsFolder))
     }
 
     /// The Transcript file of a Meeting. If Sync created several files with the same ID, the
     /// Meeting note's own Transcript link identifies the right one; otherwise this is a conflict.
     func findTranscript(takkuID: UUID, expectedNote: URL?) throws -> URL? {
-        let matches = files(in: transcriptsFolder).filter { Self.belongs($0, to: takkuID) }
+        let matches = files(in: transcriptsFolder).filter { Self.takkuID(of: $0) == takkuID }
         if matches.count > 1,
            let noteURL = try findMeetingNote(takkuID: takkuID, expected: expectedNote),
            let linkedName = try? meetingNote(at: noteURL).transcriptName {
@@ -295,8 +283,16 @@ struct Vault {
 
     // MARK: - Private
 
-    private static func belongs(_ url: URL, to takkuID: UUID) -> Bool {
-        (try? String(contentsOf: url, encoding: .utf8)).map { MeetingNote(content: $0).takkuID == takkuID } ?? false
+    private static func takkuID(of url: URL) -> UUID? {
+        (try? String(contentsOf: url, encoding: .utf8)).flatMap { MeetingNote(content: $0).takkuID }
+    }
+
+    private static func byTakkuID(_ urls: [URL]) -> [UUID: [URL]] {
+        var byID: [UUID: [URL]] = [:]
+        for url in urls {
+            if let takkuID = takkuID(of: url) { byID[takkuID, default: []].append(url) }
+        }
+        return byID
     }
 
     func uniqueMatch(_ matches: [URL], takkuID: UUID) throws -> URL? {

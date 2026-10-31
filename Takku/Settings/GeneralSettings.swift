@@ -114,9 +114,7 @@ struct CalendarToggle: View {
             HStack {
                 Text("Allow Takku in System Settings → Privacy & Security → Calendars.").foregroundStyle(.secondary)
                 Spacer()
-                Button("Open Calendars") {
-                    NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Calendars")!)
-                }
+                Button("Open Calendars") { PrivacyPane.calendars.open() }
             }
         }
     }

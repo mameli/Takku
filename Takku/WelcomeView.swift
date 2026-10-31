@@ -75,7 +75,7 @@ struct WelcomeView: View {
                     HStack {
                         Text("The microphone is not allowed.").foregroundStyle(.secondary)
                         Spacer()
-                        Button("Open System Settings") { controller.openMicrophoneSettings() }
+                        Button("Open System Settings") { PrivacyPane.microphone.open() }
                     }
                 }
                 if permissionsAsked {
@@ -84,7 +84,7 @@ struct WelcomeView: View {
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
                         Spacer()
-                        Button("Open System Settings") { AudioPermissions.openSystemAudioSettings() }
+                        Button("Open System Settings") { PrivacyPane.screenRecording.open() }
                     }
                 }
             } header: {
@@ -159,7 +159,7 @@ struct WelcomeView: View {
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
                         Spacer()
-                        Button("Open System Settings") { controller.openScreenRecordingSettings() }
+                        Button("Open System Settings") { PrivacyPane.screenRecording.open() }
                     }
                 }
             } header: {

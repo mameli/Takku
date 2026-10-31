@@ -52,7 +52,7 @@ public struct ProcessingRecord: Codable, Equatable, Sendable {
     /// When the source file was imported, not when the Meeting was originally recorded.
     public var importedAt: Date?
     /// Source audio skipped during import: persisted so Processing can report it after a restart.
-    public var importWarnings: [String]
+    public var importWarnings: [String]?
 
     /// How Reprocess Recording rebuilds the Transcript from the audio.
     public enum Reprocessing: String, Codable, Sendable {
@@ -72,7 +72,7 @@ public struct ProcessingRecord: Codable, Equatable, Sendable {
     public init(
         takkuID: UUID, startedAt: Date, status: Status,
         templateName: String, summaryProfile: ProviderProfile?, noteURL: URL?,
-        reprocessing: Reprocessing? = nil, importedAt: Date? = nil, importWarnings: [String] = []
+        reprocessing: Reprocessing? = nil, importedAt: Date? = nil, importWarnings: [String]? = nil
     ) {
         self.takkuID = takkuID
         self.startedAt = startedAt
@@ -83,24 +83,6 @@ public struct ProcessingRecord: Codable, Equatable, Sendable {
         self.reprocessing = reprocessing
         self.importedAt = importedAt
         self.importWarnings = importWarnings
-    }
-
-    private enum CodingKeys: String, CodingKey {
-        case takkuID, startedAt, status, templateName, summaryProfile, noteURL, reprocessing, importedAt, importWarnings
-    }
-
-    /// Records written before these fields existed keep the normal cached Processing behavior.
-    public init(from decoder: Decoder) throws {
-        let values = try decoder.container(keyedBy: CodingKeys.self)
-        takkuID = try values.decode(UUID.self, forKey: .takkuID)
-        startedAt = try values.decode(Date.self, forKey: .startedAt)
-        status = try values.decode(Status.self, forKey: .status)
-        templateName = try values.decode(String.self, forKey: .templateName)
-        summaryProfile = try values.decodeIfPresent(ProviderProfile.self, forKey: .summaryProfile)
-        noteURL = try values.decodeIfPresent(URL.self, forKey: .noteURL)
-        reprocessing = try values.decodeIfPresent(Reprocessing.self, forKey: .reprocessing)
-        importedAt = try values.decodeIfPresent(Date.self, forKey: .importedAt)
-        importWarnings = try values.decodeIfPresent([String].self, forKey: .importWarnings) ?? []
     }
 
     /// After a restart: Meetings queued, in progress or interrupted while recording resume.

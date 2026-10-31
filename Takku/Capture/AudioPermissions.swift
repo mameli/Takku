@@ -43,8 +43,4 @@ enum AudioPermissions {
         window?.orderFrontRegardless()
         window?.makeKey()
     }
-
-    static func openSystemAudioSettings() {
-        NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture")!)
-    }
 }
