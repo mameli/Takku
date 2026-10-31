@@ -287,7 +287,7 @@ final class MeetingController {
         guard let currentTakkuID, let vault = Vault.configured else { return }
         do {
             guard let note = try vault.findMeetingNote(takkuID: currentTakkuID, expected: currentNoteURL) else {
-                recordingError = String(localized: "Meeting note not found in the Vault.")
+                recordingError = String(localized: "Meeting note not found in the notes folder.")
                 return
             }
             Vault.openInEditor(note)

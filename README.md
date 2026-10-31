@@ -10,7 +10,7 @@
 
 <p align="center"><a href="https://takku.app">takku.app</a> · <a href="https://github.com/mameli/Takku/releases/latest"><b>Download the latest version</b></a> · macOS 15+ · Apple Silicon</p>
 
-A macOS menu bar app that records your meetings, transcribes them **on your Mac** and writes the Transcript and a Summary into your **Obsidian** vault. You choose who writes the Summary: a model running locally, or any OpenAI-compatible provider you trust (for example one hosted in the EU).
+A macOS menu bar app that records your meetings, transcribes them **on your Mac** and writes the Transcript and a Summary as **Markdown files in a folder on your Mac**: open them with any app, or keep them in your Obsidian vault. You choose who writes the Summary: a model running locally, or any OpenAI-compatible provider you trust (for example one hosted in the EU).
 
 It was built as an alternative to Granola for people whose company does not allow meeting audio and text to leave the EU.
 
@@ -21,7 +21,7 @@ It was built as an alternative to Granola for people whose company does not allo
 - **Suggests when to record** (optional): a notification when a call app takes the microphone, and another when the call seems over.
 - **Transcribes locally** with OpenAI Whisper or NVIDIA Parakeet: the audio never leaves the Mac. Choose between Parakeet Ultra (default), Parakeet v3, Whisper Large v3 Turbo, its full version and Small in *Settings → Transcription*. Parakeet is the more accurate; Whisper always writes in the meeting's language, where Parakeet can switch language on a short reply.
 - **Summarises with a provider you pick**: llama.cpp, Ollama or LM Studio on your Mac, or a remote OpenAI-compatible API. You can also skip the Summary and keep only the Transcript.
-- **Writes Markdown into Obsidian**: one note per meeting, created when the meeting starts so you can take notes, plus a separate Transcript file. Your own notes are kept and used to steer the Summary.
+- **Writes plain Markdown**: one note per meeting, created when the meeting starts so you can take notes, plus a separate Transcript file. Your own notes are kept and used to steer the Summary.
 - **Templates are Markdown files**: write the structure and instructions of the Summary in `~/.takku/templates/`, with any editor. With `full_text: true` a Template gets the whole meeting rewritten instead of summarised, for example the full text of a lecture.
 - **Screenshots in the note** (optional): one shortcut keeps what is on screen, under the point of the Summary it belongs to. The model never sees them.
 - **A Vocabulary for your jargon**: names and technical terms that recognition gets wrong are fixed in the Transcript and spelled right in the Summary.
@@ -32,7 +32,6 @@ https://github.com/user-attachments/assets/f74b6fe5-6423-46f6-9194-a4f1c48a4579
 ## Requirements
 
 - A Mac with Apple Silicon and macOS 15 or later
-- An Obsidian vault (any folder works, Obsidian is only needed to open the notes)
 - Disk space for the transcription model, downloaded on first use: about 630 MB for the default one (from 220 MB to 1.6 GB depending on the model)
 
 Meetings can be in Italian, English or 23 other European languages (*Settings → Transcription → Meeting languages*), one language per meeting; the Summary can be written in any language.
@@ -48,7 +47,7 @@ Meetings can be in Italian, English or 23 other European languages (*Settings �
 
 Takku appears in the menu bar, not in the Dock. Continue with [First setup](#first-setup).
 
-**Updating**: `brew upgrade --cask takku`, or quit Takku and replace it in Applications with the new version. Settings, Profiles, API keys, permissions and downloaded models are kept. `brew uninstall --cask --zap takku` also deletes Takku's settings, Recordings and models; your vault is not touched.
+**Updating**: `brew upgrade --cask takku`, or quit Takku and replace it in Applications with the new version. Settings, Profiles, API keys, permissions and downloaded models are kept. `brew uninstall --cask --zap takku` also deletes Takku's settings, Recordings and models; your notes folder is not touched.
 
 What changes in each version, and what may need your attention when you update: [CHANGELOG.md](CHANGELOG.md).
 
@@ -56,14 +55,14 @@ What changes in each version, and what may need your attention when you update: 
 
 ## First setup
 
-At the first launch a *Welcome to Takku* window walks you through these steps (until you choose a vault, *Set up Takku…* in the menu opens it again). Each one can also be done later:
+At the first launch a *Welcome to Takku* window walks you through these steps (until you choose a notes folder, *Set up Takku…* in the menu opens it again). Each one can also be done later:
 
 1. **Permissions.** macOS asks for the microphone and for *System Audio Recording Only*: allow both. If you skip it, macOS asks at the first meeting.
    For screenshots, the last step of the welcome window asks for *Screen Recording* too (optional; otherwise macOS asks at the first ⌃⌥⌘S). macOS applies it when Takku is reopened: if it offers *Quit & Reopen*, *Later* is fine.
    The welcome window also downloads the transcription model and prepares it, which takes a few minutes once. If you skip it, that happens during the first meeting: the menu shows the progress, and the first Summary waits for it.
-2. **Vault.** In the welcome window, or Takku menu → *Settings…* → *Notes* → *Obsidian Vault* → choose your vault folder. `Meetings/` and `Meetings/Transcripts/` fill up with the first meeting, `Meetings/Screenshots/` with the first screenshot.
+2. **Notes folder.** In the welcome window, *Use Documents/Takku*, or *Choose…* any other folder (your Obsidian vault, if you use Obsidian); later, Takku menu → *Settings…* → *Notes* → *Notes folder*. `Meetings/` and `Meetings/Transcripts/` fill up with the first meeting, `Meetings/Screenshots/` with the first screenshot.
 3. **Open at login** (optional). *Settings → General*: Takku starts with the Mac, in the menu bar. Turn it on from the copy in `/Applications`, the one you will keep using.
-4. **Summary Profile.** The simplest is *Takku Credit*: prepaid credit for Summaries, with nothing to set up but the key that arrives by email after you buy a pack at [takku.app/credit](https://takku.app/credit). It's optional: *Summary Profiles* also starts with four more ready-made ones: *Ollama* on your Mac (`ollama pull hf.co/ggml-org/gemma-4-E4B-it-GGUF:Q4_0`, and start Ollama with `OLLAMA_CONTEXT_LENGTH=32768`, or its default context cuts the Transcript), and *Mistral*, *TensorX* and *OpenRouter*, which only need your API key (stored in the macOS Keychain). Pick one, press *Test connection*, then *Use for Summaries*. Or add your own: name, base URL, model, max context and, if the provider needs one, the API key. Some examples:
+4. **Summary Profile.** The simplest is *Takku Credit*: prepaid credit for Summaries, with nothing to set up but the key that arrives by email after you buy a pack. The welcome window shows the packs and takes the key; or buy at [takku.app/credit](https://takku.app/credit) and paste the key in *Settings → Summary*. It's optional: *Summary Profiles* also starts with four more ready-made ones: *Ollama* on your Mac (`ollama pull hf.co/ggml-org/gemma-4-E4B-it-GGUF:Q4_0`, and start Ollama with `OLLAMA_CONTEXT_LENGTH=32768`, or its default context cuts the Transcript), and *Mistral*, *TensorX* and *OpenRouter*, which only need your API key (stored in the macOS Keychain). Pick one, press *Test connection*, then *Use for Summaries*. Or add your own: name, base URL, model, max context and, if the provider needs one, the API key. Some examples:
 
    | Provider | Base URL | Model | Key |
    |---|---|---|---|
@@ -88,10 +87,10 @@ At the first launch a *Welcome to Takku* window walks you through these steps (u
 - **Mark a moment** with **⌃⌥⌘M** while recording: the dot turns into a star for a second, the passage gets a ⭐ in the Transcript and the Summary gives it priority.
 - **Take a screenshot** with **⌃⌥⌘S** while recording: Takku keeps the window you are looking at (the whole screen if it is in full screen) and marks the moment, like ⌃⌥⌘M (the dot turns into a camera for a second). The picture goes under the point of the Summary that covers that moment and under its passage in the Transcript; those no point covers are listed after the Summary. The model writing the Summary never sees them: Takku places them by the Transcript times the Summary cites.
 - If Takku hears nothing from the microphone or from the call for 2 minutes, the menu says so; if it has heard nothing since the start, a notification tells you what to check.
-- **Open note** in the menu opens the meeting note in Obsidian: write your own notes under **Personal notes**. Takku never touches them. To have it open by itself when the meeting starts, turn on *Settings → Notes → Open the note when a meeting starts*.
+- **Open note** in the menu opens the meeting note in your editor (Obsidian if you have it, otherwise the Mac's app for Markdown, such as TextEdit): write your own notes under **Personal notes**. Takku never touches them. To have it open by itself when the meeting starts, turn on *Settings → Notes → Open the note when a meeting starts*.
 - After the stop Takku finishes the transcription, writes the Summary at the top of the note, links the Transcript and renames the note with a short title (unless it is named after a calendar event). While it works, the menu shows the Meeting and the current phase, including the part of a long Summary. A notification tells you when it is ready.
 - **Template** and **Summary Profile** are chosen in the menu. Choose *Transcript* as Profile to get only the Transcript, with no Summary.
-- **Recent meetings → Open Transcript** opens the Transcript directly. **Regenerate Summary** uses the current Transcript in the Vault, with the Template and Profile selected in the menu; **Reprocess Recording…** instead rebuilds the Transcript from the audio after asking for confirmation: with the current Vocabulary and Speaker names, reusing what was already transcribed when it is still valid, or from scratch if you tick *Transcribe again from scratch*. The notification says how it was rebuilt. If the new attempt fails, a previously successful Summary and Transcript stay unchanged. *Show all in Obsidian…* lists every meeting note.
+- **Recent meetings → Open Transcript** opens the Transcript directly. **Regenerate Summary** uses the current Transcript in the notes folder, with the Template and Profile selected in the menu; **Reprocess Recording…** instead rebuilds the Transcript from the audio after asking for confirmation: with the current Vocabulary and Speaker names, reusing what was already transcribed when it is still valid, or from scratch if you tick *Transcribe again from scratch*. The notification says how it was rebuilt. If the new attempt fails, a previously successful Summary and Transcript stay unchanged. *Show all in Obsidian…* lists every meeting note (without Obsidian, *Show the notes folder in Finder…*).
 - **Report a problem…** writes a report with Takku's version, your Mac, the transcription model, the Summary model and Takku's logs of the last 3 days, shows it in Finder and opens a bug report on GitHub with those fields filled in. Nothing is sent by itself: check the file, then drag it into the issue.
 
 ### Calendar
@@ -155,11 +154,11 @@ commands to run each CLI with no tools, and the rules: ask before sending meetin
 and test by hand before saying it works. Start from examples/hooks/copilot.sh.
 -->
 
-A Hook takes each meeting somewhere else once Takku is done with it: Notion, Confluence, a git commit of your vault, anything a script can do. Takku has no integrations of its own: put an executable at `~/.takku/hooks/after-processing` and, when a meeting is ready and again after every successful Retry, Takku runs it with the paths of the meeting note and of the Transcript.
+A Hook takes each meeting somewhere else once Takku is done with it: Notion, Confluence, a git commit of your notes folder, anything a script can do. Takku has no integrations of its own: put an executable at `~/.takku/hooks/after-processing` and, when a meeting is ready and again after every successful Retry, Takku runs it with the paths of the meeting note and of the Transcript.
 
 ```sh
 #!/bin/sh
-# $1: the meeting note, $2: the Transcript. The Hook runs in the vault folder.
+# $1: the meeting note, $2: the Transcript. The Hook runs in the notes folder.
 git add -A && git commit -qm "Meeting: $(basename "$1" .md)"
 ```
 
@@ -169,19 +168,19 @@ How to write one, how to run several, and a ready-made Hook that copies every me
 
 **A Summary from a subscription you already have.** If you pay for Copilot, Claude, Codex or another assistant with a command-line tool (or your company allows only that one), record with *Transcript* only and let a Hook ask that tool for the Summary. You lose what Takku does around its own Summary: the Template, the Vocabulary in the prompt, the Speaker names taken from the Summary, and the title and rename of the note. [`examples/hooks/copilot.sh`](examples/hooks/copilot.sh) does it with GitHub Copilot CLI, with every tool disabled, and writes the Summary into a file next to the note; changing the `copilot` command adapts it to another CLI. It sends only the meetings whose note has the property `copilot: true`: a meeting with a customer is the customer's data, so mark it only if the customer allowed it.
 
-### Using another editor
+### Obsidian or another editor
 
-Takku is made for Obsidian, but the notes are plain Markdown: *Settings → Notes → Editor* opens them in another app, such as Zed or VS Code. The notes stay the same, `[[links]]` included. *Recent meetings* then offers *Open Vault in Zed…* instead of *Show all in Obsidian…*.
+The notes are plain Markdown, so any app opens them. With Obsidian installed Takku opens them there, and the link from the note to its Transcript is a click away. Without it, the Mac's app for Markdown opens them (usually TextEdit, on a Mac with no other editor). *Settings → Notes → Editor* picks another app, such as Zed or VS Code: the notes stay the same, `[[links]]` included, and *Recent meetings* offers *Open the notes folder in Zed…* instead of *Show all in Obsidian…*.
 
 - **Turn on autosave** in the editor. Takku reads your Personal notes from disk when it writes the Summary: notes not yet saved are left out. In Zed, set `"autosave": "on_focus_change"`.
-- **Keep the vault open** as a project (in Zed, *Open Vault in Zed…*). Notes then open in that window, and Zed follows the note when Takku renames it at the end; other editors may show it as deleted, and the "Summary ready" notification opens it under its new name.
+- **Keep the notes folder open** as a project (in Zed, *Open the notes folder in Zed…*). Notes then open in that window, and Zed follows the note when Takku renames it at the end; other editors may show it as deleted, and the "Summary ready" notification opens it under its new name.
 
 ### Where your data is
 
-- **Notes and Transcripts**: in your vault, as plain Markdown.
-- **Screenshots**: in `Meetings/Screenshots/` in your vault, as JPEG (about 0.5–1 MB each). Takku never deletes them and never sends them anywhere.
-- **Templates and Vocabulary**: in `~/.takku/`, as plain Markdown, the same whatever the vault.
-- **Audio**: in `~/Library/Application Support/Takku/Recordings/`, about 20 MB per hour of meeting. It is deleted after 7 days, or kept longer or forever (*Settings → Recordings*); after that, Retry rebuilds the Summary from the Transcript in the vault.
+- **Notes and Transcripts**: in your notes folder, as plain Markdown.
+- **Screenshots**: in `Meetings/Screenshots/` in your notes folder, as JPEG (about 0.5–1 MB each). Takku never deletes them and never sends them anywhere.
+- **Templates and Vocabulary**: in `~/.takku/`, as plain Markdown, the same whatever the notes folder.
+- **Audio**: in `~/Library/Application Support/Takku/Recordings/`, about 20 MB per hour of meeting. It is deleted after 7 days, or kept longer or forever (*Settings → Recordings*); after that, Retry rebuilds the Summary from the Transcript in the notes folder.
 - **Summary log**: in `~/.takku/summary-log/`, one JSON file per Summary with every request sent to the model (Transcript, Template, Vocabulary, Personal notes, participants) and every reply, as they went. It is there to improve your Templates: write what was wrong in the `comment` field at the top of a file, then give a few files to a model you trust and ask what to change. Takku never reads it back. Up to 5 MB, the oldest files go first; turn it off or delete it in *Settings → Recordings*. *Report a problem…* never includes it.
 - **API keys**: in the macOS Keychain.
 - **Transcription model**: in `~/Library/Application Support/Takku/Models/`, downloaded once from Hugging Face. Only the model is downloaded; no audio or text is sent.

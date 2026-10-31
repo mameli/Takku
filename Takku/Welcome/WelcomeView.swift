@@ -436,7 +436,7 @@ private struct SetupRow<Actions: View>: View {
     }
 }
 
-/// The Vault and the permissions macOS asks for once.
+/// The notes folder and the permissions macOS asks for once.
 struct PermissionsSetup: View {
     @Binding var state: PermissionsState
     var isBusy: Bool
@@ -447,13 +447,21 @@ struct PermissionsSetup: View {
             SetupRow(
                 seed: 640,
                 isDone: vaultPath.isEmpty ? nil : true,
-                title: "Obsidian vault",
+                title: "Notes folder",
                 detail: vaultPath.isEmpty
-                    ? Text("One note per meeting goes into its Meetings folder. Any folder works.")
+                    ? Text("One Markdown note per meeting, which any app opens. Obsidian too, if you use it: choose your vault.")
                     : Text(verbatim: (vaultPath as NSString).abbreviatingWithTildeInPath)
             ) {
-                Button(vaultPath.isEmpty ? "Choose…" : "Change…") { _ = Vault.choose() }
-                    .buttonStyle(PaperButtonStyle(isPrimary: vaultPath.isEmpty))
+                // A ready folder, for those with none in mind: nothing to decide, nothing to install.
+                if vaultPath.isEmpty {
+                    Button("Use Documents/Takku") { if Vault.useSuggested() == nil { _ = Vault.choose() } }
+                        .buttonStyle(PaperButtonStyle())
+                    Button("Choose…") { _ = Vault.choose() }
+                        .buttonStyle(PaperButtonStyle(isPrimary: false))
+                } else {
+                    Button("Change…") { _ = Vault.choose() }
+                        .buttonStyle(PaperButtonStyle(isPrimary: false))
+                }
             }
 
             SetupRow(seed: 650, isDone: audioDone, title: "Microphone and system audio", detail: audioDetail) {

@@ -20,7 +20,7 @@ enum SettingsTab: Hashable {
 }
 
 /// Settings window, one tab per subject: General (start at login, calendar, call suggestions,
-/// updates, keyboard shortcuts), Notes (Vault, Templates, Vocabulary), Transcription (Meeting languages and models),
+/// updates, keyboard shortcuts), Notes (notes folder, Templates, Vocabulary), Transcription (Meeting languages and models),
 /// Summary (Provider Profiles) and Recordings (audio and Summary log kept on this Mac).
 struct SettingsView: View {
     let models: TranscriptionModels
@@ -138,14 +138,14 @@ private struct GeneralTab: View {
     }
 }
 
-/// Where the notes go and what shapes them: the Vault and its Editor, the Templates, the Vocabulary.
+/// Where the notes go and what shapes them: the notes folder and its Editor, the Templates, the Vocabulary.
 private struct NotesTab: View {
     @State private var vaultPath = AppSettings.vaultPath ?? ""
     @State private var defaultTemplate = AppSettings.defaultTemplate
 
     var body: some View {
         Form {
-            Section("Obsidian Vault") {
+            Section("Notes folder") {
                 LabeledContent("Folder") {
                     HStack {
                         Text(vaultPath.isEmpty ? String(localized: "None") : vaultPath)

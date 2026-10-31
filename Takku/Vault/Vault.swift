@@ -1,7 +1,8 @@
 import AppKit
 import TakkuCore
 
-/// The Obsidian Vault where Takku writes Meeting notes and Transcripts.
+/// The notes folder, where Takku writes Meeting notes and Transcripts: any folder, an Obsidian
+/// Vault or not. In the code it is still the Vault.
 struct Vault {
     let root: URL
 
@@ -18,15 +19,32 @@ struct Vault {
         AppSettings.vaultPath.map { Vault(root: URL(filePath: $0, directoryHint: .isDirectory)) }
     }
 
-    /// Asks for the Vault folder (Settings, welcome window) and saves it. The chosen path, or
+    /// Where the welcome window offers to put the notes, for those with no folder in mind.
+    static let suggestedRoot = URL.documentsDirectory.appending(path: "Takku", directoryHint: .isDirectory)
+
+    /// Creates the suggested folder and saves it. The path, or `nil` if it could not be created.
+    @MainActor
+    static func useSuggested() -> String? {
+        do {
+            try FileManager.default.createDirectory(at: suggestedRoot, withIntermediateDirectories: true)
+        } catch {
+            return nil
+        }
+        let path = suggestedRoot.path(percentEncoded: false)
+        AppSettings.vaultPath = path
+        return path
+    }
+
+    /// Asks for the notes folder (Settings, welcome window) and saves it. The chosen path, or
     /// `nil` if the user cancelled.
     @MainActor
     static func choose() -> String? {
         let panel = NSOpenPanel()
         panel.canChooseDirectories = true
         panel.canChooseFiles = false
+        panel.canCreateDirectories = true
         panel.allowsMultipleSelection = false
-        panel.prompt = String(localized: "Use this Vault")
+        panel.prompt = String(localized: "Use this folder")
         guard panel.runModal() == .OK, let url = panel.url else { return nil }
         let path = url.path(percentEncoded: false)
         AppSettings.vaultPath = path
@@ -221,8 +239,8 @@ struct Vault {
         var title: String {
             switch self {
             case .obsidianSearch: String(localized: "Show all in Obsidian…")
-            case .vault(let app): String(localized: "Open Vault in \(TextEditors.name(of: app))…")
-            case .finder: String(localized: "Show Vault in Finder…")
+            case .vault(let app): String(localized: "Open the notes folder in \(TextEditors.name(of: app))…")
+            case .finder: String(localized: "Show the notes folder in Finder…")
             }
         }
     }
@@ -336,11 +354,11 @@ enum VaultError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .unreachable(let path): String(localized: "Vault not reachable: \(path).")
+        case .unreachable(let path): String(localized: "Notes folder not reachable: \(path).")
         case .busy(let file): String(localized: "\(file) keeps changing while Takku tries to update it.")
         case .invalidName(let name): String(localized: "\"\(name)\" is not a valid file name.")
         case .duplicateTakkuID(let takkuID, let paths):
-            String(localized: "Duplicate takku_id \(takkuID.uuidString). Takku cannot safely choose between: \(paths.joined(separator: ", ")). Fix the duplicate notes or Transcript links in the Vault.")
+            String(localized: "Duplicate takku_id \(takkuID.uuidString). Takku cannot safely choose between: \(paths.joined(separator: ", ")). Fix the duplicate notes or Transcript links in the notes folder.")
         }
     }
 }

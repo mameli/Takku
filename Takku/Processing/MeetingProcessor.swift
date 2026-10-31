@@ -178,7 +178,7 @@ final class MeetingProcessor {
     func openNote(_ takkuID: UUID) {
         do {
             guard let note = try noteInVault(takkuID)?.note else {
-                lastError = String(localized: "Meeting note not found in the Vault.")
+                lastError = String(localized: "Meeting note not found in the notes folder.")
                 return
             }
             Vault.openInEditor(note)
@@ -217,7 +217,7 @@ final class MeetingProcessor {
                   let transcriptFile = try? String(contentsOf: transcriptURL, encoding: .utf8),
                   let note = try? vault.meetingNote(at: noteURL)
             else {
-                lastError = String(localized: "Meeting note or Transcript not found in the Vault.")
+                lastError = String(localized: "Meeting note or Transcript not found in the notes folder.")
                 return nil
             }
             let (transcript, _) = Transcript.parse(vaultFile: transcriptFile)
@@ -247,7 +247,7 @@ final class MeetingProcessor {
     ) -> Bool {
         do {
             guard let (vault, noteURL) = try noteInVault(takkuID) else {
-                lastError = String(localized: "Meeting note not found in the Vault.")
+                lastError = String(localized: "Meeting note not found in the notes folder.")
                 return false
             }
             try vault.update(noteURL) { $0.replaceSpeakerNames(with: names) }
@@ -457,11 +457,11 @@ final class MeetingProcessor {
                 lastNoteURL = noteURL
                 if let summaryProblem { problems.append(summaryProblem) }
             } catch {
-                problems.append(String(localized: "Writing to the Vault failed: \(error.localizedDescription)"))
+                problems.append(String(localized: "Writing to the notes folder failed: \(error.localizedDescription)"))
             }
         } else {
             update(.writingNote, for: record.takkuID)
-            warnings.append(String(localized: "No Vault configured: no Summary, the Transcript is only in the Recording folder."))
+            warnings.append(String(localized: "No notes folder chosen: no Summary, the Transcript is only in the Recording folder."))
         }
         finish(&record, problems: problems, warnings: warnings, started: started, rebuild: rebuildDescription(record, finished))
     }
@@ -493,7 +493,7 @@ final class MeetingProcessor {
                   let foundNote = try configured.findMeetingNote(takkuID: takkuID, expected: record.noteURL),
                   let foundTranscript = try configured.findTranscript(takkuID: takkuID, expectedNote: foundNote)
             else {
-                finish(&record, problems: [String(localized: "Retry not possible: the audio is deleted and the Meeting note or Transcript is not in the Vault.")], warnings: [], started: started)
+                finish(&record, problems: [String(localized: "Retry not possible: the audio is deleted and the Meeting note or Transcript is not in the notes folder.")], warnings: [], started: started)
                 return
             }
             vault = configured

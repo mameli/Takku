@@ -80,7 +80,7 @@ final class Notifications: NSObject, UNUserNotificationCenterDelegate {
         if !problems.isEmpty {
             notify(title: String(localized: "Processing failed"), body: "\(noteName): \(problems.joined(separator: " "))", note: note)
         } else if !hasVault {
-            let detail = warnings.isEmpty ? String(localized: "Set up the Vault to get the Summary.") : warnings.joined(separator: " ")
+            let detail = warnings.isEmpty ? String(localized: "Choose a notes folder to get the Summary.") : warnings.joined(separator: " ")
             notify(title: String(localized: "Transcript ready"), body: "\(noteName): \(detail)\(rebuildLine)", note: note)
         } else {
             let body = warnings.isEmpty ? noteName : "\(noteName) (\(warnings.joined(separator: " ")))"

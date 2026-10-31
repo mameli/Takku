@@ -54,7 +54,7 @@ struct RecordingsSection: View {
                 }
             }
         } footer: {
-            Text("About 20 MB per hour of Meeting. Notes and Transcripts stay in the Vault: without the audio, Retry makes only the Summary again. The Summary log keeps what was sent to the model and its replies, in ~/.takku/summary-log, to improve the Templates: up to 5 MB, the oldest go first.")
+            Text("About 20 MB per hour of Meeting. Notes and Transcripts stay in the notes folder: without the audio, Retry makes only the Summary again. The Summary log keeps what was sent to the model and its replies, in ~/.takku/summary-log, to improve the Templates: up to 5 MB, the oldest go first.")
                 .foregroundStyle(.secondary)
         }
         .onAppear {
@@ -81,7 +81,7 @@ struct RecordingsSection: View {
                 summaryLogSize = SummaryLogStorage.size()
             }
         } message: {
-            Text("It cannot be undone. Notes and Transcripts in the Vault are not touched.")
+            Text("It cannot be undone. Notes and Transcripts in the notes folder are not touched.")
         }
     }
 

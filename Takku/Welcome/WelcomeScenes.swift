@@ -50,7 +50,7 @@ struct HeroScene: View {
     static let beats = [
         Beat(start: 0, text: Text("Takku hears your microphone and the call, from Meet, Zoom, Teams or any other app.")),
         Beat(start: 4.5, text: Text("It transcribes them on this Mac: the audio never leaves it.")),
-        Beat(start: 9, text: Text("Then it writes the note in your Obsidian vault, with the Summary on top.")),
+        Beat(start: 9, text: Text("Then it writes the note in a folder on your Mac, with the Summary on top.")),
     ]
 
     var body: some View {

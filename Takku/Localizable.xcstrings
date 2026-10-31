@@ -281,12 +281,12 @@
         }
       }
     },
-    "About 20 MB per hour of Meeting. Notes and Transcripts stay in the Vault: without the audio, Retry makes only the Summary again. The Summary log keeps what was sent to the model and its replies, in ~/.takku/summary-log, to improve the Templates: up to 5 MB, the oldest go first.": {
+    "About 20 MB per hour of Meeting. Notes and Transcripts stay in the notes folder: without the audio, Retry makes only the Summary again. The Summary log keeps what was sent to the model and its replies, in ~/.takku/summary-log, to improve the Templates: up to 5 MB, the oldest go first.": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Circa 20 MB per ora di riunione. Note e trascrizioni restano nel Vault: senza l'audio, Riprova rifà solo il riepilogo. Il log dei Riepiloghi tiene ciò che è stato mandato al modello e le sue risposte, in ~/.takku/summary-log, per migliorare i Template: fino a 5 MB, i più vecchi se ne vanno per primi."
+            "value": "Circa 20 MB per ora di riunione. Note e trascrizioni restano nella cartella delle note: senza l'audio, Riprova rifà solo il riepilogo. Il log dei Riepiloghi tiene ciò che è stato mandato al modello e le sue risposte, in ~/.takku/summary-log, per migliorare i Template: fino a 5 MB, i più vecchi se ne vanno per primi."
           }
         }
       }
@@ -915,12 +915,12 @@
         }
       }
     },
-    "It cannot be undone. Notes and Transcripts in the Vault are not touched.": {
+    "It cannot be undone. Notes and Transcripts in the notes folder are not touched.": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Non si può annullare. Note e trascrizioni nel Vault non vengono toccate."
+            "value": "Non si può annullare. Note e trascrizioni nella cartella delle note non vengono toccate."
           }
         }
       }
@@ -1328,12 +1328,12 @@
         }
       }
     },
-    "Meeting note not found in the Vault.": {
+    "Meeting note not found in the notes folder.": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nota della Riunione non trovata nel Vault."
+            "value": "Nota della Riunione non trovata nella cartella delle note."
           }
         }
       }
@@ -1768,12 +1768,12 @@
         }
       }
     },
-    "Then it writes the note in your Obsidian vault, with the Summary on top.": {
+    "Then it writes the note in a folder on your Mac, with the Summary on top.": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Poi scrive la nota nel tuo vault Obsidian, con il Riepilogo in cima."
+            "value": "Poi scrive la nota in una cartella del tuo Mac, con il Riepilogo in cima."
           }
         }
       }
@@ -1948,12 +1948,12 @@
         }
       }
     },
-    "No Vault configured: no Summary, the Transcript is only in the Recording folder.": {
+    "No notes folder chosen: no Summary, the Transcript is only in the Recording folder.": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nessun Vault configurato: niente Riepilogo, la Trascrizione è solo nella cartella della Registrazione."
+            "value": "Nessuna cartella delle note scelta: niente Riepilogo, la Trascrizione è solo nella cartella della Registrazione."
           }
         }
       }
@@ -1988,12 +1988,12 @@
         }
       }
     },
-    "Obsidian Vault": {
+    "Notes folder": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vault Obsidian"
+            "value": "Cartella delle note"
           }
         }
       }
@@ -2069,12 +2069,12 @@
         }
       }
     },
-    "Open Vault in %@…": {
+    "Open the notes folder in %@…": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Apri il Vault in %@…"
+            "value": "Apri la cartella delle note in %@…"
           }
         }
       }
@@ -2250,12 +2250,12 @@
         }
       }
     },
-    "Duplicate takku_id %@. Takku cannot safely choose between: %@. Fix the duplicate notes or Transcript links in the Vault.": {
+    "Duplicate takku_id %@. Takku cannot safely choose between: %@. Fix the duplicate notes or Transcript links in the notes folder.": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "takku_id %@ duplicato. Takku non può scegliere in sicurezza tra: %@. Correggi le note duplicate o i link al Transcript nel Vault."
+            "value": "takku_id %@ duplicato. Takku non può scegliere in sicurezza tra: %@. Correggi le note duplicate o i link al Transcript nella cartella delle note."
           }
         }
       }
@@ -2460,12 +2460,12 @@
         }
       }
     },
-    "Retry not possible: the audio is deleted and the Meeting note or Transcript is not in the Vault.": {
+    "Retry not possible: the audio is deleted and the Meeting note or Transcript is not in the notes folder.": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Impossibile riprovare: l'audio è stato cancellato e la nota della riunione o la trascrizione non sono nel Vault."
+            "value": "Impossibile riprovare: l'audio è stato cancellato e la nota della riunione o la trascrizione non sono nella cartella delle note."
           }
         }
       }
@@ -2490,12 +2490,12 @@
         }
       }
     },
-    "Set up the Vault to get the Summary.": {
+    "Choose a notes folder to get the Summary.": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Configura il Vault per avere il Riepilogo."
+            "value": "Scegli una cartella delle note per avere il Riepilogo."
           }
         }
       }
@@ -2520,12 +2520,12 @@
         }
       }
     },
-    "Show Vault in Finder…": {
+    "Show the notes folder in Finder…": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mostra il Vault nel Finder…"
+            "value": "Mostra la cartella delle note nel Finder…"
           }
         }
       }
@@ -2897,12 +2897,12 @@
         }
       }
     },
-    "Use this Vault": {
+    "Use this folder": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Usa questo Vault"
+            "value": "Usa questa cartella"
           }
         }
       }
@@ -2937,12 +2937,12 @@
         }
       }
     },
-    "Vault not reachable: %@.": {
+    "Notes folder not reachable: %@.": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vault non raggiungibile: %@."
+            "value": "Cartella delle note non raggiungibile: %@."
           }
         }
       }
@@ -3057,12 +3057,12 @@
         }
       }
     },
-    "Writing to the Vault failed: %@": {
+    "Writing to the notes folder failed: %@": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Scrittura nel Vault non riuscita: %@"
+            "value": "Scrittura nella cartella delle note non riuscita: %@"
           }
         }
       }
@@ -3477,22 +3477,22 @@
         }
       }
     },
-    "Obsidian vault": {
+    "Use Documents/Takku": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vault Obsidian"
+            "value": "Usa Documenti/Takku"
           }
         }
       }
     },
-    "One note per meeting goes into its Meetings folder. Any folder works.": {
+    "One Markdown note per meeting, which any app opens. Obsidian too, if you use it: choose your vault.": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Una nota per riunione, nella sua cartella Meetings. Va bene qualsiasi cartella."
+            "value": "Una nota Markdown per riunione, che si apre con qualsiasi app. Anche con Obsidian, se lo usi: scegli il tuo vault."
           }
         }
       }
@@ -3777,12 +3777,12 @@
         }
       }
     },
-    "Meeting note or Transcript not found in the Vault.": {
+    "Meeting note or Transcript not found in the notes folder.": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nota della Riunione o Transcript non trovati nel Vault."
+            "value": "Nota della Riunione o Trascrizione non trovate nella cartella delle note."
           }
         }
       }
