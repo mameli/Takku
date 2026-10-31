@@ -1,3 +1,4 @@
+import AVFoundation
 import AppKit
 import KeyboardShortcuts
 import SwiftUI
@@ -8,24 +9,61 @@ import SwiftUI
 struct WelcomeView: View {
     static let windowID = "welcome"
 
-    /// While there is no Vault; afterwards from the menu. In Debug builds `-showWelcome YES` shows
-    /// it anyway, to try it with the real settings (*Choose…* saves the Vault for real).
+    /// While there is no Vault, and once more when Takku reopens for Screen Recording from here;
+    /// afterwards from the menu. In Debug builds `-showWelcome YES` shows it anyway, to try it with
+    /// the real settings (*Choose…* saves the Vault for real). Read once per launch.
     static var isNeededAtLaunch: Bool {
         #if DEBUG
         if UserDefaults.standard.bool(forKey: "showWelcome") { return true }
         #endif
-        return AppSettings.vaultPath == nil
+        return isResuming || AppSettings.vaultPath == nil
+    }
+
+    /// Takku was just reopened from here, by *Reopen Takku* or by macOS's *Quit & Reopen* after a
+    /// switch in System Settings. Read once per launch.
+    private static let isResuming: Bool = {
+        let isResuming = (UserDefaults.standard.object(forKey: resumeUntilKey) as? Date).map { $0 > Date() } ?? false
+        UserDefaults.standard.removeObject(forKey: resumeUntilKey)
+        return isResuming
+    }()
+
+    /// Until when a relaunch opens this window again.
+    private static let resumeUntilKey = "welcomeResumeUntil"
+
+    private static func resumeAfterRelaunch() {
+        UserDefaults.standard.set(Date().addingTimeInterval(10 * 60), forKey: resumeUntilKey)
+    }
+
+    /// Opens `pane` with the card to drag Takku into `list`. Any switch turned on in that pane makes
+    /// macOS offer Quit & Reopen: this window then comes back.
+    private static func showDragCard(_ pane: PrivacyPane, list: String) {
+        resumeAfterRelaunch()
+        SettingsDragCard.shared.show(for: pane, list: list)
+    }
+
+    /// Quits and opens Takku again once this process has exited: two Takku running at once would both record.
+    private static func relaunch() {
+        resumeAfterRelaunch()
+        let process = Process()
+        process.executableURL = URL(filePath: "/bin/sh")
+        process.arguments = [
+            "-c", "while kill -0 \(ProcessInfo.processInfo.processIdentifier) 2>/dev/null; do sleep 0.2; done; /usr/bin/open \"$0\"",
+            Bundle.main.bundleURL.path(percentEncoded: false),
+        ]
+        guard (try? process.run()) != nil else { return }
+        NSApplication.shared.terminate(nil)
     }
 
     let controller: MeetingController
     @Environment(\.openSettings) private var openSettings
     @Environment(\.dismissWindow) private var dismissWindow
     @AppStorage(AppSettings.vaultPathKey) private var vaultPath = ""
-    @State private var microphoneAllowed = AudioPermissions.microphoneAllowed
-    @State private var permissionsAsked = false
-    /// True only from the launch after it was allowed: macOS applies it when Takku is reopened.
-    @State private var screenRecordingAllowed = CGPreflightScreenCaptureAccess()
-    @State private var screenRecordingAsked = false
+    @State private var microphone = AVCaptureDevice.authorizationStatus(for: .audio)
+    @State private var audioAsked = false
+    /// Whether the last test heard the system audio; `nil` before one.
+    @State private var systemAudio: Bool?
+    @State private var isTestingSystemAudio = false
+    @State private var screenRecording = CGPreflightScreenCaptureAccess() ? ScreenRecording.on : .off
     @State private var isPreparingModel = false
     @State private var modelError: String?
 
@@ -63,32 +101,70 @@ struct WelcomeView: View {
                         let window = NSApplication.shared.keyWindow
                         Task {
                             await AudioPermissions.request()
-                            microphoneAllowed = AudioPermissions.microphoneAllowed
-                            permissionsAsked = true
+                            microphone = AVCaptureDevice.authorizationStatus(for: .audio)
+                            audioAsked = true
                             await AudioPermissions.bringBack(window)
+                            // Once the system audio prompt is answered, which can be after `request()`.
+                            await testSystemAudio()
                         }
                     }
-                    .disabled(permissionsAsked)
+                    .disabled(audioAsked || (microphone == .authorized && systemAudio == true))
                     Spacer()
                 }
-                if permissionsAsked && !microphoneAllowed {
-                    HStack {
-                        Text("The microphone is not allowed.").foregroundStyle(.secondary)
-                        Spacer()
+                PermissionRow("Microphone", isAllowed: microphone == .notDetermined ? nil : microphone == .authorized) {
+                    if microphone == .denied || microphone == .restricted {
                         Button("Open System Settings") { PrivacyPane.microphone.open() }
                     }
                 }
-                if permissionsAsked {
-                    HStack {
-                        Text("If you chose Don't Allow for the system audio, turn Takku on in Screen & System Audio Recording.")
-                            .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                        Spacer()
-                        Button("Open System Settings") { PrivacyPane.screenRecording.open() }
+                PermissionRow("System audio", isAllowed: systemAudio) {
+                    if isTestingSystemAudio {
+                        ProgressView().controlSize(.small)
+                    } else {
+                        if systemAudio == false {
+                            Button("Show in System Settings") {
+                                Self.showDragCard(.screenRecording, list: String(localized: "System Audio Recording Only"))
+                            }
+                        }
+                        Button("Test") { Task { await testSystemAudio() } }
+                            .help("Takku plays a short sound and checks that it hears it.")
                     }
                 }
+                if systemAudio == false {
+                    Text("Takku did not hear its test sound. If you chose Don't Allow, add Takku to System Audio Recording Only, then Test again.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                PermissionRow("Screenshots (optional)", isAllowed: screenRecording == .on) {
+                    switch screenRecording {
+                    case .off, .waiting:
+                        Button("Allow…") {
+                            screenRecording = .waiting
+                            Self.showDragCard(.screenRecording, list: String(localized: "Screen & System Audio Recording"))
+                        }
+                    case .needsReopen:
+                        Button("Reopen Takku") { Self.relaunch() }
+                            .disabled(isBusy)
+                            .help(isBusy ? String(localized: "After the meeting and its Processing.") : "")
+                    case .on:
+                        EmptyView()
+                    }
+                }
+                switch screenRecording {
+                case .waiting:
+                    Text("Turn Takku on in Screen & System Audio Recording: drag it there if it is not in the list.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                case .needsReopen:
+                    Text("Allowed: macOS applies it once Takku reopens.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                case .off, .on:
+                    EmptyView()
+                }
             } header: {
-                Step(number: 2, title: "Microphone and system audio", isDone: permissionsAsked && microphoneAllowed)
+                Step(number: 2, title: "Permissions", isDone: microphone == .authorized && systemAudio == true)
             }
 
             Section {
@@ -140,32 +216,6 @@ struct WelcomeView: View {
                 Step(number: 4, title: "Summary (optional)", isDone: AppSettings.activeProviderProfile != nil)
             }
 
-            // Last: the "Quit & Reopen" macOS offers would close this window, and with a Vault it does not come back.
-            Section {
-                Text("Only for screenshots during a meeting. If macOS offers to reopen Takku, choose Later: the permission works from the next launch.")
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                HStack {
-                    Button("Allow screen recording") {
-                        screenRecordingAllowed = ScreenshotTaker.isAllowed()
-                        screenRecordingAsked = true
-                    }
-                    .disabled(screenRecordingAsked || screenRecordingAllowed)
-                    Spacer()
-                }
-                if screenRecordingAsked && !screenRecordingAllowed {
-                    HStack {
-                        Text("Turn Takku on in Screen & System Audio Recording.")
-                            .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                        Spacer()
-                        Button("Open System Settings") { PrivacyPane.screenRecording.open() }
-                    }
-                }
-            } header: {
-                Step(number: 5, title: "Screenshots (optional)", isDone: screenRecordingAllowed)
-            }
-
             Section("Optional") {
                 LaunchAtLoginToggle()
                 CalendarToggle()
@@ -192,9 +242,75 @@ struct WelcomeView: View {
         .frame(width: 560, height: 720)
         // Takku has no Dock icon: without activating it the window would open behind the others.
         .onAppear { NSApplication.shared.activate() }
+        .task {
+            // Reopened from the background, System Settings in front: macOS may turn the activation down.
+            guard Self.isResuming else { return }
+            try? await Task.sleep(for: .milliseconds(500))
+            await AudioPermissions.bringBack(NSApp.windows.first { $0.identifier?.rawValue.hasPrefix(Self.windowID) == true })
+        }
         // Back from System Settings, where the microphone may have just been allowed.
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
-            microphoneAllowed = AudioPermissions.microphoneAllowed
+            microphone = AVCaptureDevice.authorizationStatus(for: .audio)
+        }
+        // While Takku waits in the list: this process would not see the switch turned on.
+        .task(id: screenRecording == .waiting) {
+            while screenRecording == .waiting, !Task.isCancelled {
+                if await ScreenshotTaker.isAllowedInNewProcess() {
+                    screenRecording = .needsReopen
+                    SettingsDragCard.shared.close()
+                }
+                try? await Task.sleep(for: .seconds(1))
+            }
+        }
+        .onDisappear { SettingsDragCard.shared.close() }
+    }
+
+    private func testSystemAudio() async {
+        isTestingSystemAudio = true
+        systemAudio = await AudioPermissions.hearsSystemAudio()
+        isTestingSystemAudio = false
+    }
+
+    /// A relaunch now would interrupt a Meeting or its Processing.
+    private var isBusy: Bool {
+        controller.isInProgress || controller.processor.pendingCount > 0 || controller.importingFileName != nil
+    }
+}
+
+/// Screen Recording as this window knows it: allowed only from the launch after the switch is on.
+private enum ScreenRecording {
+    case off
+    /// System Settings is open with the card to drag Takku into the list.
+    case waiting
+    case needsReopen
+    case on
+}
+
+/// A permission and its state: allowed, not allowed, or `nil` when macOS does not say.
+private struct PermissionRow<Actions: View>: View {
+    let title: LocalizedStringKey
+    let isAllowed: Bool?
+    @ViewBuilder let actions: Actions
+
+    init(_ title: LocalizedStringKey, isAllowed: Bool?, @ViewBuilder actions: () -> Actions) {
+        self.title = title
+        self.isAllowed = isAllowed
+        self.actions = actions()
+    }
+
+    var body: some View {
+        LabeledContent {
+            HStack { actions }
+        } label: {
+            Label {
+                Text(title)
+            } icon: {
+                switch isAllowed {
+                case true?: Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
+                case false?: Image(systemName: "xmark.circle.fill").foregroundStyle(.red)
+                case nil: Image(systemName: "circle.dashed").foregroundStyle(.secondary)
+                }
+            }
         }
     }
 }

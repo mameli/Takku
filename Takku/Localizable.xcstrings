@@ -131,6 +131,36 @@
         }
       }
     },
+    "After the meeting and its Processing.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dopo il meeting e la sua elaborazione."
+          }
+        }
+      }
+    },
+    "Allowed: macOS applies it once Takku reopens.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consentito: macOS lo applica quando Takku si riapre."
+          }
+        }
+      }
+    },
+    "Allow…": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consenti…"
+          }
+        }
+      }
+    },
     "API key": {
       "localizations": {
         "it": {
@@ -277,6 +307,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Scegli…"
+          }
+        }
+      }
+    },
+    "Close": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chiudi"
           }
         }
       }
@@ -487,6 +527,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "1 termine"
+          }
+        }
+      }
+    },
+    "Drag Takku to %@ above": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trascina Takku in %@ qui sopra"
           }
         }
       }
@@ -753,6 +803,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Medio"
+          }
+        }
+      }
+    },
+    "Microphone": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Microfono"
           }
         }
       }
@@ -1038,6 +1098,16 @@
         }
       }
     },
+    "Permissions": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permessi"
+          }
+        }
+      }
+    },
     "Play a few seconds of this voice. Play again for another passage.": {
       "localizations": {
         "it": {
@@ -1098,6 +1168,26 @@
         }
       }
     },
+    "Reopen Takku": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Riapri Takku"
+          }
+        }
+      }
+    },
+    "Screen & System Audio Recording": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registrazione schermo e audio di sistema"
+          }
+        }
+      }
+    },
     "Search": {
       "localizations": {
         "it": {
@@ -1108,12 +1198,62 @@
         }
       }
     },
+    "Show in System Settings": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostra in Impostazioni di Sistema"
+          }
+        }
+      }
+    },
     "Stop": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
             "value": "Interrompi"
+          }
+        }
+      }
+    },
+    "System audio": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Audio di sistema"
+          }
+        }
+      }
+    },
+    "System Audio Recording Only": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo registrazione audio di sistema"
+          }
+        }
+      }
+    },
+    "Takku did not hear its test sound. If you chose Don't Allow, add Takku to System Audio Recording Only, then Test again.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku non ha sentito il suono di prova. Se hai scelto Non consentire, aggiungi Takku a Solo registrazione audio di sistema, poi premi di nuovo Prova."
+          }
+        }
+      }
+    },
+    "Takku plays a short sound and checks that it hears it.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku riproduce un breve suono e controlla di sentirlo."
           }
         }
       }
@@ -1134,6 +1274,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Takku ricostruirà il Transcript dall'audio, con il Vocabolario e i nomi degli speaker attuali, riusando la trascrizione già salvata dove è ancora valida. Se l'elaborazione riesce, le modifiche che hai fatto al Transcript attuale saranno sostituite."
+          }
+        }
+      }
+    },
+    "Test": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prova"
           }
         }
       }
@@ -1666,6 +1816,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Transcript ricostruito dall'audio. Segmenti trascritti di nuovo: %lld; dalla trascrizione salvata: %lld."
+          }
+        }
+      }
+    },
+    "Turn Takku on in Screen & System Audio Recording: drag it there if it is not in the list.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attiva Takku in Registrazione schermo e audio di sistema: se non è nella lista, trascinalo lì."
           }
         }
       }
@@ -2777,16 +2937,6 @@
         }
       }
     },
-    "Microphone and system audio": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Microfono e audio di sistema"
-          }
-        }
-      }
-    },
     "Takku records your voice and the call. macOS asks once for each: choose Allow.": {
       "localizations": {
         "it": {
@@ -2807,32 +2957,12 @@
         }
       }
     },
-    "The microphone is not allowed.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Il microfono non è consentito."
-          }
-        }
-      }
-    },
     "Open System Settings": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
             "value": "Apri Impostazioni di Sistema"
-          }
-        }
-      }
-    },
-    "If you chose Don't Allow for the system audio, turn Takku on in Screen & System Audio Recording.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Se per l'audio di sistema hai scelto Non consentire, attiva Takku in Registrazione schermo e audio di sistema."
           }
         }
       }
@@ -3033,36 +3163,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Non è stato possibile salvare l'immagine in JPEG."
-          }
-        }
-      }
-    },
-    "Only for screenshots during a meeting. If macOS offers to reopen Takku, choose Later: the permission works from the next launch.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Serve solo per gli screenshot durante un meeting. Se macOS propone di riaprire Takku, scegli Più tardi: il permesso vale dal prossimo avvio."
-          }
-        }
-      }
-    },
-    "Allow screen recording": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Consenti registrazione schermo"
-          }
-        }
-      }
-    },
-    "Turn Takku on in Screen & System Audio Recording.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Attiva Takku in Registrazione schermo e audio di sistema."
           }
         }
       }

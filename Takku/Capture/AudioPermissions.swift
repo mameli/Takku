@@ -1,5 +1,6 @@
 import AVFoundation
 import AppKit
+import TakkuCore
 import os
 
 private let logger = Logger(subsystem: "app.takku.takku", category: "permissions")
@@ -8,12 +9,8 @@ private let logger = Logger(subsystem: "app.takku.takku", category: "permissions
 /// not interrupt the first call with its prompts.
 @MainActor
 enum AudioPermissions {
-    static var microphoneAllowed: Bool {
-        AVCaptureDevice.authorizationStatus(for: .audio) == .authorized
-    }
-
     /// The system audio has no request of its own: macOS asks when a process tap starts, so one
-    /// runs for a moment, recording nothing. Whether it was allowed cannot be read.
+    /// runs for a moment, recording nothing.
     static func request() async {
         _ = await AVCaptureDevice.requestAccess(for: .audio)
         let capture = SystemAudioCapture()
@@ -24,6 +21,32 @@ enum AudioPermissions {
         } catch {
             logger.error("System audio tap for the permission failed: \(error, privacy: .public)")
         }
+    }
+
+    /// Whether the system audio reaches Takku: a tap listens for a moment while Takku plays a short
+    /// sound, which the tap hears too. macOS does not tell apps whether this permission is given: a
+    /// tap it refuses records only silence. The first time, macOS asks while the tap starts.
+    static func hearsSystemAudio() async -> Bool {
+        let heard = OSAllocatedUnfairLock(initialState: false)
+        let capture = SystemAudioCapture()
+        do {
+            try capture.start { buffer, _ in
+                guard let samples = buffer.floatChannelData?[0] else { return }
+                let isSound = UnsafeBufferPointer(start: samples, count: Int(buffer.frameLength))
+                    .contains { abs($0) > TrackSilence.soundThreshold }
+                if isSound { heard.withLock { $0 = true } }
+            }
+        } catch {
+            logger.error("System audio tap for the test failed: \(error, privacy: .public)")
+            return false
+        }
+        try? await Task.sleep(for: .milliseconds(300))
+        NSSound(named: "Glass")?.play()
+        try? await Task.sleep(for: .seconds(1.5))
+        capture.stop()
+        let result = heard.withLock { $0 }
+        logger.notice("System audio test: \(result ? "heard" : "silence", privacy: .public)")
+        return result
     }
 
     /// The prompts belong to another app of macOS: when the last one closes, the focus goes back

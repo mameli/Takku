@@ -8,6 +8,9 @@ struct TakkuApp: App {
     @State private var controller: MeetingController
 
     init() {
+        if CommandLine.arguments.contains(ScreenshotTaker.checkArgument) {
+            exit(CGPreflightScreenCaptureAccess() ? 0 : 1)
+        }
         _controller = State(initialValue: MeetingController())
         DockPresence.start()
     }

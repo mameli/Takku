@@ -26,6 +26,27 @@ enum ScreenshotTaker {
         CGPreflightScreenCaptureAccess() || CGRequestScreenCaptureAccess()
     }
 
+    /// Takku launched with this argument only says whether Screen Recording is allowed, in its exit
+    /// status, and quits before anything else starts (see `TakkuApp.init`).
+    static let checkArgument = "-checkScreenRecording"
+
+    /// Whether Screen Recording is allowed now, read in a new Takku process:
+    /// `CGPreflightScreenCaptureAccess` keeps its first answer for the life of this one.
+    static func isAllowedInNewProcess() async -> Bool {
+        guard let executable = Bundle.main.executableURL else { return false }
+        return await withCheckedContinuation { continuation in
+            let process = Process()
+            process.executableURL = executable
+            process.arguments = [checkArgument]
+            process.terminationHandler = { continuation.resume(returning: $0.terminationStatus == 0) }
+            do {
+                try process.run()
+            } catch {
+                continuation.resume(returning: false)
+            }
+        }
+    }
+
     static func jpeg() async throws -> Data {
         let content = try await SCShareableContent.excludingDesktopWindows(true, onScreenWindowsOnly: true)
         let front = frontmostWindow()
