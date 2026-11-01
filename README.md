@@ -168,19 +168,25 @@ How to write one, how to run several, and a ready-made Hook that copies every me
 
 ### Your meetings in an AI assistant (MCP)
 
-Takku can serve your meetings to an assistant that speaks MCP, such as Claude Code or Claude Desktop: ask it *what did we decide about the release with Mario last week?* and it searches your notes and Transcripts. It reads the notes folder and never writes; Takku does not need to be open.
+Ask an AI assistant about your meetings: *what did we decide about the release with Mario last week?* It searches your notes and Transcripts and answers from them. This works with any assistant that supports MCP, the standard way assistants read from other apps: Claude Code, Claude Desktop, Cursor and others. Takku 1.14.0 or later; Takku does not need to be open.
+
+In Claude Code, once, for every project:
 
 ```sh
-claude mcp add takku -- /Applications/Takku.app/Contents/MacOS/Takku mcp
+claude mcp add --scope user takku -- /Applications/Takku.app/Contents/MacOS/Takku mcp
 ```
 
-In Claude Desktop, add it to `claude_desktop_config.json` (*Settings → Developer → Edit Config*):
+`claude mcp list` should then show `takku … ✔ Connected`. In Claude Desktop, open *Settings → Developer → Edit Config*, add `takku` to `mcpServers` (next to the servers already there, if any) and restart Claude:
 
 ```json
 { "mcpServers": { "takku": { "command": "/Applications/Takku.app/Contents/MacOS/Takku", "args": ["mcp"] } } }
 ```
 
-The assistant gets three tools: `list_meetings` (by date, title, folder or participant), `search_meetings` (every word, case and accents ignored, with the matching lines) and `get_meeting` (the note and the whole Transcript). `--notes-folder PATH` after `mcp` serves another folder than the one in Settings. What the assistant reads goes to its model, like anything else you give it: a meeting with a customer is the customer's data.
+Any other assistant takes the same command, `/Applications/Takku.app/Contents/MacOS/Takku`, with the argument `mcp`.
+
+The assistant can list your meetings (by date, title, folder or participant), search them (every word, case and accents ignored) and read one, its note and whole Transcript. It reads only the `Meetings` folder of your notes folder, never the audio, and never changes a file. `mcp --notes-folder PATH` serves another notes folder than the one in Settings.
+
+What the assistant reads goes to its model, as anything else you give it: a meeting with a customer is the customer's data.
 
 ### Obsidian or another editor
 
