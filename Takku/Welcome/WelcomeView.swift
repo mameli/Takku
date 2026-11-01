@@ -624,7 +624,8 @@ enum WelcomeRender {
         try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         for (appearance, name) in [(NSAppearance.Name.aqua, "light"), (.darkAqua, "dark")] {
             for page in WelcomePage.allCases {
-                let moments = page.isTour ? stride(from: 0.0, to: page.loop, by: page.loop / 6).map { $0 } + [page.still] : [0]
+                // The Summary page twice: Takku Credit closed (0), then open on the packs (1).
+                let moments = page.isTour ? stride(from: 0.0, to: page.loop, by: page.loop / 6).map { $0 } + [page.still] : page == .summary ? [0, 1] : [0]
                 for t in moments {
                     let view = WelcomeLayout(
                         page: page, isForward: true, shortcuts: WelcomeShortcuts(),
@@ -637,7 +638,7 @@ enum WelcomeRender {
                         } else if page == .summary {
                             SummarySetup(previewPacks: [5, 10, 20].map { price in
                                 TakkuCredit.Pack(priceEuros: Decimal(price), url: TakkuCredit.buyURL.appending(path: "\(price)"), isRecommended: price == 10)
-                            })
+                            }, previewStep: t == 0 ? .closed : .buying)
                         } else {
                             TranscriptionSetup(model: ModelState(isPreparing: true), isModelReady: false, progress: "Downloading transcription model… 34%", retry: {})
                         }

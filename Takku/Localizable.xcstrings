@@ -131,12 +131,42 @@
         }
       }
     },
-    "A model hosted in the EU, and nothing is kept. No subscription: the credit never expires.": {
+    "A model hosted in the EU, and nothing is kept. No subscription, no account, and the credit never expires.": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Un modello ospitato in UE, e niente viene conservato. Nessun abbonamento: il credito non scade."
+            "value": "Un modello ospitato in UE, e niente viene conservato. Niente abbonamento, niente account, e il credito non scade."
+          }
+        }
+      }
+    },
+    "You pay only for the Summaries Takku writes. Recording and transcription stay free, on your Mac.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paghi solo i Riepiloghi che Takku scrive. La registrazione e la trascrizione restano gratis, sul tuo Mac."
+          }
+        }
+      }
+    },
+    "Use Takku Credit…": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usa Takku Credit…"
+          }
+        }
+      }
+    },
+    "I already have a key": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ho già una chiave"
           }
         }
       }
@@ -1524,16 +1554,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Consigliato"
-          }
-        }
-      }
-    },
-    "recommended": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "consigliato"
           }
         }
       }

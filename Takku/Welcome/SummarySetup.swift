@@ -5,7 +5,18 @@ import TakkuCore
 /// Who writes the Summary: a model on this Mac, or an external one, which gets only the text.
 /// Takku Credit is done here, start to end: a pack bought from the gateway's list, the key from
 /// the email pasted, checked and made the Profile for Summaries, without going through Settings.
+/// The packs show only once asked for: a free app does not open with a price list.
 struct SummarySetup: View {
+    /// How much of Takku Credit is open.
+    enum CreditStep {
+        /// What it is and what it costs, in words.
+        case closed
+        /// The packs, then the key.
+        case buying
+        /// Only the key, for one bought on takku.app or before.
+        case pastingKey
+    }
+
     /// Shown in place of the gateway's answer by `-renderWelcome`, which runs no task.
     private let previewPacks: [TakkuCredit.Pack]?
 
@@ -18,10 +29,12 @@ struct SummarySetup: View {
     @State private var isActivating = false
     @State private var problem: String?
     @State private var balance: TakkuCredit.Balance?
+    @State private var step: CreditStep
 
-    init(previewPacks: [TakkuCredit.Pack]? = nil) {
+    init(previewPacks: [TakkuCredit.Pack]? = nil, previewStep: CreditStep = .closed) {
         self.previewPacks = previewPacks
         _packs = State(initialValue: previewPacks)
+        _step = State(initialValue: previewStep)
     }
 
     /// What the gateway says a Summary costs, about: as on takku.app/credit (5 € ≈ 400 meetings).
@@ -92,22 +105,34 @@ struct SummarySetup: View {
             HStack(spacing: 8) {
                 if active?.isTakkuCredit == true { HandStatus(isDone: true) }
                 Text(verbatim: "Takku Credit").font(Paper.hand(17, bold: true)).foregroundStyle(Paper.ink)
-                Text("recommended")
-                    .font(Paper.hand(12, bold: true))
-                    .foregroundStyle(Color(red: 0.11, green: 0.13, blue: 0.19))
-                    .padding(.horizontal, 7)
-                    .background(Sketch(Capsule(), seed: 820).fill(Color(red: 0.94, green: 0.71, blue: 0.24)))
             }
-            Text("A model hosted in the EU, and nothing is kept. No subscription: the credit never expires.")
+            Text("A model hosted in the EU, and nothing is kept. No subscription, no account, and the credit never expires.")
                 .font(Paper.serif(12)).foregroundStyle(Paper.text)
                 .fixedSize(horizontal: false, vertical: true)
             if active?.isTakkuCredit == true {
                 activeCredit
             } else {
-                step(1, "Buy a pack: the key arrives by email.")
-                packButtons
-                step(2, "Paste the key from the email.")
-                keyField
+                switch step {
+                case .closed:
+                    Text("You pay only for the Summaries Takku writes. Recording and transcription stay free, on your Mac.")
+                        .font(Paper.serif(12)).foregroundStyle(Paper.graphite)
+                        .fixedSize(horizontal: false, vertical: true)
+                    HStack(spacing: 14) {
+                        Button("Use Takku Credit…") { step = .buying }
+                            .buttonStyle(PaperButtonStyle())
+                        Button("I already have a key") { step = .pastingKey }
+                            .buttonStyle(PaperButtonStyle(isPrimary: false))
+                    }
+                    .padding(.top, 2)
+                case .buying:
+                    stepLabel(1, "Buy a pack: the key arrives by email.")
+                    packButtons
+                    stepLabel(2, "Paste the key from the email.")
+                    keyField
+                case .pastingKey:
+                    stepLabel(1, "Paste the key from the email.")
+                    keyField
+                }
             }
             if let problem {
                 Text(problem).font(Paper.serif(12)).foregroundStyle(Paper.red)
@@ -124,7 +149,7 @@ struct SummarySetup: View {
         }
     }
 
-    private func step(_ number: Int, _ text: LocalizedStringKey) -> some View {
+    private func stepLabel(_ number: Int, _ text: LocalizedStringKey) -> some View {
         HStack(spacing: 6) {
             Text(verbatim: "\(number)")
                 .font(Paper.hand(13, bold: true)).foregroundStyle(Paper.ink)
