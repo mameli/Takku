@@ -4,7 +4,7 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
-## 1.13.0
+## 1.13.0 (2026-11-01)
 
 - **A new welcome window**: a short tour, drawn on squared paper, shows what Takku does before asking for anything: it records the call, marks a moment and keeps a slide with a shortcut (try them while the tour plays), names the speakers and works beyond calls, for a lecture or an imported memo. Then the setup, one page at a time: where the notes go, the permissions, the transcription model (already downloading during the tour) and who writes the Summary.
 - **Permissions as they really are**: one button for the microphone and the system audio, which Takku checks with a short test sound, since macOS does not say whether the system audio is allowed. For screenshots, *Allow…* opens System Settings with Takku ready to drag into the list; after the reopen macOS asks for, the welcome window comes back where you left it.
