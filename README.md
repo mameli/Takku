@@ -27,8 +27,6 @@ It was built as an alternative to Granola for people whose company does not allo
 - **A Vocabulary for your jargon**: names and technical terms that recognition gets wrong are fixed in the Transcript and spelled right in the Summary.
 - **Hands each meeting to your own script** (optional): a Hook sends it to Notion, Confluence, git or anywhere else when it is ready.
 
-https://github.com/user-attachments/assets/f74b6fe5-6423-46f6-9194-a4f1c48a4579
-
 ## Requirements
 
 - A Mac with Apple Silicon and macOS 15 or later
