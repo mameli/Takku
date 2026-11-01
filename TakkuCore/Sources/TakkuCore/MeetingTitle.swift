@@ -17,6 +17,24 @@ public enum MeetingTitle {
         ]
     }
 
+    /// How much of the Transcript a title without a Summary is written from: its start, where a
+    /// meeting usually says what it is about, small enough for Apple Intelligence's context.
+    public static let transcriptExcerptCharacters = 6_000
+
+    /// For a Meeting without a Summary (only the Transcript): the title from the start of the Transcript.
+    public static func request(transcript: Transcript, language: String, vocabulary: Vocabulary = .empty) -> [ChatMessage] {
+        let terms = vocabulary.entries.isEmpty
+            ? "" : "\nSpell these names and terms exactly like this: \(vocabulary.entries.map(\.term).joined(separator: ", "))."
+        return [
+            ChatMessage(role: .system, content: """
+                Write the title of a meeting from the start of its transcript: what it is about, at most \(maxWords) \
+                words, in \(Language.name(language)), no date, no names of people, no quotes and no final \
+                period. Reply with the title only.
+                """ + terms),
+            ChatMessage(role: .user, content: String(transcript.markdown.prefix(transcriptExcerptCharacters))),
+        ]
+    }
+
     /// First line with words, without Markdown headings, "Title:" prefixes, quotes, bold
     /// and final punctuation, at most `maxWords` words. `nil` if nothing is left.
     public static func clean(_ reply: String) -> String? {

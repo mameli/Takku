@@ -126,6 +126,7 @@ public struct ProviderProfile: Codable, Identifiable, Equatable, Hashable, Senda
 
     /// Whether the provider is a server on this Mac (llama.cpp, Ollama, LM Studio).
     public var runsOnThisMac: Bool {
+        if isAppleIntelligence { return true }
         guard let host = URL(string: baseURL.trimmingCharacters(in: .whitespaces))?.host() else { return false }
         return Self.loopbackHosts.contains(host.lowercased())
     }

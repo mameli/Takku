@@ -4,6 +4,11 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
+## Unreleased
+
+- **Summaries with Apple Intelligence**: on a Mac with Apple Intelligence (macOS 26 or later), *Use Apple Intelligence* in the welcome window, or + → *Apple Intelligence* in *Settings → Summary*, writes the Summaries on the Mac: free, nothing to set up, and nothing leaves the Mac. Its model is small, so an hour-long meeting takes a few minutes and the Summary is shorter and less precise than with a large model.
+- **A title even without a Summary**: with *Transcript* as Profile, on a Mac with Apple Intelligence, the note is renamed with a short title written on the Mac from the start of the Transcript, instead of staying *Meeting*.
+
 ## 1.14.0 (2026-11-01)
 
 - **Your meetings in Claude and other assistants**: `Takku mcp` serves the notes folder over MCP, read only, so Claude Code, Claude Desktop or another assistant can list your meetings, search what was said and read a note with its Transcript. One line sets it up: [README → Your meetings in an AI assistant](README.md#your-meetings-in-an-ai-assistant-mcp).

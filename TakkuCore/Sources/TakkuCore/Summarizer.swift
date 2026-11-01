@@ -18,13 +18,15 @@ public struct Summarizer: Sendable {
     /// Below this context there is no useful room left for the Transcript after rules and reply.
     public static let minimumContextTokens = 8_192
 
-    /// With `log`, every request and reply is also copied there.
+    /// With `log`, every request and reply is also copied there. A context below the minimum is
+    /// raised to it, as a mistake in the Profile, unless `isReportedContext`: then it is what the
+    /// model really has (Apple Intelligence says so itself), and going past it would fail.
     public init(
-        client: ChatClient, maxContextTokens: Int, log: SummaryLog.Recorder? = nil,
+        client: ChatClient, maxContextTokens: Int, isReportedContext: Bool = false, log: SummaryLog.Recorder? = nil,
         onProgress: (@Sendable (Progress) -> Void)? = nil
     ) {
         self.client = client
-        self.maxContextTokens = max(maxContextTokens, Self.minimumContextTokens)
+        self.maxContextTokens = isReportedContext ? maxContextTokens : max(maxContextTokens, Self.minimumContextTokens)
         self.log = log
         self.onProgress = onProgress ?? { _ in }
     }

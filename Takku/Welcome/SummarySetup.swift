@@ -66,14 +66,30 @@ struct SummarySetup: View {
                 HandStatus(isDone: active?.runsOnThisMac == true ? true : nil)
                 Text("On this Mac").font(Paper.hand(18, bold: true)).foregroundStyle(Paper.ink)
             }
-            Text("Ollama or LM Studio, with a model on your Mac. Nothing leaves the Mac, but it takes a powerful Mac, and the Summaries are less precise.")
-                .font(Paper.serif(12.5)).foregroundStyle(Paper.text)
-                .fixedSize(horizontal: false, vertical: true)
-            Spacer(minLength: 4)
-            Button("Set up in Settings…") {
-                openProfiles(AppSettings.summaryProfiles.first { $0.runsOnThisMac }?.id)
+            // Takku Credit stays the card that stands out: these are plain links.
+            if AppleIntelligenceModel.isAvailable {
+                Text("Apple Intelligence, or Ollama and LM Studio. Nothing leaves the Mac, but the Summaries are less precise.")
+                    .font(Paper.serif(12.5)).foregroundStyle(Paper.text)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 4)
+                if active?.isAppleIntelligence != true {
+                    Button("Use Apple Intelligence", action: useAppleIntelligence)
+                        .buttonStyle(PaperButtonStyle(isPrimary: false))
+                }
+                Button("Ollama or LM Studio…") {
+                    openProfiles(AppSettings.summaryProfiles.first { $0.runsOnThisMac && !$0.isAppleIntelligence }?.id)
+                }
+                .buttonStyle(PaperButtonStyle(isPrimary: false))
+            } else {
+                Text("Ollama or LM Studio, with a model on your Mac. Nothing leaves the Mac, but it takes a powerful Mac, and the Summaries are less precise.")
+                    .font(Paper.serif(12.5)).foregroundStyle(Paper.text)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 4)
+                Button("Set up in Settings…") {
+                    openProfiles(AppSettings.summaryProfiles.first { $0.runsOnThisMac }?.id)
+                }
+                .buttonStyle(PaperButtonStyle(isPrimary: false))
             }
-            .buttonStyle(PaperButtonStyle(isPrimary: false))
         }
         .padding(14)
         .frame(maxHeight: .infinity, alignment: .topLeading)
@@ -281,6 +297,18 @@ struct SummarySetup: View {
         } catch {
             problem = String(localized: "The key was not accepted: \(error.localizedDescription)")
         }
+    }
+
+    /// Makes Apple Intelligence the Profile for Summaries, adding it if there is none yet.
+    private func useAppleIntelligence() {
+        var profiles = AppSettings.summaryProfiles
+        let profile = profiles.first(where: \.isAppleIntelligence) ?? {
+            let model = AppleIntelligence.profile(contextTokens: AppleIntelligenceModel.contextTokens)
+            profiles.append(model)
+            return model
+        }()
+        AppSettings.summaryProfiles = profiles
+        activeProfileID = profile.id.uuidString
     }
 
     private func openProfiles(_ profile: UUID?) {

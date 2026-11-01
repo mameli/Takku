@@ -26,6 +26,7 @@ struct ProfileRow: View {
 
     private var caption: String {
         if profile.isTakkuCredit { return String(localized: "Prepaid credit") }
+        if profile.isAppleIntelligence { return String(localized: "On this Mac") }
         return profile.model.isEmpty ? String(localized: "To be configured") : profile.model
     }
 }
@@ -51,13 +52,15 @@ struct ProfileEditor: View {
         Section {
             if profile.isTakkuCredit {
                 creditRows
+            } else if profile.isAppleIntelligence {
+                appleIntelligenceRows
             } else {
                 providerRows
             }
 
             // The only place where the key is entered. It is saved only on Return or with the
             // button, never while typing: a stray keystroke must not replace a working key.
-            LabeledContent("API key") {
+            if !profile.isAppleIntelligence { LabeledContent("API key") {
                 HStack {
                     PasteableTextField(
                         placeholder: storedKeySuffix.map { String(localized: "Saved in the Keychain (…\($0)) · paste here to replace it") }
@@ -77,7 +80,7 @@ struct ProfileEditor: View {
                         }
                     }
                 }
-            }
+            } }
 
             HStack {
                 Button("Test connection") { Task { await test() } }
@@ -107,6 +110,17 @@ struct ProfileEditor: View {
         // Back from the browser after paying: the new balance without pressing anything.
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             Task { await readCredit() }
+        }
+    }
+
+    /// Apple Intelligence has nothing to configure: the model and its context are the system's.
+    @ViewBuilder private var appleIntelligenceRows: some View {
+        Text("Apple Intelligence's model, on this Mac: free, and nothing leaves the Mac. It is a small model, so long meetings are summarised in more parts and the Summaries are shorter and less precise than with a large model.")
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
+        if let unavailability = AppleIntelligenceModel.unavailability {
+            Text(unavailability.localizedDescription).foregroundStyle(.orange)
         }
     }
 

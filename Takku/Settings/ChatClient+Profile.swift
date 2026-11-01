@@ -15,6 +15,11 @@ extension ChatClient {
     }()
 
     init(profile: ProviderProfile) throws {
+        if profile.isAppleIntelligence {
+            if let unavailability = AppleIntelligenceModel.unavailability { throw unavailability }
+            self = AppleIntelligenceModel.client()!
+            return
+        }
         let url = try profile.validatedBaseURL()
         let model = profile.model
         // Never the address: the log goes in *Report a problem…*, and a Profile's address can name a company.

@@ -3966,6 +3966,116 @@
           }
         }
       }
+    },
+    "Apple Intelligence needs macOS 26 or later.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Intelligence richiede macOS 26 o successivo."
+          }
+        }
+      }
+    },
+    "This Mac does not support Apple Intelligence.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Questo Mac non supporta Apple Intelligence."
+          }
+        }
+      }
+    },
+    "Apple Intelligence is turned off: turn it on in System Settings → Apple Intelligence & Siri.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Intelligence è disattivato: attivalo in Impostazioni di Sistema → Apple Intelligence e Siri."
+          }
+        }
+      }
+    },
+    "Apple Intelligence is still getting its model ready: try again in a few minutes.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Intelligence sta ancora preparando il suo modello: riprova tra qualche minuto."
+          }
+        }
+      }
+    },
+    "Apple Intelligence is not available on this Mac right now.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Intelligence non è disponibile su questo Mac in questo momento."
+          }
+        }
+      }
+    },
+    "The request was too long for Apple Intelligence.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La richiesta era troppo lunga per Apple Intelligence."
+          }
+        }
+      }
+    },
+    "Apple Intelligence refused to answer about this text.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Intelligence si è rifiutato di rispondere su questo testo."
+          }
+        }
+      }
+    },
+    "Apple Intelligence's model, on this Mac: free, and nothing leaves the Mac. It is a small model, so long meetings are summarised in more parts and the Summaries are shorter and less precise than with a large model.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il modello di Apple Intelligence, su questo Mac: gratis, e niente esce dal Mac. È un modello piccolo: le riunioni lunghe vengono riassunte in più parti e i Summary sono più brevi e meno precisi che con un modello grande."
+          }
+        }
+      }
+    },
+    "Apple Intelligence, or Ollama and LM Studio. Nothing leaves the Mac, but the Summaries are less precise.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Intelligence, oppure Ollama e LM Studio. Niente esce dal Mac, ma i Summary sono meno precisi."
+          }
+        }
+      }
+    },
+    "Use Apple Intelligence": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usa Apple Intelligence"
+          }
+        }
+      }
+    },
+    "Ollama or LM Studio…": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ollama o LM Studio…"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

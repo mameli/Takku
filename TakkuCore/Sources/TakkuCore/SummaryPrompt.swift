@@ -12,6 +12,9 @@ public struct SummaryPrompt: Sendable {
     private let vocabulary: Vocabulary
     private let userName: String?
     private let participants: [String]
+    /// Room left for the model's reply in every request: `replyReserveTokens` unless the Profile
+    /// says otherwise (`ProviderProfile.replyReserveTokens`).
+    public var replyRoom = Self.replyReserveTokens
 
     /// `userName` is who "Me" is in the Transcript, so the Summary names them as the others call them.
     /// `participants`: who the calendar event invited, as the Meeting note lists them now.
@@ -46,7 +49,7 @@ public struct SummaryPrompt: Sendable {
         ]
     }
 
-    /// Room left for the model's reply in every request.
+    /// Room left for the model's reply in every request, by default.
     public static let replyReserveTokens = 4_096
 
     /// Conservative estimate: about 3 characters per token (Italian uses more tokens than English).
@@ -55,14 +58,14 @@ public struct SummaryPrompt: Sendable {
     }
 
     func fits(maxContextTokens: Int) -> Bool {
-        Self.estimatedTokens(singleRequest()) + Self.replyReserveTokens <= maxContextTokens
+        Self.estimatedTokens(singleRequest()) + replyRoom <= maxContextTokens
     }
 
     /// The Transcript split into blocks of consecutive paragraphs, one request per block.
     /// A paragraph is never split: if it alone exceeds the room, it forms its own block.
     func partialRequests(maxContextTokens: Int) -> [[ChatMessage]] {
         let overhead = Self.estimatedTokens(partialRequest(part: 1, of: 1, transcript: ""))
-        let budget = max(1, (maxContextTokens - Self.replyReserveTokens - overhead) * 3)
+        let budget = max(1, (maxContextTokens - replyRoom - overhead) * 3)
 
         var blocks: [[Paragraph]] = []
         var size = 0
@@ -84,14 +87,14 @@ public struct SummaryPrompt: Sendable {
     }
 
     func mergeFits(partials: [String], maxContextTokens: Int) -> Bool {
-        Self.estimatedTokens(mergeRequest(partials: partials)) + Self.replyReserveTokens <= maxContextTokens
+        Self.estimatedTokens(mergeRequest(partials: partials)) + replyRoom <= maxContextTokens
     }
 
     /// When the merge does not fit in the context: consecutive partial summaries are grouped
     /// and every group becomes a single summary, one request per group.
     func groupRequests(partials: [String], maxContextTokens: Int) -> [[ChatMessage]] {
         let overhead = Self.estimatedTokens(groupRequest(""))
-        let budget = max(1, (maxContextTokens - Self.replyReserveTokens - overhead) * 3)
+        let budget = max(1, (maxContextTokens - replyRoom - overhead) * 3)
         var groups: [[String]] = []
         var size = 0
         for partial in partials {

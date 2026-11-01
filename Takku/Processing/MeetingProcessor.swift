@@ -719,8 +719,12 @@ final class MeetingProcessor {
             isTestProfile = true
         }
         #endif
-        // No Profile chosen ("Transcript" in the menu): no Summary and no Template, only the Transcript.
-        guard let profile else { return (.transcriptOnly, nil, nil) }
+        // No Profile chosen ("Transcript" in the menu): no Summary and no Template, only the Transcript,
+        // with a title from Apple Intelligence when the Mac has it, so the note is not just "Meeting".
+        guard let profile else {
+            let title = wantsTitle ? await appleIntelligenceTitle(transcript, language: language, vocabulary: vocabulary) : nil
+            return (.transcriptOnly, title, nil)
+        }
         // A Profile deleted after the Meeting started has lost its key in the Keychain too.
         guard isTestProfile || AppSettings.summaryProfiles.contains(where: { $0.id == profile.id }) else {
             return (.failed(reason: String(localized: "the Profile \"\(profile.displayName)\" was deleted: choose another one in the menu and Retry.")), nil, nil)
@@ -733,12 +737,16 @@ final class MeetingProcessor {
         logger.notice("Summary started: \(transcript.paragraphs.count) paragraphs, model \(profile.model, privacy: .public)")
         do {
             let client = try ChatClient(profile: profile)
-            let prompt = SummaryPrompt(
+            var prompt = SummaryPrompt(
                 template: template, personalNotes: personalNotes, transcript: transcript, meetingLanguage: language,
                 vocabulary: vocabulary, userName: NSFullUserName(), participants: participants
             )
+            prompt.replyRoom = profile.replyReserveTokens
+            // Apple Intelligence's context is the system's, which grows with macOS: read now, not stored.
+            let context = profile.isAppleIntelligence ? AppleIntelligenceModel.contextTokens : profile.maxContextTokens
             let summary = try await Summarizer(
-                client: client, maxContextTokens: profile.maxContextTokens, log: log?.recorder, onProgress: onProgress
+                client: client, maxContextTokens: context, isReportedContext: profile.isAppleIntelligence,
+                log: log?.recorder, onProgress: onProgress
             )
                 .summarize(prompt)
             logger.notice("Summary written in \(secondsSince(started), privacy: .public)")
@@ -754,6 +762,21 @@ final class MeetingProcessor {
         } catch {
             logger.error("Summary not generated after \(secondsSince(started), privacy: .public): \(error.localizedDescription, privacy: .public)")
             return (.failed(reason: error.localizedDescription), nil, log)
+        }
+    }
+
+    /// The title of a Meeting without a Summary, from the start of its Transcript, by Apple
+    /// Intelligence on this Mac; `nil` without it, without speech, or if it fails.
+    private func appleIntelligenceTitle(_ transcript: Transcript, language: String?, vocabulary: Vocabulary) async -> String? {
+        guard !transcript.paragraphs.isEmpty, let client = AppleIntelligenceModel.client() else { return nil }
+        let request = MeetingTitle.request(transcript: transcript, language: language ?? "it", vocabulary: vocabulary)
+        do {
+            let title = MeetingTitle.clean(try await client.complete(request))
+            logger.notice("Title without a Summary from Apple Intelligence: \(title == nil ? "empty" : "written", privacy: .public)")
+            return title
+        } catch {
+            logger.error("Title without a Summary not written: \(error.localizedDescription, privacy: .public)")
+            return nil
         }
     }
 
