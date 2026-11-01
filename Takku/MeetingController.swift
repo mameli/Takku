@@ -719,6 +719,7 @@ final class MeetingController {
                     self.openMenu = menu
                     // Notes deleted or renamed in the Vault since the last time.
                     self.processor.refreshRecent()
+                    self.processor.refreshPhaseMinutes()
                 }
                 self.openMenus += 1
             }

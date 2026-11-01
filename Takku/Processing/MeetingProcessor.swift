@@ -28,6 +28,8 @@ final class MeetingProcessor {
         case writingSummary(part: Int, total: Int)
         case mergingSummary
         case writingNote
+        /// *Stop processing* was chosen: the current step is ending.
+        case stopping
 
         var label: String {
             switch self {
@@ -47,7 +49,15 @@ final class MeetingProcessor {
                 String(localized: "Merging Summary…")
             case .writingNote:
                 String(localized: "Writing note…")
+            case .stopping:
+                String(localized: "Stopping…")
             }
+        }
+
+        /// The label with how long the phase has lasted, from the first whole minute: a model that
+        /// does not answer shows up before its timeout.
+        func label(minutes: Int) -> String {
+            minutes > 0 ? String(localized: "\(label) · \(minutes) min") : label
         }
     }
 
@@ -79,10 +89,16 @@ final class MeetingProcessor {
     private var recordingRecords: [UUID: ProcessingRecord] = [:]
     /// The last Processing in the queue: the next one starts when this one ends.
     private var queueTail: Task<Void, Never>?
+    /// The queued and running Processing of each Meeting, so *Stop processing* can cancel it. The
+    /// token tells a stopped entry from the Retry of the same Meeting that may follow it.
+    private var tasks: [UUID: (token: UUID, task: Task<Void, Never>)] = [:]
     private(set) var pendingCount = 0
     private(set) var currentTitle: String?
     private(set) var currentPhase: Phase?
     private var currentID: UUID?
+    /// When the current phase began, and its whole minutes as of the last time the menu opened.
+    private var phaseStartedAt: Date?
+    private(set) var phaseMinutes = 0
     private(set) var lastError: String?
     private(set) var recent: [RecentMeeting] = []
     private(set) var lastNoteURL: URL?
@@ -313,10 +329,46 @@ final class MeetingProcessor {
             """)
         save(record)
         if regenerating {
-            enqueue { await self.runRegeneration(record) }
+            enqueue(takkuID) { await self.runRegeneration(record) }
         } else {
             enqueueProcessing(record)
         }
+    }
+
+    /// *Stop processing*: a queued Meeting leaves the queue at once; the running one stops at the
+    /// end of its current step (a request to the model is cancelled, a transcription in progress
+    /// finishes first) and writes nothing more. A Retry gives the Meeting back as it was; a
+    /// Meeting never processed fails, with its audio kept for *Reprocess Recording…*.
+    func stop(_ takkuID: UUID) {
+        guard let entry = tasks[takkuID] else { return }
+        entry.task.cancel()
+        let isRunning = currentID == takkuID
+        logger.notice("Stop \(takkuID, privacy: .public) \(isRunning ? "while running" : "while queued", privacy: .public)")
+        if isRunning {
+            update(.stopping, for: takkuID)
+            return
+        }
+        // Its task only waits for the one before it to end, then returns without working.
+        tasks[takkuID] = nil
+        pendingCount -= 1
+        guard var record = record(takkuID) else { return }
+        try? record.stop(reason: Self.stoppedReason)
+        save(record)
+    }
+
+    /// The Processing shown in the menu, the one running.
+    func stopCurrent() {
+        if let currentID { stop(currentID) }
+    }
+
+    private static var stoppedReason: String {
+        String(localized: "Processing stopped: Reprocess Recording to try again.")
+    }
+
+    /// Called when the menu opens: it shows how long the current phase has lasted.
+    func refreshPhaseMinutes() {
+        let minutes = phaseStartedAt.map { Int(Date().timeIntervalSince($0) / 60) } ?? 0
+        if minutes != phaseMinutes { phaseMinutes = minutes }
     }
 
     #if DEBUG
@@ -354,12 +406,27 @@ final class MeetingProcessor {
         currentID = record.takkuID
         currentTitle = record.noteURL?.deletingPathExtension().lastPathComponent
             ?? record.startedAt.formatted(date: .abbreviated, time: .shortened)
-        currentPhase = phase
+        setPhase(phase)
     }
 
     private func update(_ phase: Phase, for takkuID: UUID) {
-        guard currentID == takkuID else { return }
+        // A step reporting its progress does not hide that a Stop is on its way.
+        guard currentID == takkuID, currentPhase != .stopping else { return }
+        setPhase(phase)
+    }
+
+    private func setPhase(_ phase: Phase?) {
+        guard phase != currentPhase else { return }
         currentPhase = phase
+        phaseStartedAt = phase == nil ? nil : Date()
+        if phaseMinutes != 0 { phaseMinutes = 0 }
+    }
+
+    /// The Processing shown in the menu is over, finished or stopped.
+    private func clearCurrent() {
+        currentID = nil
+        currentTitle = nil
+        setPhase(nil)
     }
 
     private func update(_ progress: Summarizer.Progress, for takkuID: UUID) {
@@ -372,17 +439,23 @@ final class MeetingProcessor {
     }
 
     private func enqueueProcessing(_ record: ProcessingRecord) {
-        enqueue { await self.process(record) }
+        enqueue(record.takkuID) { await self.process(record) }
     }
 
-    private func enqueue(_ work: @escaping @MainActor () async -> Void) {
+    private func enqueue(_ takkuID: UUID, _ work: @escaping @MainActor () async -> Void) {
         pendingCount += 1
         let previous = queueTail
-        queueTail = Task {
+        let token = UUID()
+        let task = Task {
             await previous?.value
+            // Stopped while queued: `stop` has already given the Meeting back and counted it out.
+            guard !Task.isCancelled else { return }
             await work()
             pendingCount -= 1
+            if tasks[takkuID]?.token == token { tasks[takkuID] = nil }
         }
+        tasks[takkuID] = (token, task)
+        queueTail = task
     }
 
     private func process(_ queued: ProcessingRecord) async {
@@ -449,6 +522,10 @@ final class MeetingProcessor {
             finished = nil
             problems.append(String(localized: "Transcription failed: \(error.localizedDescription)"))
         }
+        if Task.isCancelled {
+            stopped(&record, started: started)
+            return
+        }
 
         if let vault = Vault.configured {
             update(finished == nil ? .writingNote : .writingSummary(part: 0, total: 0), for: record.takkuID)
@@ -459,6 +536,9 @@ final class MeetingProcessor {
                 record.noteURL = noteURL
                 lastNoteURL = noteURL
                 if let summaryProblem { problems.append(summaryProblem) }
+            } catch is CancellationError {
+                stopped(&record, started: started)
+                return
             } catch {
                 problems.append(String(localized: "Writing to the notes folder failed: \(error.localizedDescription)"))
             }
@@ -533,10 +613,22 @@ final class MeetingProcessor {
             if let summaryProblem { problems.append(summaryProblem) }
             record.noteURL = noteURL
             lastNoteURL = noteURL
+        } catch is CancellationError {
+            stopped(&record, started: started)
+            return
         } catch {
             problems.append(String(localized: "Retry failed: \(error.localizedDescription)"))
         }
         finish(&record, problems: problems, warnings: [], started: started)
+    }
+
+    /// The end of a Processing stopped from the menu: no notification, the user asked for it.
+    private func stopped(_ record: inout ProcessingRecord, started: ContinuousClock.Instant) {
+        let takkuID = record.takkuID
+        logger.notice("Processing \(takkuID, privacy: .public) stopped after \(secondsSince(started), privacy: .public)")
+        try? record.stop(reason: Self.stoppedReason)
+        save(record)
+        clearCurrent()
     }
 
     private func finish(
@@ -568,10 +660,9 @@ final class MeetingProcessor {
             hasSummary: record.summaryProfile != nil, problems: problems, warnings: warnings, rebuild: rebuild
         )
         record.reprocessing = nil
+        record.statusBeforeRetry = nil
         save(record)
-        currentID = nil
-        currentTitle = nil
-        currentPhase = nil
+        clearCurrent()
         // After every completed Processing, Retry included, so the Hook can update what it sent.
         if problems.isEmpty, HookRunner.isInstalled, let vault = Vault.configured, let noteURL = record.noteURL {
             do {
@@ -662,6 +753,13 @@ final class MeetingProcessor {
                 Task { @MainActor in self?.update(progress, for: record.takkuID) }
             }
         )
+        // Stopped while the model was writing: the note stays as it was; the log keeps the request.
+        if Task.isCancelled {
+            if let log {
+                await writeSummaryLog(log, summary: summary, noteURL: noteURL, template: template.name, record: record)
+            }
+            throw CancellationError()
+        }
         let rename = renameIfProvisional(noteURL, title: title, startedAt: record.startedAt, in: vault)
         if let log {
             await writeSummaryLog(log, summary: summary, noteURL: rename.url, template: template.name, record: record)

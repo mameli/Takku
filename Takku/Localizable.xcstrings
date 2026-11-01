@@ -2170,6 +2170,46 @@
         }
       }
     },
+    "%@ · %lld min": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ · %2$lld min"
+          }
+        }
+      }
+    },
+    "Stop processing": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Interrompi elaborazione"
+          }
+        }
+      }
+    },
+    "Stopping…": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Interruzione in corso…"
+          }
+        }
+      }
+    },
+    "Processing stopped: Reprocess Recording to try again.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elaborazione interrotta: usa Rielabora Registrazione per riprovare."
+          }
+        }
+      }
+    },
     "Processing…": {
       "localizations": {
         "it": {

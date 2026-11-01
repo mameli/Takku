@@ -53,6 +53,9 @@ public struct ProcessingRecord: Codable, Equatable, Sendable {
     public var importedAt: Date?
     /// Source audio skipped during import: persisted so Processing can report it after a restart.
     public var importWarnings: [String]?
+    /// The status before a Retry or a Regeneration, while it is queued or running: stopping it, or
+    /// a restart in the middle of a Regeneration, gives the Meeting back as it was.
+    public var statusBeforeRetry: Status?
 
     /// How Reprocess Recording rebuilds the Transcript from the audio.
     public enum Reprocessing: String, Codable, Sendable {
@@ -87,7 +90,8 @@ public struct ProcessingRecord: Codable, Equatable, Sendable {
 
     /// After a restart: Meetings queued, in progress or interrupted while recording resume.
     /// An interrupted Regeneration is not redone as full Processing (the audio may be gone):
-    /// the Meeting simply goes back to completed.
+    /// the Meeting simply goes back to what it was before (completed, for a record written
+    /// before that was saved).
     public static func afterRestart(_ records: [ProcessingRecord]) -> RestartPlan {
         let toProcess = records
             .filter { [.recording, .queued, .processing].contains($0.status) }
@@ -96,7 +100,8 @@ public struct ProcessingRecord: Codable, Equatable, Sendable {
             .filter { $0.status == .regenerating }
             .map { record in
                 var record = record
-                record.status = .completed
+                record.status = record.statusBeforeRetry ?? .completed
+                record.statusBeforeRetry = nil
                 return record
             }
         return RestartPlan(toProcess: toProcess, toSave: toSave)
@@ -105,12 +110,25 @@ public struct ProcessingRecord: Codable, Equatable, Sendable {
     /// Queues a concluded Meeting again to redo the whole Processing.
     public mutating func queueForRetry() throws {
         guard status.canRetry else { throw InvalidTransition(from: status) }
+        statusBeforeRetry = status
         status = .queued
     }
 
     public mutating func beginRegeneration() throws {
         guard status.canRetry else { throw InvalidTransition(from: status) }
+        statusBeforeRetry = status
         status = .regenerating
+    }
+
+    /// Stops a queued or running Processing (*Stop processing* in the menu). A Retry or a
+    /// Regeneration gives the Meeting back as it was before it; a Meeting never processed fails with
+    /// `reason`, so it can be retried and is not resumed after a restart. A Meeting being recorded
+    /// is stopped with the recording, not here.
+    public mutating func stop(reason: String) throws {
+        guard [.queued, .processing, .regenerating].contains(status) else { throw InvalidTransition(from: status) }
+        status = statusBeforeRetry ?? .failed(reason: reason)
+        statusBeforeRetry = nil
+        reprocessing = nil
     }
 
     /// The Template a Retry uses. A failed Meeting keeps its own: the Retry redoes the Summary that

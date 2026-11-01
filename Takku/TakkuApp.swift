@@ -144,7 +144,10 @@ private struct MeetingMenu: View {
                 Text(currentTitle).lineLimit(1)
             }
             if let currentPhase = controller.processor.currentPhase {
-                Text(currentPhase.label)
+                Text(currentPhase.label(minutes: controller.processor.phaseMinutes))
+                if currentPhase != .stopping {
+                    Button("Stop processing") { controller.processor.stopCurrent() }
+                }
             } else if controller.processor.currentTitle == nil {
                 Text("Processing…")
             }
@@ -296,6 +299,8 @@ private struct RecentMeetingsMenu: View {
                         if controller.processor.hasRecording(meeting.id) {
                             Button("Reprocess Recording…") { controller.confirmReprocessing(meeting.id) }
                         }
+                    } else if meeting.status != .recording {
+                        Button("Stop processing") { controller.processor.stop(meeting.id) }
                     }
                 }
             }

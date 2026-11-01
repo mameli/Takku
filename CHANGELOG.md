@@ -4,6 +4,11 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
+## Unreleased
+
+- **Stop processing**: a Meeting being processed or waiting in the queue can be stopped from the menu (*Stop processing* under the current one, or in its *Recent meetings* submenu). A Regenerate or a Reprocess you stop leaves the Meeting as it was, Summary and Transcript included; a Meeting stopped at its first Processing keeps its audio for *Reprocess Recording…*.
+- **A provider that does not answer no longer holds the queue for half an hour**: a request to an external model now fails after 3 minutes without an answer, or 10 in all, instead of 15 and 30 (a model on your Mac keeps the long limits). The menu shows how long the current step has lasted, from the first minute (*Writing Summary · 4 min*).
+
 ## 1.15.0 (2026-11-01)
 
 - **Summaries with Apple Intelligence**: on a Mac with Apple Intelligence (macOS 26 or later), *Use Apple Intelligence* in the welcome window, or + → *Apple Intelligence* in *Settings → Summary*, writes the Summaries on the Mac: free, nothing to set up, and nothing leaves the Mac. Its model is small, so an hour-long meeting takes a few minutes and the Summary is shorter and less precise than with a large model.

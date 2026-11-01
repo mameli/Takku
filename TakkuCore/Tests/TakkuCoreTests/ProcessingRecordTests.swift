@@ -37,6 +37,7 @@ struct ProcessingRecordTests {
         saved.reprocessing = .fromScratch
         saved.importedAt = start.addingTimeInterval(3_600)
         saved.importWarnings = ["Unreadable audio skipped from 1.000 s to 1.064 s."]
+        saved.statusBeforeRetry = .completed
 
         try saved.save(inFolder: directory)
 
@@ -54,6 +55,7 @@ struct ProcessingRecordTests {
         object.removeValue(forKey: "reprocessing")
         object.removeValue(forKey: "importedAt")
         object.removeValue(forKey: "importWarnings")
+        object.removeValue(forKey: "statusBeforeRetry")
         let data = try JSONSerialization.data(withJSONObject: object)
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
@@ -109,6 +111,62 @@ struct ProcessingRecordTests {
         #expect(plan.toProcess.map(\.takkuID) == [queued.takkuID])
         #expect(plan.toSave.map(\.takkuID) == [regenerating.takkuID])
         #expect(plan.toSave.first?.status == .completed)
+    }
+
+    @Test("after a restart an interrupted Regeneration of a failed Meeting goes back to failed, with its reason")
+    func interruptedRegenerationOfFailed() throws {
+        var meeting = record(.failed(reason: "401"))
+        try meeting.beginRegeneration()
+
+        let plan = ProcessingRecord.afterRestart([meeting])
+
+        #expect(plan.toSave.first?.status == .failed(reason: "401"))
+        #expect(plan.toSave.first?.statusBeforeRetry == nil)
+    }
+
+    @Test("stopping a Retry or a Regeneration gives the Meeting back as it was, queued or running", arguments: [
+        ProcessingRecord.Status.completed, .failed(reason: "Timeout"),
+    ])
+    func stopRetry(before: ProcessingRecord.Status) throws {
+        var queued = record(before)
+        try queued.queueForRetry()
+        queued.reprocessing = .fromScratch
+        var running = record(before)
+        try running.queueForRetry()
+        running.status = .processing
+        var regenerating = record(before)
+        try regenerating.beginRegeneration()
+
+        for var meeting in [queued, running, regenerating] {
+            try meeting.stop(reason: "Stopped")
+            #expect(meeting.status == before)
+            #expect(meeting.statusBeforeRetry == nil)
+            #expect(meeting.reprocessing == nil)
+            #expect(ProcessingRecord.afterRestart([meeting]).toProcess.isEmpty)
+        }
+    }
+
+    @Test("stopping a Meeting never processed makes it failed with the reason, so it can be retried and is not resumed")
+    func stopFirstProcessing() throws {
+        for status in [ProcessingRecord.Status.queued, .processing] {
+            var meeting = record(status)
+
+            try meeting.stop(reason: "Stopped")
+
+            #expect(meeting.status == .failed(reason: "Stopped"))
+            #expect(meeting.status.canRetry)
+            #expect(ProcessingRecord.afterRestart([meeting]).toProcess.isEmpty)
+        }
+    }
+
+    @Test("only a queued or running Processing can be stopped", arguments: [
+        ProcessingRecord.Status.recording, .completed, .failed(reason: "401"),
+    ])
+    func stopNotAllowed(status: ProcessingRecord.Status) {
+        var meeting = record(status)
+
+        #expect(throws: ProcessingRecord.InvalidTransition.self) { try meeting.stop(reason: "Stopped") }
+        #expect(meeting.status == status)
     }
 
     @Test("Retry and Regenerate are allowed only for completed or failed Meetings", arguments: [
