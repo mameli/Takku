@@ -133,14 +133,56 @@ struct CalendarToggle: View {
     }
 }
 
-/// The global keyboard shortcuts, each one changed or removed by the user.
+/// The global keyboard shortcuts: one row with the keys in use, and a sheet to change or remove
+/// them. Few change them, so they do not take a section of their own.
 struct ShortcutsSection: View {
+    @State private var isEditing = false
+
     var body: some View {
-        Section("Keyboard shortcuts") {
-            ShortcutRow("Start or stop a meeting", name: .startStopMeeting)
-            ShortcutRow("Mark this moment", name: .markMoment)
-            ShortcutRow("Take a screenshot", name: .takeScreenshot)
+        Section {
+            LabeledContent {
+                Button("Change…") { isEditing = true }
+            } label: {
+                Text("Keyboard shortcuts")
+                // Read again when the sheet closes: `isEditing` changes.
+                Text(verbatim: inUse).monospacedDigit()
+            }
         }
+        .sheet(isPresented: $isEditing) { ShortcutsSheet() }
+    }
+
+    /// The shortcuts in use, in the order of the sheet; a removed one is left out.
+    private var inUse: String {
+        _ = isEditing
+        return KeyboardShortcuts.Name.takku.compactMap { $0.shortcut?.description }.joined(separator: "  ")
+    }
+}
+
+private struct ShortcutsSheet: View {
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        VStack(alignment: .trailing, spacing: 0) {
+            Form {
+                Section {
+                    ShortcutRow("Start or stop a meeting", name: .startStopMeeting)
+                    ShortcutRow("Mark this moment", name: .markMoment)
+                    ShortcutRow("Take a screenshot", name: .takeScreenshot)
+                } header: {
+                    Text("Keyboard shortcuts")
+                } footer: {
+                    Text("They work from any app. Change one if another app already uses its keys.")
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .formStyle(.grouped)
+            .scrollDisabled(true)
+            Button("Done") { dismiss() }
+                .keyboardShortcut(.defaultAction)
+                .padding([.horizontal, .bottom], 20)
+        }
+        .frame(width: 460)
+        .fixedSize(horizontal: false, vertical: true)
     }
 }
 

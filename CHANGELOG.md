@@ -33,7 +33,7 @@ Takku was called Steno up to 0.2.1.
 - **Full text instead of a summary**: a Template with `full_text: true` in its header gets the whole meeting rewritten, cleaned up but complete, for example the full text of a lecture to study from. Takku writes it ten minutes at a time and joins the parts, so the end of a long lecture is as detailed as the beginning.
 - **Parakeet Ultra is the default transcription model** for new installs: the most accurate, and fast. If you never chose a model, you keep Large v3 Turbo, already on your Mac; to switch, *Settings → Transcription*.
 - **Tidier Settings**: one tab per subject (General, Notes, Transcription, Summary, Recordings) instead of one long page, and the actions of each row in a ⋯ menu instead of a row of buttons. Models still to download have a download icon, and how long the audio is kept is a menu of days, with *Forever* too.
-- **Templates for lectures**: two examples to copy into `~/.takku/templates/`: [Lecture](https://github.com/mameli/Takku/blob/main/examples/templates/Lecture.md) for study notes and [Sbobina](https://github.com/mameli/Takku/blob/main/examples/templates/Sbobina.md) for the full text of a lecture.
+- **Templates for lectures**: two examples to copy into `~/.takku/templates/`: [Lecture](https://github.com/mameli/Takku/blob/v1.10.0/examples/templates/Lecture.md) for study notes and [Sbobina](https://github.com/mameli/Takku/blob/v1.10.0/examples/templates/Sbobina.md) for the full text of a lecture.
 
 ## 1.9.0 (2026-10-24)
 

@@ -37,12 +37,18 @@ enum TakkuFolder {
 
     /// Creates the default Template (Notes) if the Templates folder has none, or if the
     /// default Template of the Settings no longer exists (then the default becomes Notes).
+    /// An empty folder also gets Lecture and Full text, ready to choose for a lecture.
     static func ensureDefaultTemplate() throws {
         let names = templateNames()
         guard names.isEmpty || !names.contains(AppSettings.defaultTemplate) else { return }
         try FileManager.default.createDirectory(at: templatesFolder, withIntermediateDirectories: true)
         if !names.contains(Template.defaultName) {
             try Template.defaultFileContent.write(to: templateURL(Template.defaultName), atomically: true, encoding: .utf8)
+        }
+        if names.isEmpty {
+            for file in Template.builtInFiles {
+                try file.content.write(to: templateURL(file.name), atomically: true, encoding: .utf8)
+            }
         }
         AppSettings.defaultTemplate = Template.defaultName
     }

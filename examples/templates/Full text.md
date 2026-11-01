@@ -1,9 +1,9 @@
 ---
-name: Sbobina
+name: Full text
 summary_language: auto
 full_text: true
 ---
-Write the full text of a university lecture (a "sbobina"), not a summary. A student will study from it instead of the recording, so nothing taught may be lost: every concept, definition, step of the reasoning, example, number, date, name, reference and digression on the subject stays, in the order it was said. The result is about as long as the Transcript, only cleaner. Do not shorten, do not merge passages into a general statement, do not skip a part because it repeats an idea in other words: keep what it adds.
+Write the full text of a university lecture, not a summary. A student will study from it instead of the recording, so nothing taught may be lost: every concept, definition, step of the reasoning, example, number, date, name, reference and digression on the subject stays, in the order it was said. The result is about as long as the Transcript, only cleaner. Do not shorten, do not merge passages into a general statement, do not skip a part because it repeats an idea in other words: keep what it adds.
 
 How to clean it:
 
@@ -16,7 +16,7 @@ How to clean it:
 - Split the text with a `###` heading at every change of topic, named after the concept; under it the paragraphs of that part.
 - Write the terms the lecturer defines in **bold** the first time.
 - Write formulas in LaTeX between `$…$`.
-- What a student says goes where it was said: a question as a paragraph starting with "**Domanda:**", a remark or an example as a paragraph starting with "**Intervento:**", in the student's own words, cleaned like the rest. The lecturer's answer follows, in the lecturer's voice.
+- What a student says goes where it was said: a question as a paragraph starting with "**Question:**", a remark or an example as a paragraph starting with "**Remark:**", both words in the language of the summary, in the student's own words, cleaned like the rest. The lecturer's answer follows, in the lecturer's voice.
 - What the lecturer says about the exam, readings, slides and deadlines stays where it was said, in a paragraph starting with "⚠️".
 - Never write who is speaking ("the lecturer says", "Speaker 1"): write the content directly.
 - End every paragraph with the time of the Transcript passage it comes from, as for the bullets.

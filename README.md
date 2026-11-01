@@ -83,7 +83,7 @@ At the first launch a *Welcome to Takku* window walks you through these steps (u
 
 ## Use
 
-- **Start and stop** a meeting from the menu bar or with **⌃⌥⌘R** from any app. All three shortcuts can be changed in *Settings → General → Keyboard shortcuts*. While recording the icon is a red dot and the menu shows the duration. With *Suggest recording when a call starts* on (*Settings → General*, off by default), a notification offers to start when a call app keeps the microphone for 15 seconds, and another offers to stop when it lets the microphone go.
+- **Start and stop** a meeting from the menu bar or with **⌃⌥⌘R** from any app. All three shortcuts can be changed in *Settings → General → Keyboard shortcuts → Change…*. While recording the icon is a red dot and the menu shows the duration. With *Suggest recording when a call starts* on (*Settings → General*, off by default), a notification offers to start when a call app keeps the microphone for 15 seconds, and another offers to stop when it lets the microphone go.
 - **Mark a moment** with **⌃⌥⌘M** while recording: the dot turns into a star for a second, the passage gets a ⭐ in the Transcript and the Summary gives it priority.
 - **Take a screenshot** with **⌃⌥⌘S** while recording: Takku keeps the window you are looking at (the whole screen if it is in full screen) and marks the moment, like ⌃⌥⌘M (the dot turns into a camera for a second). The picture goes under the point of the Summary that covers that moment and under its passage in the Transcript; those no point covers are listed after the Summary. The model writing the Summary never sees them: Takku places them by the Transcript times the Summary cites.
 - If Takku hears nothing from the microphone or from the call for 2 minutes, the menu says so; if it has heard nothing since the start, a notification tells you what to check.
@@ -113,14 +113,14 @@ With *Settings → Transcription → Recognise voices* on (off by default), Takk
 
 ### Templates
 
-A Template is a Markdown file in `~/.takku/templates/`: its text tells the model what to write and how. Takku creates a default *Notes* Template there at launch. Create others from *Settings → Notes → New Template…*, then edit them from their ⋯ → *Edit With*, in any text editor; ⋯ also makes one the default. Add `summary_language: en` (or `it`, `fr`, …) to its frontmatter to always get the Summary in that language; otherwise it follows the language of the meeting.
+A Template is a Markdown file in `~/.takku/templates/`: its text tells the model what to write and how. At the first launch Takku creates three there: *Notes*, the default, plus *Lecture* and *Full text* for lectures. Create others from *Settings → Notes → New Template…*, then edit them from their ⋯ → *Edit With*, in any text editor; ⋯ also makes one the default. Add `summary_language: en` (or `it`, `fr`, …) to its frontmatter to always get the Summary in that language; otherwise it follows the language of the meeting.
 
 Add `full_text: true` to get the whole meeting rewritten instead of summarised: cleaned up but complete, written ten minutes at a time so the end is as detailed as the beginning. Sections meant to sum up the whole text don't fit there, since every ten minutes gets the Template on its own.
 
-Two examples for lectures, to copy into `~/.takku/templates/`:
+The two for lectures (if your Templates folder is older than them, copy them from `examples/templates/`):
 
-- [`examples/templates/Lecture.md`](examples/templates/Lecture.md): study notes, topic by topic, with definitions, formulas, what the lecturer stresses, a glossary and review questions.
-- [`examples/templates/Sbobina.md`](examples/templates/Sbobina.md): the full text of the lecture (*sbobina* in Italian), with `full_text: true`. Students' questions and remarks stay where they were asked, and misheard technical terms are fixed the same way throughout. Its examples of misheard terms come from an economics lecture: replace them with your subject's.
+- [*Lecture*](examples/templates/Lecture.md): study notes, topic by topic, with definitions, formulas, what the lecturer stresses, a glossary and review questions.
+- [*Full text*](examples/templates/Full%20text.md): the full text of the lecture, with `full_text: true`. Students' questions and remarks stay where they were asked, and misheard technical terms are fixed the same way throughout. Its examples of misheard terms come from an economics lecture: replace them with your subject's.
 
 Two for circles run with Holacracy, written to leave no update, tension or action out:
 

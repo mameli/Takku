@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 import TakkuCore
 
@@ -84,5 +85,24 @@ struct TemplateTests {
     @Test("the default Template contains no stray backslashes from line continuations")
     func noStrayBackslashes() {
         #expect(!Template.defaultFileContent.contains("\\"))
+    }
+
+    @Test("the built-in Templates: Lecture is a Summary, Full text rewrites the whole Transcript")
+    func builtIns() {
+        let templates = Template.builtInFiles.map { Template(fileName: $0.name, content: $0.content) }
+
+        #expect(templates.map(\.name) == ["Lecture", "Full text"])
+        #expect(templates.map(\.isFullText) == [false, true])
+        #expect(templates.allSatisfy { $0.summaryLanguage == nil && !$0.body.isEmpty })
+    }
+
+    @Test("examples/templates holds the built-in Templates as they are, for a folder made before them")
+    func examplesMatchBuiltIns() throws {
+        let examples = URL(filePath: #filePath).deletingLastPathComponent()
+            .appending(path: "../../../examples/templates").standardized
+        for file in Template.builtInFiles {
+            let example = try String(contentsOf: examples.appending(path: file.name + ".md"), encoding: .utf8)
+            #expect(example == file.content, "\(file.name).md")
+        }
     }
 }

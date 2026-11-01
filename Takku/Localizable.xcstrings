@@ -141,6 +141,16 @@
         }
       }
     },
+    "They work from any app. Change one if another app already uses its keys.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Funzionano da qualsiasi app. Cambiane una se un'altra app usa già gli stessi tasti."
+          }
+        }
+      }
+    },
     "You pay only for the Summaries Takku writes. Recording and transcription stay free, on your Mac.": {
       "localizations": {
         "it": {
