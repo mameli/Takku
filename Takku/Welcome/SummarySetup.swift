@@ -37,8 +37,8 @@ struct SummarySetup: View {
         _step = State(initialValue: previewStep)
     }
 
-    /// What the gateway says a Summary costs, about: as on takku.app/credit (5 € ≈ 400 meetings).
-    private static let meetingsPerEuro: Decimal = 80
+    /// Meetings of about 30 minutes per euro of a pack, VAT included: as on takku.app/credit (5 € ≈ 120 meetings).
+    private static let meetingsPerEuro: Decimal = 24
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {

@@ -8,6 +8,7 @@ Takku was called Steno up to 0.2.1.
 
 - **Summaries with Apple Intelligence**: on a Mac with Apple Intelligence (macOS 26 or later), *Use Apple Intelligence* in the welcome window, or + → *Apple Intelligence* in *Settings → Summary*, writes the Summaries on the Mac: free, nothing to set up, and nothing leaves the Mac. Its model is small, so an hour-long meeting takes a few minutes and the Summary is shorter and less precise than with a large model.
 - **A title even without a Summary**: with *Transcript* as Profile, on a Mac with Apple Intelligence, the note is renamed with a short title written on the Mac from the start of the Transcript, instead of staying *Meeting*.
+- **Takku Credit: meetings per pack recalculated**: the welcome window and takku.app said about 400, 800 and 1,600 meetings for the 5, 10 and 20 € packs, a count that no longer matched the price of a Summary. They now say about 120, 240 and 480, counting meetings of about 30 minutes: a 30-minute meeting costs about 3 cents, an hour about 5. The price of the packs and the credit already bought do not change.
 
 ## 1.14.0 (2026-11-01)
 
