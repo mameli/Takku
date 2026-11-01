@@ -24,18 +24,29 @@ struct WelcomeView: View {
 
     /// Takku was just reopened from here, by *Reopen Takku* or by macOS's *Quit & Reopen* after a
     /// switch in System Settings. Read once per launch.
-    fileprivate static let isResuming: Bool = {
+    nonisolated fileprivate static let isResuming: Bool = {
         let isResuming = (UserDefaults.standard.object(forKey: resumeUntilKey) as? Date).map { $0 > Date() } ?? false
         UserDefaults.standard.removeObject(forKey: resumeUntilKey)
         return isResuming
     }()
 
     /// Until when a relaunch opens this window again.
-    private static let resumeUntilKey = "welcomeResumeUntil"
+    nonisolated private static let resumeUntilKey = "welcomeResumeUntil"
 
     fileprivate static func resumeAfterRelaunch() {
         UserDefaults.standard.set(Date().addingTimeInterval(10 * 60), forKey: resumeUntilKey)
     }
+
+    /// Set when the system audio test heard Takku: nothing tells it again after a relaunch, short
+    /// of playing the test sound once more.
+    nonisolated fileprivate static let systemAudioHeardKey = "welcomeSystemAudioHeard"
+
+    /// Reopened from here after the system audio test heard Takku: no need to allow it again.
+    /// Read once per launch.
+    nonisolated fileprivate static let heardSystemAudioBeforeRelaunch: Bool? = {
+        defer { UserDefaults.standard.removeObject(forKey: systemAudioHeardKey) }
+        return isResuming && UserDefaults.standard.bool(forKey: systemAudioHeardKey) ? true : nil
+    }()
 
     let controller: MeetingController
     @Environment(\.dismissWindow) private var dismissWindow
@@ -388,8 +399,9 @@ struct WelcomeLayout<Scene: View, Setup: View>: View {
 /// The permissions as this window knows them; kept while the pages change.
 struct PermissionsState {
     var microphone = AVCaptureDevice.authorizationStatus(for: .audio)
-    /// Whether the last test heard the system audio; `nil` before one.
-    var systemAudio: Bool?
+    /// Whether the last test heard the system audio, in this launch or the one before a relaunch
+    /// from the welcome window; `nil` before one.
+    var systemAudio = WelcomeView.heardSystemAudioBeforeRelaunch
     var isTestingSystemAudio = false
     var screenRecording = CGPreflightScreenCaptureAccess() ? ScreenRecording.on : .off
 }
@@ -546,7 +558,9 @@ struct PermissionsSetup: View {
 
     private func testSystemAudio() async {
         state.isTestingSystemAudio = true
-        state.systemAudio = await AudioPermissions.hearsSystemAudio()
+        let heard = await AudioPermissions.hearsSystemAudio()
+        state.systemAudio = heard
+        UserDefaults.standard.set(heard, forKey: WelcomeView.systemAudioHeardKey)
         state.isTestingSystemAudio = false
     }
 

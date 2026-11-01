@@ -1428,16 +1428,6 @@
         }
       }
     },
-    "Paste": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Incolla"
-          }
-        }
-      }
-    },
     "Paste the key from the email.": {
       "localizations": {
         "it": {

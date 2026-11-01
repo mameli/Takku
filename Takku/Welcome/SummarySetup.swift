@@ -213,11 +213,6 @@ struct SummarySetup: View {
                 .frame(height: 28)
                 .background(box(860, radius: 4).stroke(Paper.graphite, style: Paper.stroke))
                 .onSubmit { Task { await activate() } }
-            // Read when pressed, never by itself: the clipboard is the user's.
-            Button("Paste") {
-                if let copied = NSPasteboard.general.string(forType: .string) { key = copied.trimmingCharacters(in: .whitespacesAndNewlines) }
-            }
-            .buttonStyle(PaperButtonStyle(isPrimary: false))
             if isActivating {
                 ProgressView().controlSize(.small)
             } else {
