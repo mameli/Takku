@@ -3437,12 +3437,12 @@
         }
       }
     },
-    "A notification when an app uses the microphone for a while, and another when it stops. Takku never starts or stops by itself.": {
+    "A notification when a call app or a browser uses the microphone for a while, and another when it stops. Dictation apps are ignored. Takku never starts or stops by itself.": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Una notifica quando un'app usa il microfono per un po', e un'altra quando smette. Takku non avvia né ferma mai da solo."
+            "value": "Una notifica quando un'app per le chiamate o un browser usa il microfono per un po', e un'altra quando smette. Le app di dettatura sono ignorate. Takku non avvia né ferma mai da solo."
           }
         }
       }

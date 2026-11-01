@@ -13,7 +13,7 @@ public struct CallWatch: Sendable {
 
     /// Using the microphone this long without a break is a call, not a dictation.
     public static let startAfter: TimeInterval = 15
-    /// The same for a call app (`CallApp.isCallApp`), where a dictation or a voice note is unlikely.
+    /// The same for a call app (`CallApp.Kind.callApp`), where a voice message is unlikely.
     public static let callAppStartAfter: TimeInterval = 5
     /// No app on the microphone for this long while recording: the call is over.
     public static let stopAfter: TimeInterval = 30
@@ -35,7 +35,9 @@ public struct CallWatch: Sendable {
 
     public init() {}
 
-    public mutating func update(appsUsingInput apps: Set<CallApp>, isRecording: Bool, now: TimeInterval) -> Suggestion? {
+    /// Apps that are not for calls (`CallApp.kind` is `nil`) are ignored, as if off the microphone.
+    public mutating func update(appsUsingInput allApps: Set<CallApp>, isRecording: Bool, now: TimeInterval) -> Suggestion? {
+        let apps = allApps.filter { $0.kind != nil }
         if let lastUpdate, now - lastUpdate > Self.maxGap { usingSince = [:] }
         lastUpdate = now
         usingSince = usingSince.filter { apps.contains($0.key) }
@@ -67,6 +69,6 @@ public struct CallWatch: Sendable {
     }
 
     private static func startDelay(for app: CallApp) -> TimeInterval {
-        app.isCallApp ? callAppStartAfter : startAfter
+        app.kind == .callApp ? callAppStartAfter : startAfter
     }
 }

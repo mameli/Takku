@@ -12,10 +12,17 @@ public struct CallApp: Hashable, Sendable {
         self.bundleID = bundleID
     }
 
-    /// Call apps: a call there is suggested sooner than in any other app, which could be a
-    /// dictation or a voice note. Browsers are not here: a call in a browser cannot be told from
-    /// a voice message on a web page.
-    static let callBundleIDs: Set<String> = [
+    /// What an app on the microphone can be. Any other app (dictation like Dimmela or Handy,
+    /// a recorder, Siri) is never a call: Takku does not suggest recording it.
+    public enum Kind: Sendable {
+        /// An app for calls: suggested after `CallWatch.callAppStartAfter`.
+        case callApp
+        /// A browser (Meet, Teams on the web) or a chat app with calls (WhatsApp, Telegram):
+        /// it could also be a voice message, so it is suggested after `CallWatch.startAfter`.
+        case mayBeCall
+    }
+
+    static let callApps: Set<String> = [
         "us.zoom.xos",
         "com.microsoft.teams2",
         "com.microsoft.teams",
@@ -23,10 +30,34 @@ public struct CallApp: Hashable, Sendable {
         "com.apple.FaceTime",
         "Cisco-Systems.Spark",
         "com.webex.meetingmanager",
+        "com.hnc.Discord",
+        "com.skype.skype",
     ]
 
-    public var isCallApp: Bool {
-        bundleID.map(Self.callBundleIDs.contains) ?? false
+    static let mayBeCallApps: Set<String> = [
+        "com.apple.Safari",
+        "com.google.Chrome",
+        "com.google.Chrome.canary",
+        "company.thebrowser.Browser",
+        "company.thebrowser.dia",
+        "com.brave.Browser",
+        "com.microsoft.edgemac",
+        "org.mozilla.firefox",
+        "com.operasoftware.Opera",
+        "com.vivaldi.Vivaldi",
+        "com.kagi.kagimacOS",
+        "net.whatsapp.WhatsApp",
+        "desktop.WhatsApp",
+        "ru.keepcoder.Telegram",
+        "org.whispersystems.signal-desktop",
+    ]
+
+    /// `nil` for an app that is not for calls.
+    public var kind: Kind? {
+        guard let bundleID else { return nil }
+        if Self.callApps.contains(bundleID) { return .callApp }
+        if Self.mayBeCallApps.contains(bundleID) { return .mayBeCall }
+        return nil
     }
 
     /// Helper processes that capture the microphone for an app whose bundle identifier does not

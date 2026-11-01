@@ -35,12 +35,25 @@ struct CallWatchTests {
         #expect(suggestions.first?.0 == 6)
     }
 
-    @Test("a short dictation suggests nothing")
+    @Test("a short use of the microphone suggests nothing")
     func shortUse() {
         var watch = CallWatch()
-        #expect(run(&watch, apps: [handy], recording: false, from: 0, to: 12).isEmpty)
+        #expect(run(&watch, apps: [chrome], recording: false, from: 0, to: 12).isEmpty)
         #expect(run(&watch, apps: [], recording: false, from: 15, to: 30).isEmpty)
-        #expect(run(&watch, apps: [handy], recording: false, from: 33, to: 45).isEmpty)
+        #expect(run(&watch, apps: [chrome], recording: false, from: 33, to: 45).isEmpty)
+    }
+
+    @Test("an app that is not for calls, like a dictation app, is never suggested, however long it listens")
+    func dictationIgnored() {
+        var watch = CallWatch()
+        #expect(run(&watch, apps: [handy], recording: false, from: 0, to: 300).isEmpty)
+    }
+
+    @Test("while recording, a dictation app on the microphone does not hold off the stop suggestion")
+    func dictationDoesNotHoldTheCall() {
+        var watch = CallWatch()
+        _ = run(&watch, apps: [zoom], recording: true, from: 0, to: 60)
+        #expect(run(&watch, apps: [handy], recording: true, from: 63, to: 120).map(\.1) == [.stop])
     }
 
     @Test("an app back on the microphone within a minute is the same call; after a minute away, a new one")

@@ -11,6 +11,7 @@ struct TakkuApp: App {
         if CommandLine.arguments.contains(ScreenshotTaker.checkArgument) {
             exit(CGPreflightScreenCaptureAccess() ? 0 : 1)
         }
+        MCPCommand.runIfRequested()
         #if DEBUG
         WelcomeRender.runIfRequested()
         #endif

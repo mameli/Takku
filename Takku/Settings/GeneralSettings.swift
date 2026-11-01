@@ -85,7 +85,7 @@ struct SuggestCallsToggle: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             Toggle("Suggest recording when a call starts", isOn: $suggestCalls)
-            Text("A notification when an app uses the microphone for a while, and another when it stops. Takku never starts or stops by itself.")
+            Text("A notification when a call app or a browser uses the microphone for a while, and another when it stops. Dictation apps are ignored. Takku never starts or stops by itself.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }

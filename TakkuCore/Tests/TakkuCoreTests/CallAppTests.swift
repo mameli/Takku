@@ -15,10 +15,12 @@ struct CallAppTests {
         #expect(CallApp.candidateBundleIDs(forAudioProcess: "org.mozilla.plugincontainer").first == "org.mozilla.firefox")
     }
 
-    @Test("call apps are told from browsers and other apps")
-    func callApps() {
-        #expect(CallApp(name: "zoom.us", bundleID: "us.zoom.xos").isCallApp)
-        #expect(!CallApp(name: "Google Chrome", bundleID: "com.google.Chrome").isCallApp)
-        #expect(!CallApp(name: "CptHost", bundleID: nil).isCallApp)
+    @Test("call apps are told from browsers, chat apps and the others")
+    func kinds() {
+        #expect(CallApp(name: "zoom.us", bundleID: "us.zoom.xos").kind == .callApp)
+        #expect(CallApp(name: "Google Chrome", bundleID: "com.google.Chrome").kind == .mayBeCall)
+        #expect(CallApp(name: "WhatsApp", bundleID: "net.whatsapp.WhatsApp").kind == .mayBeCall)
+        #expect(CallApp(name: "Dettatura", bundleID: "com.example.dictation").kind == nil)
+        #expect(CallApp(name: "CptHost", bundleID: nil).kind == nil)
     }
 }

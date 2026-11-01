@@ -166,6 +166,22 @@ How to write one, how to run several, and a ready-made Hook that copies every me
 
 **A Summary from a subscription you already have.** If you pay for Copilot, Claude, Codex or another assistant with a command-line tool (or your company allows only that one), record with *Transcript* only and let a Hook ask that tool for the Summary. You lose what Takku does around its own Summary: the Template, the Vocabulary in the prompt, the Speaker names taken from the Summary, and the title and rename of the note. [`examples/hooks/copilot.sh`](examples/hooks/copilot.sh) does it with GitHub Copilot CLI, with every tool disabled, and writes the Summary into a file next to the note; changing the `copilot` command adapts it to another CLI. It sends only the meetings whose note has the property `copilot: true`: a meeting with a customer is the customer's data, so mark it only if the customer allowed it.
 
+### Your meetings in an AI assistant (MCP)
+
+Takku can serve your meetings to an assistant that speaks MCP, such as Claude Code or Claude Desktop: ask it *what did we decide about the release with Mario last week?* and it searches your notes and Transcripts. It reads the notes folder and never writes; Takku does not need to be open.
+
+```sh
+claude mcp add takku -- /Applications/Takku.app/Contents/MacOS/Takku mcp
+```
+
+In Claude Desktop, add it to `claude_desktop_config.json` (*Settings → Developer → Edit Config*):
+
+```json
+{ "mcpServers": { "takku": { "command": "/Applications/Takku.app/Contents/MacOS/Takku", "args": ["mcp"] } } }
+```
+
+The assistant gets three tools: `list_meetings` (by date, title, folder or participant), `search_meetings` (every word, case and accents ignored, with the matching lines) and `get_meeting` (the note and the whole Transcript). `--notes-folder PATH` after `mcp` serves another folder than the one in Settings. What the assistant reads goes to its model, like anything else you give it: a meeting with a customer is the customer's data.
+
 ### Obsidian or another editor
 
 The notes are plain Markdown, so any app opens them. With Obsidian installed Takku opens them there, and the link from the note to its Transcript is a click away. Without it, the Mac's app for Markdown opens them (usually TextEdit, on a Mac with no other editor). *Settings → Notes → Editor* picks another app, such as Zed or VS Code: the notes stay the same, `[[links]]` included, and *Recent meetings* offers *Open the notes folder in Zed…* instead of *Show all in Obsidian…*.
@@ -184,6 +200,7 @@ The notes are plain Markdown, so any app opens them. With Obsidian installed Tak
 - **Transcription model**: in `~/Library/Application Support/Takku/Models/`, downloaded once from Hugging Face. Only the model is downloaded; no audio or text is sent.
 - **Calendar**: read on the Mac through macOS, only if you turn it on; titles and participants go into the note, and the participants into the Summary request.
 - **Hook**: only if you put one in `~/.takku/hooks/`; it sends the note and the Transcript wherever your script sends them.
+- **MCP**: only if you add Takku to an assistant; it reads the notes and Transcripts the assistant asks for and hands them to it.
 - **Update check**: once a day Takku asks GitHub for the latest version (*Settings → General → Check for updates*). The request carries nothing about you or your meetings.
 
 Recording a meeting may require the consent of the other participants: tell them, and follow the rules that apply to you.
