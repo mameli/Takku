@@ -4,6 +4,15 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
+## 1.13.0
+
+- **A new welcome window**: a short tour, drawn on squared paper, shows what Takku does before asking for anything: it records the call, marks a moment and keeps a slide with a shortcut (try them while the tour plays), names the speakers and works beyond calls, for a lecture or an imported memo. Then the setup, one page at a time: where the notes go, the permissions, the transcription model (already downloading during the tour) and who writes the Summary.
+- **Permissions as they really are**: one button for the microphone and the system audio, which Takku checks with a short test sound, since macOS does not say whether the system audio is allowed. For screenshots, *Allow…* opens System Settings with Takku ready to drag into the list; after the reopen macOS asks for, the welcome window comes back where you left it.
+- **No Obsidian needed**: Takku writes plain Markdown into a **notes folder**, any folder. The welcome window offers *Use Documents/Takku*, or choose your own folder, your Obsidian vault too. Without Obsidian, the notes open in the Mac's app for Markdown. Settings, menus and messages now say *notes folder* instead of *Vault*.
+- **Takku Credit from the welcome window**: choose who writes the Summary, a model on your Mac or an external one. *Use Takku Credit…* shows the packs; once you buy one, paste the key from the email and *Activate*: the Summary Profile is ready, with nothing to set up in Settings. *I already have a key* skips the packs.
+- **Templates for lectures**: a new install gets *Lecture* (study notes) and *Full text* (the whole lecture rewritten, formerly the *Sbobina* example) next to *Notes*. An existing Templates folder is left as it is: copy them from [`examples/templates`](https://github.com/mameli/Takku/tree/main/examples/templates) if you want them.
+- **Keyboard shortcuts in a sheet**: *Settings → General → Keyboard shortcuts → Change…*, so the three shortcuts no longer take a whole section.
+
 ## 1.12.0 (2026-10-30)
 
 - **Recent meetings, clearer actions**: *Retry* is replaced by *Regenerate Summary*, which always writes the Summary again from the Transcript in your Vault (your corrections included, even while the audio is still there), and *Reprocess Recording…*, which rebuilds the Transcript from the audio after asking, because it replaces the edits you made to it. It reuses what was already transcribed when still valid, so a new Vocabulary word or Speaker name is applied in seconds; tick *Transcribe again from scratch* to redo it all, voices included. The notification says which of the two happened. *Open Transcript* opens it directly, and a failed meeting shows its error in its own submenu.
