@@ -4,7 +4,7 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
-## Unreleased
+## 1.14.0
 
 - **Your meetings in Claude and other assistants**: `Takku mcp` serves the notes folder over MCP, read only, so Claude Code, Claude Desktop or another assistant can list your meetings, search what was said and read a note with its Transcript. One line sets it up: [README → Your meetings in an AI assistant](README.md#your-meetings-in-an-ai-assistant-mcp).
 - **Less of the others' voice in your lines, more of yours kept**: with the call on the speakers, the microphone also hears the others. Takku now compares the loudness of the microphone and of the system audio every 20 ms: what is only the others coming back from the speakers is removed even when the words came out different, and what you say over them stays even when it repeats their words. With headphones nothing of yours is removed. Words spelled a little differently (*riunione*, *riunioni*) now count as the same when the signal cannot tell.
