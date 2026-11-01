@@ -427,7 +427,7 @@ actor MeetingTranscription {
                       cached.currentSignal == nil || (segment.track == .me && cached.currentLevels == nil)
                 else { continue }
                 group.addTask {
-                    let (measured, problem) = await measured(cached, segment, in: directory, speechDetector: speechDetector)
+                    let (measured, problem) = await withMeasures(cached, segment, in: directory, speechDetector: speechDetector)
                     return (segment.fileName, measured, problem)
                 }
             }
@@ -443,7 +443,7 @@ actor MeetingTranscription {
 
     /// The Segment's cache with the peak level of each Me Utterance and the signal measured on the
     /// audio, and saved. It decodes the audio, so it runs off the actor. A failed save keeps what was measured.
-    private nonisolated static func measured(
+    private nonisolated static func withMeasures(
         _ cached: CachedSegment, _ segment: Segment, in directory: URL, speechDetector: SpeechDetector
     ) async -> (CachedSegment, String?) {
         guard let samples = try? await loadSamples(directory.appending(path: segment.fileName)) else { return (cached, nil) }
