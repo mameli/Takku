@@ -8,9 +8,10 @@ extension ChatClient {
     /// A slow local model can go minutes without sending a byte before answering:
     /// the default timeout (60 s of silence) is not enough.
     private static let localSession = session(silence: 900, total: 1_800)
-    /// A remote provider answers within a minute or two, or not at all: a request it leaves
-    /// hanging fails after 3 minutes of silence or 10 in all, instead of holding the queue for 30.
-    private static let remoteSession = session(silence: 180, total: 600)
+    /// A remote provider sends nothing until its reply is complete (no streaming): a long Transcript
+    /// with a lot of reasoning took 217 s. A request it leaves hanging fails after 10 minutes of
+    /// silence or 15 in all, instead of holding the queue for 30; *Stop processing* ends it sooner.
+    private static let remoteSession = session(silence: 600, total: 900)
 
     private static func session(silence: TimeInterval, total: TimeInterval) -> URLSession {
         let configuration = URLSessionConfiguration.ephemeral
