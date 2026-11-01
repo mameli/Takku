@@ -4,6 +4,12 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
+## Unreleased
+
+- **Less of the others' voice in your lines, more of yours kept**: with the call on the speakers, the microphone also hears the others. Takku now compares the loudness of the microphone and of the system audio every 20 ms: what is only the others coming back from the speakers is removed even when the words came out different, and what you say over them stays even when it repeats their words. With headphones nothing of yours is removed. Words spelled a little differently (*riunione*, *riunioni*) now count as the same when the signal cannot tell.
+- **No more made-up sentences on noise**: a click, a cough or the hum of the room could become a sentence in the Transcript. A small speech detector (Silero, a few MB, downloaded the first time) now checks that someone spoke where a sentence was recognised. *Reprocess Recording…* applies both to a meeting still on your Mac.
+- **Calls suggested sooner**: a call in Zoom, Teams, FaceTime, Slack or Webex is suggested after about 5 seconds instead of 15 (browsers and other apps stay at 15, since a voice message there is not a call). Zoom's and Firefox's calls are named after the app instead of a helper process, an app back on the microphone within a minute (reconnecting, a mute) is not suggested again, and waking the Mac no longer counts the sleep as time on the microphone.
+
 ## 1.13.0 (2026-11-01)
 
 - **A new welcome window**: a short tour, drawn on squared paper, shows what Takku does before asking for anything: it records the call, marks a moment and keeps a slide with a shortcut (try them while the tour plays), names the speakers and works beyond calls, for a lecture or an imported memo. Then the setup, one page at a time: where the notes go, the permissions, the transcription model (already downloading during the tour) and who writes the Summary.

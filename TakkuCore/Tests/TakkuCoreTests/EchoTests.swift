@@ -72,4 +72,42 @@ struct EchoTests {
         #expect(peakLevel(of: silence[...], sampleRate: sampleRate) < -100)
         #expect(abs(peakLevel(of: loud[..<400], sampleRate: sampleRate) - (-20)) < 0.01)
     }
+
+    @Test("a degraded copy of the others' words is echo too")
+    func misspelledEchoRemoved() {
+        let me = [Utterance(track: .me, start: 6.5, end: 10, text: " cioè non è che servi essere un esperta, la macchina di parla")]
+
+        #expect(removingEcho(others + me) == others)
+    }
+
+    /// 12 seconds of the others with their voice coming back from the speakers into my microphone,
+    /// and my own voice from 5 to 8 seconds.
+    func speakerSignal() -> EchoSignal {
+        let othersAudio = EchoSignalTests.speech(12, seed: 11)
+        var meAudio = EchoSignalTests.bleed(othersAudio, delay: 60, gain: 0.08)
+        EchoSignalTests.adding(EchoSignalTests.speech(3, seed: 29), at: 5, gain: 0.9, to: &meAudio)
+        return EchoSignalTests.signal(othersAudio, meAudio)
+    }
+
+    @Test("with the signal, bleed is echo even when its words came out different")
+    func bleedRemoved() {
+        let me = [Utterance(track: .me, start: 1, end: 4.5, text: " Una casa che capisce più lui della strada")]
+
+        #expect(removingEcho(others + me, signal: speakerSignal()) == others)
+    }
+
+    @Test("with the signal, my voice over the others stays even when the words match")
+    func localKept() {
+        let me = [Utterance(track: .me, start: 5, end: 8, text: " non è che serve essere un esperto")]
+
+        #expect(removingEcho(others + me, signal: speakerSignal()) == others + me)
+    }
+
+    @Test("in a run of echo, my own sentence shown local by the signal stays")
+    func localSentenceInEchoRun() {
+        let bleed = Utterance(track: .me, start: 1, end: 4.5, text: " una cosa che capisce pure l'uomo della strada")
+        let mine = Utterance(track: .me, start: 5, end: 8, text: " Sì, però dobbiamo decidere il budget.")
+
+        #expect(removingEcho(others + [bleed, mine], signal: speakerSignal()) == others + [mine])
+    }
 }

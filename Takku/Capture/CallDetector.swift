@@ -2,13 +2,14 @@ import AppKit
 import CoreAudio
 import TakkuCore
 
-/// Every 3 seconds reads which apps are using an audio input (Core Audio process objects: nothing
+/// Every second reads which apps are using an audio input (Core Audio process objects: nothing
 /// is recorded or listened to) and passes them to `CallWatch`, which decides when to suggest
 /// starting or stopping a Meeting. Takku itself is ignored.
 @MainActor
 final class CallDetector {
     private var watch = CallWatch()
     private var poller: Task<Void, Never>?
+    private static let clockOrigin = ContinuousClock.now
 
     /// `isRecording` is read at every poll; `suggest` is called with what `CallWatch` suggests.
     func start(isRecording: @escaping @MainActor () -> Bool, suggest: @escaping @MainActor (CallWatch.Suggestion) -> Void) {
@@ -18,14 +19,16 @@ final class CallDetector {
                 guard let self else { return }
                 if AppSettings.suggestCalls {
                     let apps = Self.appsUsingInput()
-                    let now = ProcessInfo.processInfo.systemUptime
+                    // Counts the time asleep too: a wake-up after a long sleep is a gap, not a call.
+                    let elapsed = Self.clockOrigin.duration(to: .now).components
+                    let now = TimeInterval(elapsed.seconds) + TimeInterval(elapsed.attoseconds) * 1e-18
                     if let suggestion = self.watch.update(appsUsingInput: apps, isRecording: isRecording(), now: now) {
                         suggest(suggestion)
                     }
                 } else {
                     self.watch = CallWatch()
                 }
-                try? await Task.sleep(for: .seconds(3))
+                try? await Task.sleep(for: .seconds(1))
             }
         }
     }
@@ -33,43 +36,66 @@ final class CallDetector {
     /// Listening for "Hey Siri" is not a call.
     private static let ignoredProcesses: Set<String> = ["com.apple.CoreSpeech"]
 
-    /// System processes that capture for an app without being part of it.
-    private static let knownProcesses = [
-        "com.apple.avconferenced": "FaceTime",
-        "com.apple.WebKit.GPU": "Safari",
+    /// System processes that capture for an app without being part of it: the app and its name
+    /// when it is not running.
+    private static let systemProcesses = [
+        "com.apple.avconferenced": (bundleID: "com.apple.FaceTime", name: "FaceTime"),
+        "com.apple.WebKit.GPU": (bundleID: "com.apple.Safari", name: "Safari"),
     ]
 
-    /// The names of the apps with a process using an audio input, Takku excluded.
-    private static func appsUsingInput() -> Set<String> {
+    /// The apps with a process using an audio input, Takku excluded.
+    private static func appsUsingInput() -> Set<CallApp> {
         let ownPID = ProcessInfo.processInfo.processIdentifier
-        var apps: Set<String> = []
+        var apps: Set<CallApp> = []
         for process in processObjects() where isRunningInput(process) {
             guard let pid = processPID(process), pid != ownPID else { continue }
             let bundleID = bundleID(process)
             if let bundleID, ignoredProcesses.contains(bundleID) { continue }
-            apps.insert(appName(pid: pid, bundleID: bundleID))
+            apps.insert(app(pid: pid, bundleID: bundleID))
         }
         return apps
     }
 
-    /// The app a process belongs to: a helper (`com.google.Chrome.helper`) is named after the app
-    /// whose bundle identifier starts its own.
-    private static func appName(pid: pid_t, bundleID: String?) -> String {
-        if let bundleID, let known = knownProcesses[bundleID] { return known }
-        if var components = bundleID?.split(separator: ".").map(String.init) {
-            while components.count >= 2 {
-                let candidate = components.joined(separator: ".")
-                if let app = NSRunningApplication.runningApplications(withBundleIdentifier: candidate)
-                    .first(where: { $0.activationPolicy == .regular }),
-                   let name = app.localizedName {
-                    return name
-                }
-                components.removeLast()
+    /// The app a process belongs to: a helper (`com.google.Chrome.helper`, Zoom's `us.zoom.CptHost`)
+    /// is named after its app, found by bundle identifier or, failing that, among its parent processes.
+    private static func app(pid: pid_t, bundleID: String?) -> CallApp {
+        if let bundleID, let system = systemProcesses[bundleID] {
+            return regularApp(withBundleID: system.bundleID) ?? CallApp(name: system.name, bundleID: system.bundleID)
+        }
+        if let bundleID {
+            for candidate in CallApp.candidateBundleIDs(forAudioProcess: bundleID) {
+                if let app = regularApp(withBundleID: candidate) { return app }
             }
         }
-        return NSRunningApplication(processIdentifier: pid)?.localizedName
-            ?? bundleID
-            ?? String(localized: "another app")
+        var current = pid
+        for _ in 0..<4 {
+            guard let parent = parentPID(of: current), parent > 1 else { break }
+            if let app = NSRunningApplication(processIdentifier: parent), app.activationPolicy == .regular,
+               let name = app.localizedName {
+                return CallApp(name: name, bundleID: app.bundleIdentifier)
+            }
+            current = parent
+        }
+        let running = NSRunningApplication(processIdentifier: pid)
+        return CallApp(
+            name: running?.localizedName ?? bundleID ?? String(localized: "another app"),
+            bundleID: running?.bundleIdentifier ?? bundleID
+        )
+    }
+
+    private static func regularApp(withBundleID bundleID: String) -> CallApp? {
+        guard let app = NSRunningApplication.runningApplications(withBundleIdentifier: bundleID)
+            .first(where: { $0.activationPolicy == .regular }),
+            let name = app.localizedName
+        else { return nil }
+        return CallApp(name: name, bundleID: bundleID)
+    }
+
+    private static func parentPID(of pid: pid_t) -> pid_t? {
+        var info = proc_bsdinfo()
+        let size = Int32(MemoryLayout<proc_bsdinfo>.size)
+        guard proc_pidinfo(pid, PROC_PIDTBSDINFO, 0, &info, size) == size else { return nil }
+        return pid_t(info.pbi_ppid)
     }
 
     // MARK: - Core Audio

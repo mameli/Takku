@@ -20,3 +20,16 @@ public func isLikelyHallucination(_ texts: [String], speechDuration: TimeInterva
         .trimmingCharacters(in: .whitespacesAndNewlines.union(.punctuationCharacters))
     return stockSentences.contains(text)
 }
+
+/// The Utterances of a Segment starting at `segmentStart` (seconds from the start of the Meeting)
+/// in which Silero heard speech: the recognizer also makes up sentences on a click, a cough or
+/// room noise loud enough for the speech ranges, not only the stock ones. Without speech
+/// probabilities every Utterance is kept.
+public func removingUnspoken(_ utterances: [Utterance], signal: SegmentSignal?, segmentStart: TimeInterval) -> [Utterance] {
+    utterances.filter { isSpoken($0, signal: signal, segmentStart: segmentStart) }
+}
+
+/// False when Silero heard no speech during the Utterance; true without speech probabilities.
+public func isSpoken(_ utterance: Utterance, signal: SegmentSignal?, segmentStart: TimeInterval) -> Bool {
+    signal?.hasSpeech(from: utterance.start - segmentStart, to: utterance.end - segmentStart) ?? true
+}

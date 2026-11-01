@@ -50,6 +50,19 @@ actor MeetingTranscription {
         var currentLevels: [Double?]? {
             levelsVersion == Self.currentLevelsVersion && levels?.count == utterances.count ? levels : nil
         }
+        /// The level of every 20 ms and Silero's speech probabilities, for the echo removal and to
+        /// drop made-up sentences. `nil` in caches written before 1.14.0: measured once on the audio and added.
+        var signal: SegmentSignal?
+        var signalVersion: Int? = CachedSegment.currentSignalVersion
+        /// Bump when `SegmentSignal` is measured another way: it is measured again.
+        static let currentSignalVersion = 1
+
+        /// The signal if measured the current way with speech probabilities, `nil` otherwise: a
+        /// Segment measured while the speech detector was not available is measured again.
+        var currentSignal: SegmentSignal? {
+            guard signalVersion == Self.currentSignalVersion, let signal, signal.hasSpeechProbabilities else { return nil }
+            return signal
+        }
     }
 
     /// The Speaker turns of the Others Track, kept in the Recording folder: a Retry does not
@@ -78,6 +91,7 @@ actor MeetingTranscription {
 
     private let transcriber: LocalTranscriber
     private let diarizer: SpeakerDiarizer
+    private let speechDetector: SpeechDetector
     /// Fixed for the whole Meeting: Segments transcribed by another model are done again.
     private let model: TranscriptionModel
     /// The Meeting languages ticked in Settings at the start: detection picks among them.
@@ -96,9 +110,13 @@ actor MeetingTranscription {
     private var fromCacheSegments: Set<String> = []
 
     /// `languages`: the Meeting languages; with only one it is forced, otherwise detected among them.
-    init(transcriber: LocalTranscriber, diarizer: SpeakerDiarizer, model: TranscriptionModel, languages: [String]) {
+    init(
+        transcriber: LocalTranscriber, diarizer: SpeakerDiarizer, speechDetector: SpeechDetector,
+        model: TranscriptionModel, languages: [String]
+    ) {
         self.transcriber = transcriber
         self.diarizer = diarizer
+        self.speechDetector = speechDetector
         self.model = model
         self.languages = MeetingLanguages.normalized(languages)
         self.forcedLanguage = MeetingLanguages.forced(languages)
@@ -153,7 +171,7 @@ actor MeetingTranscription {
                 }
             }
         }
-        let measured = await Self.measuringMissingLevels(recording, bySegment, in: directory)
+        let measured = await Self.measuringMissing(recording, bySegment, in: directory, speechDetector: speechDetector)
         bySegment = measured.segments
         cacheProblems.append(contentsOf: measured.cacheProblems)
 
@@ -161,7 +179,10 @@ actor MeetingTranscription {
         // the cache: Retry on an old Recording benefits too. Only what they are computed from is cached
         // (Me levels, Speaker turns), so a Retry does not decode and diarize the audio again.
         var stage = ContinuousClock.now
-        var utterances = removingEcho(removingEchoResidue(withMeLevels(recording, bySegment)))
+        let spoken = spokenWithMeLevels(recording, bySegment)
+        let signal = Self.echoSignal(recording, bySegment)
+        if signal == nil { logger.notice("Echo removed by words only: some Segments have no levels") }
+        var utterances = removingEcho(removingEchoResidue(spoken), signal: signal)
         logger.notice("Echo removed in \(secondsSince(stage), privacy: .public)")
         // Without the Speakers the Transcript keeps "Others": it is a warning, not a failure.
         var speakersProblem: String?
@@ -191,16 +212,34 @@ actor MeetingTranscription {
         )
     }
 
-    /// The Utterances of every Segment with the cached peak level of the Me ones; `nil` where the
-    /// levels could not be measured.
-    private func withMeLevels(
+    /// The Utterances of every Segment in which Silero heard speech, with the cached peak level of
+    /// the Me ones; `nil` where the levels could not be measured.
+    private func spokenWithMeLevels(
         _ recording: Recording, _ bySegment: [String: CachedSegment]
     ) -> [(utterance: Utterance, level: Double?)] {
         recording.segments.flatMap { segment -> [(utterance: Utterance, level: Double?)] in
             guard let cached = bySegment[segment.fileName] else { return [] }
             let levels = cached.currentLevels ?? Array(repeating: nil, count: cached.utterances.count)
-            return Array(zip(cached.utterances, levels))
+            let spoken = zip(cached.utterances, levels)
+                .filter { isSpoken($0.0, signal: cached.currentSignal, segmentStart: segment.start) }
+                .map { (utterance: $0.0, level: $0.1) }
+            if spoken.count < cached.utterances.count {
+                logger.notice("\(segment.fileName, privacy: .public): \(cached.utterances.count - spoken.count) sentences without speech dropped")
+            }
+            return spoken
         }
+    }
+
+    /// Both Tracks' levels for the echo removal, `nil` unless every Segment with Utterances has
+    /// them: a Track missing where it has speech would look silent, and the signal would judge wrong.
+    private static func echoSignal(_ recording: Recording, _ bySegment: [String: CachedSegment]) -> EchoSignal? {
+        var segments: [(segment: Segment, levels: [Float])] = []
+        for segment in recording.segments {
+            guard let cached = bySegment[segment.fileName], !cached.utterances.isEmpty else { continue }
+            guard cached.signalVersion == CachedSegment.currentSignalVersion, let signal = cached.signal else { return nil }
+            segments.append((segment, signal.levels))
+        }
+        return EchoSignal(segments: segments)
     }
 
     /// The peak level of each Utterance in the audio of the Segment starting at `start`.
@@ -340,8 +379,10 @@ actor MeetingTranscription {
             }
         }
         let levels = segment.track == .me ? Self.levels(of: utterances, in: samples, startingAt: segment.start) : nil
+        let signal = utterances.isEmpty ? nil : await Self.signal(of: samples, speechDetector: speechDetector)
         let result = CachedSegment(
-            model: model.id, language: language, isLanguageReliable: isReliable, utterances: utterances, levels: levels
+            model: model.id, language: language, isLanguageReliable: isReliable, utterances: utterances, levels: levels,
+            signal: signal
         )
         saveCache(result, to: cacheURL)
         return result
@@ -375,16 +416,18 @@ actor MeetingTranscription {
         return cached
     }
 
-    /// Every Me Segment cached without current levels, measured on its audio (in parallel) and saved.
-    private nonisolated static func measuringMissingLevels(
-        _ recording: Recording, _ bySegment: [String: CachedSegment], in directory: URL
+    /// Every Segment cached without current levels (Me only) or signal, measured on its audio (in
+    /// parallel) and saved. A Segment without Utterances needs neither.
+    private nonisolated static func measuringMissing(
+        _ recording: Recording, _ bySegment: [String: CachedSegment], in directory: URL, speechDetector: SpeechDetector
     ) async -> (segments: [String: CachedSegment], cacheProblems: [String]) {
         await withTaskGroup(of: (String, CachedSegment, String?).self) { group in
-            for segment in recording.segments where segment.track == .me {
-                guard let cached = bySegment[segment.fileName], !cached.utterances.isEmpty, cached.currentLevels == nil
+            for segment in recording.segments {
+                guard let cached = bySegment[segment.fileName], !cached.utterances.isEmpty,
+                      cached.currentSignal == nil || (segment.track == .me && cached.currentLevels == nil)
                 else { continue }
                 group.addTask {
-                    let (measured, problem) = await withLevels(cached, segment, in: directory)
+                    let (measured, problem) = await measured(cached, segment, in: directory, speechDetector: speechDetector)
                     return (segment.fileName, measured, problem)
                 }
             }
@@ -398,24 +441,37 @@ actor MeetingTranscription {
         }
     }
 
-    /// The Segment's cache with the peak level of each Utterance measured on the audio, and saved.
-    /// It decodes the audio, so it runs off the actor. A failed save keeps the measured levels.
-    private nonisolated static func withLevels(
-        _ cached: CachedSegment, _ segment: Segment, in directory: URL
+    /// The Segment's cache with the peak level of each Me Utterance and the signal measured on the
+    /// audio, and saved. It decodes the audio, so it runs off the actor. A failed save keeps what was measured.
+    private nonisolated static func measured(
+        _ cached: CachedSegment, _ segment: Segment, in directory: URL, speechDetector: SpeechDetector
     ) async -> (CachedSegment, String?) {
         guard let samples = try? await loadSamples(directory.appending(path: segment.fileName)) else { return (cached, nil) }
         var measured = cached
-        measured.levels = levels(of: cached.utterances, in: samples, startingAt: segment.start)
-        measured.levelsVersion = CachedSegment.currentLevelsVersion
+        if segment.track == .me, cached.currentLevels == nil {
+            measured.levels = levels(of: cached.utterances, in: samples, startingAt: segment.start)
+            measured.levelsVersion = CachedSegment.currentLevelsVersion
+        }
+        if cached.currentSignal == nil {
+            measured.signal = await signal(of: samples, speechDetector: speechDetector)
+            measured.signalVersion = CachedSegment.currentSignalVersion
+        }
         let cacheURL = directory.appending(path: segment.transcriptionCacheFileName)
         do {
             try measured.save(to: cacheURL)
             return (measured, nil)
         } catch {
             let problem = "\(cacheURL.lastPathComponent): \(error.localizedDescription)"
-            logger.warning("Cache not saved, levels kept in memory: \(problem, privacy: .public)")
+            logger.warning("Cache not saved, measures kept in memory: \(problem, privacy: .public)")
             return (measured, problem)
         }
+    }
+
+    private nonisolated static func signal(of samples: [Float], speechDetector: SpeechDetector) async -> SegmentSignal {
+        SegmentSignal(
+            levels: SegmentSignal.frameLevels(of: samples, sampleRate: Recording.sampleRate),
+            speech: await speechDetector.speechProbabilities(samples)
+        )
     }
 
     /// One language per Meeting, detected once on up to 30 seconds of speech (silence

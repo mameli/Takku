@@ -10,9 +10,13 @@ private let minWords = 3
 private let minSharedFraction = 0.8
 
 /// Removes from the Me Track the others' voice leaked into the microphone (speakers without
-/// headphones: Takku has no echo cancellation): a run of Me Utterances whose words almost all
-/// appear, in the same order, in what the others say at the same moment.
-public func removingEcho(_ utterances: [Utterance]) -> [Utterance] {
+/// headphones: Takku has no echo cancellation). A run of Me Utterances is echo when `signal` says
+/// the delayed Others Track explains its sound (bleed); it is kept when the signal shows someone
+/// speaking in the room (local), even if the words match, since I may talk over the others. When
+/// the signal cannot tell, or there is none, it is echo if almost all its words appear, in the
+/// same order, in what the others say at the same moment. In a run that is echo, a sentence the
+/// signal shows local survives; in one that is not, each sentence is judged on its own.
+public func removingEcho(_ utterances: [Utterance], signal: EchoSignal? = nil) -> [Utterance] {
     let others = utterances.filter { $0.track == .others }.sorted { $0.start < $1.start }
     let me = utterances.indices.filter { utterances[$0].track == .me }.sorted { utterances[$0].start < utterances[$1].start }
 
@@ -25,15 +29,32 @@ public func removingEcho(_ utterances: [Utterance]) -> [Utterance] {
         }
     }
 
-    var echo = Set<Int>()
-    for run in runs {
+    func verdict(_ run: [Int]) -> EchoSignal.Verdict? {
+        signal?.assess(from: utterances[run.first!].start, to: run.map { utterances[$0].end }.max()!)
+    }
+    func repeatsOthers(_ run: [Int]) -> Bool {
         let meWords = run.flatMap { words(utterances[$0].text) }
-        guard meWords.count >= minWords else { continue }
+        guard meWords.count >= minWords else { return false }
         let from = utterances[run.first!].start - timeTolerance
         let to = utterances[run.last!].end + timeTolerance
         let othersWords = others.filter { $0.end >= from && $0.start <= to }.flatMap { words($0.text) }
-        if Double(commonSubsequenceLength(meWords, othersWords)) >= minSharedFraction * Double(meWords.count) {
-            echo.formUnion(run)
+        return Double(commonSubsequenceLength(meWords, othersWords)) >= minSharedFraction * Double(meWords.count)
+    }
+    func isEcho(_ run: [Int]) -> Bool {
+        switch verdict(run) {
+        case .bleed: true
+        case .local: false
+        case nil: repeatsOthers(run)
+        }
+    }
+
+    var echo = Set<Int>()
+    for run in runs {
+        if isEcho(run) {
+            // Bleed can run straight into my own sentence: one the signal shows local stays.
+            echo.formUnion(run.filter { words(utterances[$0].text).count < minWords || verdict([$0]) != .local })
+        } else if run.count > 1, signal != nil {
+            echo.formUnion(run.filter { isEcho([$0]) })
         }
     }
     return utterances.indices.filter { !echo.contains($0) }.map { utterances[$0] }
@@ -79,6 +100,29 @@ private func words(_ text: String) -> [String] {
     text.lowercased().split { !$0.isLetter && !$0.isNumber }.map(String.init)
 }
 
+/// The echo reaches the microphone degraded and the recognizer may spell it differently: words of
+/// at least 4 letters match when at least 60% of their letters agree ("riunione" and "riunioni").
+/// Loose on its own, it only counts inside a run whose words almost all match in order.
+private func sameWord(_ a: String, _ b: String) -> Bool {
+    if a == b { return true }
+    let a = Array(a), b = Array(b)
+    guard a.count >= 4, b.count >= 4 else { return false }
+    return 1 - Double(editDistance(a, b)) / Double(max(a.count, b.count)) >= 0.6
+}
+
+private func editDistance(_ a: [Character], _ b: [Character]) -> Int {
+    var previous = Array(0...b.count)
+    var current = [Int](repeating: 0, count: b.count + 1)
+    for (row, charA) in a.enumerated() {
+        current[0] = row + 1
+        for (column, charB) in b.enumerated() {
+            current[column + 1] = min(previous[column] + (charA == charB ? 0 : 1), previous[column + 1] + 1, current[column] + 1)
+        }
+        swap(&previous, &current)
+    }
+    return previous[b.count]
+}
+
 /// Length of the longest sequence of words found in both, in the same order.
 private func commonSubsequenceLength(_ a: [String], _ b: [String]) -> Int {
     guard !a.isEmpty, !b.isEmpty else { return 0 }
@@ -86,7 +130,7 @@ private func commonSubsequenceLength(_ a: [String], _ b: [String]) -> Int {
     for wordA in a {
         var current = [Int](repeating: 0, count: b.count + 1)
         for (j, wordB) in b.enumerated() {
-            current[j + 1] = wordA == wordB ? previous[j] + 1 : max(previous[j + 1], current[j])
+            current[j + 1] = sameWord(wordA, wordB) ? previous[j] + 1 : max(previous[j + 1], current[j])
         }
         previous = current
     }

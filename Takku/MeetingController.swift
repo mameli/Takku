@@ -18,6 +18,7 @@ final class MeetingController {
     let models = TranscriptionModels()
     private let transcriber: LocalTranscriber
     private let diarizer = SpeakerDiarizer()
+    private let speechDetector = SpeechDetector()
     private let voiceRecognizer = VoiceRecognizer()
     let processor: MeetingProcessor
     private var currentTakkuID: UUID?
@@ -90,7 +91,7 @@ final class MeetingController {
         if hasTestIsolation {
             try? TakkuFolder.ensureDefaultTemplate()
         }
-        processor = MeetingProcessor(transcriber: transcriber, diarizer: diarizer)
+        processor = MeetingProcessor(transcriber: transcriber, diarizer: diarizer, speechDetector: speechDetector)
         templateName = AppSettings.defaultTemplate
         Notifications.shared.configure()
         KeyboardShortcuts.onKeyDown(for: .startStopMeeting) { [weak self] in self?.toggle() }
@@ -318,7 +319,8 @@ final class MeetingController {
         now = Date()
         let model = TranscriptionModel.selected
         let transcription = MeetingTranscription(
-            transcriber: transcriber, diarizer: diarizer, model: model, languages: AppSettings.meetingLanguages
+            transcriber: transcriber, diarizer: diarizer, speechDetector: speechDetector, model: model,
+            languages: AppSettings.meetingLanguages
         )
         let started: MeetingRecorder.Started
         do {

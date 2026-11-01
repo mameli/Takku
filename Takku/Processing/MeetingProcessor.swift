@@ -71,6 +71,7 @@ final class MeetingProcessor {
 
     private let transcriber: LocalTranscriber
     private let diarizer: SpeakerDiarizer
+    private let speechDetector: SpeechDetector
     /// Transcriptions started while recording, to be completed at the stop.
     private var liveTranscriptions: [UUID: MeetingTranscription] = [:]
     /// In-memory copy of the state of Meetings being recorded: if saving to disk fails,
@@ -88,9 +89,10 @@ final class MeetingProcessor {
     /// The Transcript in the Vault or, without a Vault, the copy in the Recording folder.
     private(set) var lastTranscriptURL: URL?
 
-    init(transcriber: LocalTranscriber, diarizer: SpeakerDiarizer) {
+    init(transcriber: LocalTranscriber, diarizer: SpeakerDiarizer, speechDetector: SpeechDetector) {
         self.transcriber = transcriber
         self.diarizer = diarizer
+        self.speechDetector = speechDetector
     }
 
     static func directory(for takkuID: UUID) -> URL {
@@ -394,7 +396,8 @@ final class MeetingProcessor {
         let directory = Self.directory(for: record.takkuID)
         let transcription = liveTranscriptions.removeValue(forKey: record.takkuID)
             ?? MeetingTranscription(
-                transcriber: transcriber, diarizer: diarizer, model: .selected, languages: AppSettings.meetingLanguages
+                transcriber: transcriber, diarizer: diarizer, speechDetector: speechDetector, model: .selected,
+                languages: AppSettings.meetingLanguages
             )
 
         let recording: Recording
