@@ -4,7 +4,7 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
-## Unreleased
+## 1.15.1 (2026-11-01)
 
 - **Stop processing**: a Meeting being processed or waiting in the queue can be stopped from the menu (*Stop processing* under the current one, or in its *Recent meetings* submenu). A Regenerate or a Reprocess you stop leaves the Meeting as it was, Summary and Transcript included; a Meeting stopped at its first Processing keeps its audio for *Reprocess Recording…*.
 - **A provider that does not answer no longer holds the queue for half an hour**: a request to an external model now fails after 10 minutes without an answer, or 15 in all, instead of 15 and 30 (a model on your Mac keeps the long limits; a long Summary in blocks gets these limits for each request). The menu shows how long the current step has lasted, from the first minute (*Writing Summary · 4 min*).
