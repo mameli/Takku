@@ -68,7 +68,7 @@ struct SummarySetup: View {
             }
             // Takku Credit stays the card that stands out: these are plain links.
             if AppleIntelligenceModel.isAvailable {
-                Text("Apple Intelligence, or Ollama and LM Studio. Nothing leaves the Mac, but the Summaries are less precise.")
+                Text("Apple Intelligence, or Ollama and LM Studio. Nothing leaves this Mac; quality and speed depend on the model.")
                     .font(Paper.serif(12.5)).foregroundStyle(Paper.text)
                     .fixedSize(horizontal: false, vertical: true)
                 Spacer(minLength: 4)
@@ -81,7 +81,7 @@ struct SummarySetup: View {
                 }
                 .buttonStyle(PaperButtonStyle(isPrimary: false))
             } else {
-                Text("Ollama or LM Studio, with a model on your Mac. Nothing leaves the Mac, but it takes a powerful Mac, and the Summaries are less precise.")
+                Text("Ollama or LM Studio, with a model on your Mac. Nothing leaves this Mac; quality and speed depend on the model your Mac can run.")
                     .font(Paper.serif(12.5)).foregroundStyle(Paper.text)
                     .fixedSize(horizontal: false, vertical: true)
                 Spacer(minLength: 4)

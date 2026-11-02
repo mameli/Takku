@@ -6,6 +6,9 @@ private let stockSentences: Set<String> = [
     "grazie", "grazie a tutti", "grazie mille", "grazie per la visione", "grazie per l'attenzione",
     "sottotitoli creati dalla comunità amara.org", "sottotitoli a cura di qtss",
     "thank you", "thank you very much", "thanks for watching", "thank you for watching", "you", "bye",
+    "danke", "vielen dank", "danke fürs zuschauen", "untertitel der amara.org-community",
+    "merci", "merci beaucoup", "merci d'avoir regardé", "sous-titres réalisés par la communauté d'amara.org", "sous-titres réalisés para la communauté d'amara.org",
+    "gracias", "muchas gracias", "gracias por ver", "subtítulos realizados por la comunidad de amara.org",
 ]
 
 /// More sound than this (pauses excluded) is real speech even when the text is a stock sentence.

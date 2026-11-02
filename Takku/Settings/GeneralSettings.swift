@@ -71,7 +71,7 @@ struct UpdatesToggle: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             Toggle("Check for updates", isOn: $checkForUpdates)
-            Text("Once a day Takku asks GitHub for the latest version; nothing about you or your Meetings is sent.")
+            Text("Once a day Takku asks GitHub for the latest version; nothing about you or your meetings is sent.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -104,7 +104,7 @@ struct CalendarToggle: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             Toggle("Use the calendar", isOn: Binding(get: { useCalendar && isAuthorized }, set: { setEnabled($0) }))
-            Text("The Meeting note takes the name and the participants of the event in progress.")
+            Text("The meeting note takes the name and the participants of the event in progress.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }

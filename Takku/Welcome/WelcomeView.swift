@@ -511,7 +511,7 @@ struct PermissionsSetup: View {
                     Button("Reopen Takku") { Self.relaunch() }
                         .buttonStyle(PaperButtonStyle())
                         .disabled(isBusy)
-                        .help(isBusy ? String(localized: "After the meeting and its Processing.") : "")
+                        .help(isBusy ? String(localized: "Available once the current meeting finishes processing.") : "")
                 case .on:
                     EmptyView()
                 }

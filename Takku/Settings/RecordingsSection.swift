@@ -41,6 +41,12 @@ struct RecordingsSection: View {
                     .foregroundStyle(.secondary)
                     .textSelection(.enabled)
             }
+        } footer: {
+            Text("About 20 MB per hour of meeting. Notes and Transcripts stay in the notes folder: once the audio is deleted, you can still regenerate the Summary from the Transcript.")
+                .foregroundStyle(.secondary)
+        }
+
+        Section {
             Toggle("Keep a Summary log", isOn: $keepSummaryLog)
             LabeledContent("Summary log") {
                 HStack {
@@ -54,7 +60,7 @@ struct RecordingsSection: View {
                 }
             }
         } footer: {
-            Text("About 20 MB per hour of Meeting. Notes and Transcripts stay in the notes folder: without the audio, Retry makes only the Summary again. The Summary log keeps what was sent to the model and its replies, in ~/.takku/summary-log, to improve the Templates: up to 5 MB, the oldest go first.")
+            Text("Saves what was sent to the model and its replies in ~/.takku/summary-log (up to 5 MB, oldest first) to help you improve your Templates.")
                 .foregroundStyle(.secondary)
         }
         .onAppear {

@@ -26,7 +26,7 @@ struct VoicesSection: View {
                 }
             }
         } footer: {
-            Text("When you name the Speakers, Takku remembers their voices on this Mac and suggests the names in the next Meetings, while the audio is kept. A voice is biometric data: keep it only for people who agreed. Turning it off keeps the voices already remembered until you forget them.")
+            Text("Remembers the voices of Speakers you name (on this Mac only) to suggest their names in future meetings while the audio is kept. A voice is biometric data: turn this on only with participants' consent.")
                 .foregroundStyle(.secondary)
         }
         .onAppear { library = VoiceStorage.load() }

@@ -3,6 +3,24 @@
   "strings": {
     "NSAudioCaptureUsageDescription": {
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku nimmt den Systemton der anderen Besprechungsteilnehmer auf, um ihn zu transkribieren."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku graba el audio de los demás participantes en las reuniones para transcribirlo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku enregistre l’audio des autres participants aux réunions afin de le transcrire."
+          }
+        },
         "it": {
           "stringUnit": {
             "state": "translated",
@@ -13,6 +31,24 @@
     },
     "NSCalendarsFullAccessUsageDescription": {
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku benennt die Besprechungsnotiz nach dem laufenden Kalendereintrag und führt die eingeladenen Teilnehmer auf."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku da a la nota de la reunión el nombre del evento en curso y enumera a las personas invitadas."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku nomme la note de réunion d’après l’événement en cours et liste les personnes invitées."
+          }
+        },
         "it": {
           "stringUnit": {
             "state": "translated",
@@ -23,6 +59,24 @@
     },
     "NSMicrophoneUsageDescription": {
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku nimmt deine Stimme während Besprechungen auf, um sie zu transkribieren."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku graba tu voz durante las reuniones para transcribirla."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku enregistre votre voix pendant les réunions afin de la transcrire."
+          }
+        },
         "it": {
           "stringUnit": {
             "state": "translated",

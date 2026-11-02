@@ -20,8 +20,8 @@ struct TranscriptionSection: View {
                     .fixedSize()
                 }
                 Text(languages.count == 1
-                    ? String(localized: "Every Meeting is transcribed in this language.")
-                    : String(localized: "Takku detects which of these languages each Meeting is in."))
+                    ? String(localized: "Every meeting is transcribed in this language.")
+                    : String(localized: "Takku detects which of these languages each meeting is in."))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -32,7 +32,7 @@ struct TranscriptionSection: View {
                 Text(error).foregroundStyle(.secondary).textSelection(.enabled)
             }
         } footer: {
-            Text("Models run on this Mac. Each is downloaded once from Hugging Face: only the model is downloaded, no audio or text is sent. The model in use applies to new Meetings and to Retry.")
+            Text("Models run on this Mac and are downloaded once from Hugging Face; no audio or text is sent. The selected model is used for new meetings and when reprocessing a recording.")
                 .foregroundStyle(.secondary)
         }
     }
