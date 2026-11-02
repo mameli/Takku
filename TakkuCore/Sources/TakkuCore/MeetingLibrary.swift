@@ -73,6 +73,25 @@ public struct MeetingLibrary: Sendable {
         .sorted { ($0.date ?? "", $0.title) > ($1.date ?? "", $1.title) }
     }
 
+    /// The Meetings from `from` to `to` (`yyyy-MM-dd`, both included) whose title, folder,
+    /// participants or speakers contain `query`, ignoring case and accents; `nil` skips a filter.
+    public func meetings(from: String?, to: String?, matching query: String?) -> [Meeting] {
+        let query = query.map(Self.folded)
+        return meetings().filter { meeting in
+            let day = meeting.date.map { String($0.prefix(10)) } ?? ""
+            if let from, day < from { return false }
+            if let to, day > to { return false }
+            guard let query else { return true }
+            return Self.folded(([meeting.title, meeting.folder] + meeting.participants + meeting.speakers).joined(separator: "\n"))
+                .contains(query)
+        }
+    }
+
+    /// The Meeting with this id, `nil` when there is none.
+    public func meeting(id: UUID) -> Meeting? {
+        meetings().first { $0.id == id }
+    }
+
     /// The Meetings whose note or Transcript contains every word of `query`, ignoring case and
     /// accents, most occurrences first; for each, up to `linesPerMeeting` lines with a word.
     public func search(_ query: String, linesPerMeeting: Int = 5) -> [Match] {
@@ -110,5 +129,35 @@ public struct MeetingLibrary: Sendable {
 
     private static func folded(_ text: String) -> String {
         text.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: nil)
+    }
+}
+
+extension MeetingLibrary.Meeting {
+    /// Its metadata as JSON fields, the same for `takku mcp` and `takku list --json`.
+    var fields: [String: Any] {
+        var fields: [String: Any] = [
+            "id": id.uuidString, "title": title, "folder": folder, "has_transcript": transcript != nil,
+        ]
+        fields["date"] = date
+        fields["duration"] = duration
+        fields["language"] = language
+        if !participants.isEmpty { fields["participants"] = participants }
+        if !speakers.isEmpty { fields["speakers"] = speakers }
+        return fields
+    }
+
+    /// Its Meeting note and, with `includeTranscript`, its Transcript, each under its path.
+    func text(includeTranscript: Bool) -> String {
+        var parts = ["# \(title)", "Meeting note (\(note.path(percentEncoded: false))):",
+                     (try? String(contentsOf: note, encoding: .utf8)) ?? "(unreadable)"]
+        if includeTranscript {
+            if let transcript {
+                parts += ["Transcript (\(transcript.path(percentEncoded: false))):",
+                          (try? String(contentsOf: transcript, encoding: .utf8)) ?? "(unreadable)"]
+            } else {
+                parts.append("No Transcript in the notes folder.")
+            }
+        }
+        return parts.joined(separator: "\n\n")
     }
 }

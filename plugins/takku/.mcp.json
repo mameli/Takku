@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "takku": {
+      "command": "/Applications/Takku.app/Contents/MacOS/Takku",
+      "args": ["mcp"]
+    }
+  }
+}

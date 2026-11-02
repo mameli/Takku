@@ -21,7 +21,7 @@ Built as an alternative to Granola for people and companies that keep meeting au
 - **Markdown Templates**: customise sections and instructions in `~/.takku/templates/`, or set `full_text: true` to rewrite an entire lecture instead of summarising it.
 - **Screenshots in the note** (optional): `⌃⌥⌘S` captures the active window and embeds it under the matching summary point. Never sent to the model.
 - **Custom Vocabulary**: fixes names, acronyms and jargon in the transcript and spells them right in the summary.
-- **Hooks & MCP**: run a script after each meeting (Notion, Confluence, git) or query your meetings from Claude, Cursor and other MCP assistants.
+- **Hooks, MCP and CLI**: run a script after each meeting (Notion, Confluence, git), query your meetings from Claude, Codex, Cursor and other MCP assistants, or search them with `takku` in the terminal.
 
 ## Requirements
 
@@ -176,11 +176,16 @@ To run multiple hooks, keep each in `~/.takku/hooks/` and call them from `after-
 
 ### Your meetings in an AI assistant (MCP)
 
-Ask any MCP-compatible assistant (Claude Code, Claude Desktop, Cursor…) questions across your meetings—e.g. *"what did we decide about the release with Mario last week?"* Takku 1.14.0+ includes a built-in read-only MCP server (`Takku` does not need to be running).
+Ask any MCP-compatible assistant (Claude Code, Claude Desktop, Codex, Cursor…) questions across your meetings—e.g. *"what did we decide about the release with Mario last week?"* Takku 1.14.0+ includes a built-in read-only MCP server (`Takku` does not need to be running).
 
 - **Claude Code** (run once):
   ```sh
   claude mcp add --scope user takku -- /Applications/Takku.app/Contents/MacOS/Takku mcp
+  ```
+- **Codex** (run once): the Takku plugin adds the MCP server and two skills, one that looks up what was said and one that prepares a brief for your next meeting with someone.
+  ```sh
+  codex plugin marketplace add mameli/Takku
+  codex plugin add takku@takku
   ```
 - **Claude Desktop** (*Settings → Developer → Edit Config*):
   ```json
@@ -188,6 +193,22 @@ Ask any MCP-compatible assistant (Claude Code, Claude Desktop, Cursor…) questi
   ```
 
 The assistant can list meetings (by date, title, folder or participant), search them (case- and accent-insensitive) and read notes and transcripts from `<notes-folder>/Meetings/` (pass `--notes-folder PATH` after `mcp` to use another folder). It never accesses audio or modifies files. Remember that any meeting the assistant reads is sent to its AI provider.
+
+### Your meetings in the terminal
+
+`takku` reads the same meetings from a terminal or a script, read only, without starting the app:
+
+```sh
+takku list --from 2026-10-01 --query mario     # meetings, newest first, with their ids
+takku search release regression                # meetings containing every word, with the lines
+takku get 11111111-2222-3333-4444-555555555555 --no-transcript
+```
+
+Add `--json` for scripts (the same fields the MCP tools return) and `--notes-folder PATH` for another folder; `takku help` lists every option. Homebrew installs `takku` with the app; otherwise link it once:
+
+```sh
+sudo mkdir -p /usr/local/bin && sudo ln -s /Applications/Takku.app/Contents/MacOS/Takku /usr/local/bin/takku
+```
 
 ### Obsidian or another editor
 

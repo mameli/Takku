@@ -1,0 +1,30 @@
+{
+  "name": "takku",
+  "version": "1.0.0",
+  "description": "Your meetings recorded with Takku in Codex: list them, search what was said and read a note with its transcript, from the notes folder on your Mac.",
+  "author": {
+    "name": "Takku",
+    "url": "https://takku.app"
+  },
+  "homepage": "https://takku.app",
+  "repository": "https://github.com/mameli/Takku",
+  "license": "MIT",
+  "keywords": ["meetings", "notes", "transcripts", "markdown"],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Takku",
+    "shortDescription": "Search and read the meetings you recorded with Takku",
+    "longDescription": "Takku records meetings on your Mac, transcribes them locally and writes a Markdown note for each. This plugin lets Codex list those meetings by date, title or participant, search what was said in the summaries, notes and transcripts, and read a meeting in full. It reads the notes folder chosen in Takku's Settings through the read-only MCP server built into Takku 1.14.0 or later: Takku does not need to be running, and nothing is changed. Requires Takku in /Applications.",
+    "developerName": "Takku",
+    "category": "Productivity",
+    "capabilities": ["Read"],
+    "websiteURL": "https://takku.app",
+    "privacyPolicyURL": "https://takku.app/privacy",
+    "defaultPrompt": [
+      "What did we decide about the release in last week's meetings?"
+    ],
+    "composerIcon": "./assets/logo.png",
+    "logo": "./assets/logo.png"
+  }
+}

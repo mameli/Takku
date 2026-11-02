@@ -4,6 +4,11 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
+## Unreleased
+
+- **Your meetings in the terminal**: `takku list`, `takku search` and `takku get` print your meetings, the ones containing some words with the matching lines, or a note with its Transcript, without starting the app; `--json` gives the same fields as the MCP server, for scripts. Homebrew now installs the `takku` command with the app: [README → Your meetings in the terminal](README.md#your-meetings-in-the-terminal).
+- **Takku plugin for Codex**: `codex plugin marketplace add mameli/Takku`, then `codex plugin add takku@takku`, gives Codex the MCP server and two skills, to find what was said in your meetings and to prepare a brief for the next one: [README → Your meetings in an AI assistant](README.md#your-meetings-in-an-ai-assistant-mcp).
+
 ## 1.15.2 (2026-11-02)
 
 - **Takku in German, French and Spanish**: menus, Settings and the welcome window follow the language of your Mac. Whisper's stock sentences in these languages (*Vielen Dank*, *Merci d'avoir regardé*, *Muchas gracias*…) are dropped from the Transcript when they stand on a short burst of sound, like the Italian and English ones.

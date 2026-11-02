@@ -104,67 +104,32 @@ public struct MCPServer: Sendable {
         }
         switch name {
         case "list_meetings":
-            let from = arguments["from"] as? String, to = arguments["to"] as? String
-            let query = (arguments["query"] as? String).map(Self.folded)
-            let limit = Self.limit(arguments["limit"], default: 30)
-            let meetings = library.meetings().filter { meeting in
-                let day = meeting.date.map { String($0.prefix(10)) } ?? ""
-                if let from, day < from { return false }
-                if let to, day > to { return false }
-                guard let query else { return true }
-                return Self.folded(([meeting.title, meeting.folder] + meeting.participants + meeting.speakers).joined(separator: "\n"))
-                    .contains(query)
-            }
-            return Self.toolResult(Self.json(meetings.prefix(limit).map(Self.summary)))
+            let meetings = library.meetings(
+                from: arguments["from"] as? String, to: arguments["to"] as? String, matching: arguments["query"] as? String
+            )
+            return Self.toolResult(Self.json(meetings.prefix(Self.limit(arguments["limit"], default: 30)).map(\.fields)))
         case "search_meetings":
             guard let query = arguments["query"] as? String, !query.trimmingCharacters(in: .whitespaces).isEmpty else {
                 return Self.toolResult("The query is empty.", isError: true)
             }
             let matches = library.search(query).prefix(Self.limit(arguments["limit"], default: 10))
             return Self.toolResult(Self.json(matches.map { match in
-                Self.summary(match.meeting).merging(["occurrences": match.occurrences, "lines": match.lines]) { $1 }
+                match.meeting.fields.merging(["occurrences": match.occurrences, "lines": match.lines]) { $1 }
             }))
         case "get_meeting":
             guard let idText = arguments["id"] as? String, let id = UUID(uuidString: idText) else {
                 return Self.toolResult("The id is not a meeting id: use one from list_meetings.", isError: true)
             }
-            guard let meeting = library.meetings().first(where: { $0.id == id }) else {
+            guard let meeting = library.meeting(id: id) else {
                 return Self.toolResult("No meeting with id \(idText).", isError: true)
             }
-            return Self.toolResult(Self.fullText(meeting, includeTranscript: arguments["include_transcript"] as? Bool ?? true))
+            return Self.toolResult(meeting.text(includeTranscript: arguments["include_transcript"] as? Bool ?? true))
         default:
             return Self.toolResult("Unknown tool: \(name).", isError: true)
         }
     }
 
-    private static func summary(_ meeting: MeetingLibrary.Meeting) -> [String: Any] {
-        var fields: [String: Any] = [
-            "id": meeting.id.uuidString, "title": meeting.title, "folder": meeting.folder,
-            "has_transcript": meeting.transcript != nil,
-        ]
-        fields["date"] = meeting.date
-        fields["duration"] = meeting.duration
-        fields["language"] = meeting.language
-        if !meeting.participants.isEmpty { fields["participants"] = meeting.participants }
-        if !meeting.speakers.isEmpty { fields["speakers"] = meeting.speakers }
-        return fields
-    }
-
-    private static func fullText(_ meeting: MeetingLibrary.Meeting, includeTranscript: Bool) -> String {
-        var parts = ["# \(meeting.title)", "Meeting note (\(meeting.note.path(percentEncoded: false))):",
-                     (try? String(contentsOf: meeting.note, encoding: .utf8)) ?? "(unreadable)"]
-        if includeTranscript {
-            if let transcript = meeting.transcript {
-                parts += ["Transcript (\(transcript.path(percentEncoded: false))):",
-                          (try? String(contentsOf: transcript, encoding: .utf8)) ?? "(unreadable)"]
-            } else {
-                parts.append("No Transcript in the notes folder.")
-            }
-        }
-        return parts.joined(separator: "\n\n")
-    }
-
-    private static func limit(_ value: Any?, default fallback: Int) -> Int {
+    static func limit(_ value: Any?, default fallback: Int) -> Int {
         min(max((value as? Int) ?? fallback, 1), 200)
     }
 
@@ -172,7 +137,7 @@ public struct MCPServer: Sendable {
         ["content": [["type": "text", "text": text]], "isError": isError]
     }
 
-    private static func json(_ value: Any) -> String {
+    static func json(_ value: Any) -> String {
         encode(value, pretty: true)
     }
 
@@ -183,7 +148,4 @@ public struct MCPServer: Sendable {
         return String(decoding: data, as: UTF8.self)
     }
 
-    private static func folded(_ text: String) -> String {
-        text.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: nil)
-    }
 }
