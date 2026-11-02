@@ -4,6 +4,11 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
+## 1.15.2 (2026-11-02)
+
+- **Takku in German, French and Spanish**: menus, Settings and the welcome window follow the language of your Mac. Whisper's stock sentences in these languages (*Vielen Dank*, *Merci d'avoir regardé*, *Muchas gracias*…) are dropped from the Transcript when they stand on a short burst of sound, like the Italian and English ones.
+- **Shorter texts** in Settings and in the welcome window, and a shorter README.
+
 ## 1.15.1 (2026-11-01)
 
 - **Stop processing**: a Meeting being processed or waiting in the queue can be stopped from the menu (*Stop processing* under the current one, or in its *Recent meetings* submenu). A Regenerate or a Reprocess you stop leaves the Meeting as it was, Summary and Transcript included; a Meeting stopped at its first Processing keeps its audio for *Reprocess Recording…*.
