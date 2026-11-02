@@ -4,7 +4,7 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
-## Unreleased
+## 1.16.0
 
 - **Your meetings in the terminal**: `takku list`, `takku search` and `takku get` print your meetings, the ones containing some words with the matching lines, or a note with its Transcript, without starting the app; `--json` gives the same fields as the MCP server, for scripts. Homebrew now installs the `takku` command with the app: [README → Your meetings in the terminal](README.md#your-meetings-in-the-terminal).
 - **Takku plugin for Codex**: `codex plugin marketplace add mameli/Takku`, then `codex plugin add takku@takku`, gives Codex the MCP server and two skills, to find what was said in your meetings and to prepare a brief for the next one: [README → Your meetings in an AI assistant](README.md#your-meetings-in-an-ai-assistant-mcp).
