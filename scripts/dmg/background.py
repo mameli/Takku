@@ -86,7 +86,6 @@ page = f"""<!doctype html>
     font: 700 25px "Kalam", "Bradley Hand", cursive; color: #3f58ae;
   }}
   .say {{ top: 52px; transform: rotate(-1.5deg); }}
-  .then {{ top: 322px; font-size: 18px; color: #5b5e66; transform: rotate(-1deg); }}
 </style></head><body>
 <svg viewBox="0 0 {WIDTH} {HEIGHT}" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path d="{margin(40)}{margin(45)}" stroke="#c23b2e" stroke-opacity="0.45" stroke-width="1.2"/>
@@ -94,7 +93,6 @@ page = f"""<!doctype html>
   <path d="{''.join(arrow)}" stroke="#c23b2e" stroke-width="3"/>
 </svg>
 <p class="say">Drag Takku into Applications</p>
-<p class="then">then open it from there · takku.app/setup</p>
 </body></html>"""
 
 with tempfile.TemporaryDirectory() as tmp:
