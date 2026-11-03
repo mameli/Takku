@@ -9,6 +9,7 @@
 # button on takku.app) always gives the latest version. Releases up to 1.8.0 carry a zip instead.
 #
 #   scripts/release.sh            build, sign and pack into build/release/, then ask before publishing
+#                                 (a dry-run of the same commit is reused: no second build and notarization)
 #   scripts/release.sh --dry-run  build, sign, notarize and pack only
 #
 # Once per Mac: the certificate from Xcode → Settings → Accounts → Manage Certificates, and
@@ -23,6 +24,7 @@ app=build/release/DerivedData/Build/Products/Release/Takku.app
 zip=build/release/Takku.zip
 dmg="build/release/Takku-$version.dmg"
 latest=build/release/Takku.dmg
+built=build/release/commit
 tap=${TAKKU_TAP:-../homebrew-takku}
 cask="$tap/Casks/takku.rb"
 identity="Developer ID Application"
@@ -41,59 +43,67 @@ if [[ ! -f $cask || -n $(git -C "$tap" status --porcelain) ]]; then
     exit 1
 fi
 
-# The Team ID is the certificate's organizational unit.
-team=$(security find-certificate -c "$identity" -p 2>/dev/null | openssl x509 -noout -subject -nameopt multiline 2>/dev/null \
-    | sed -n 's/^ *organizationalUnitName *= *//p')
-if [[ -z $team ]]; then
-    echo "No \"$identity\" certificate in the keychain: create it in Xcode → Settings → Accounts → Manage Certificates." >&2
-    exit 1
-fi
-if [[ -e /Volumes/Takku ]]; then
-    echo "Eject /Volumes/Takku first: the disk image is laid out there." >&2
-    exit 1
-fi
-if ! xcrun notarytool history --keychain-profile "$notary" >/dev/null 2>&1; then
-    echo "No notarytool profile \"$notary\": run xcrun notarytool store-credentials $notary --apple-id <Apple ID> --team-id $team" >&2
-    exit 1
-fi
-
-rm -rf build/release
-# No get-task-allow entitlement: it is only for debugging (and notarization refuses it).
-# A secure timestamp is required by notarization.
-xcodebuild -project Takku.xcodeproj -scheme Takku -configuration Release \
-    -derivedDataPath build/release/DerivedData \
-    CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="$identity" DEVELOPMENT_TEAM="$team" \
-    CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO OTHER_CODE_SIGN_FLAGS=--timestamp \
-    clean build | grep -E "error: |BUILD"
-
-codesign --verify --strict --deep "$app"
-[[ $(codesign -dvv "$app" 2>&1) == *"Authority=$identity"* ]] || { echo "Not signed with the $identity certificate." >&2; exit 1; }
-
-notarize() {
-    xcrun notarytool submit "$1" --keychain-profile "$notary" --wait --output-format json > build/release/notary.json || true
-    if [[ $(plutil -extract status raw -o - build/release/notary.json 2>/dev/null) != Accepted ]]; then
-        cat build/release/notary.json >&2
-        id=$(plutil -extract id raw -o - build/release/notary.json 2>/dev/null)
-        [[ -n $id ]] && xcrun notarytool log "$id" --keychain-profile "$notary" >&2
-        echo "Notarization of $1 failed." >&2
+# A dry-run leaves the notarized disk image and the commit it was built from in build/release/:
+# publishing that same commit reuses them instead of building and notarizing everything again.
+if [[ ${1:-} != --dry-run && -f $built && $(cat "$built") == $(git rev-parse HEAD) && -f $dmg && -f $latest ]]; then
+    xcrun stapler validate -q "$dmg" || { echo "$dmg has no notarization ticket: delete build/release and run again." >&2; exit 1; }
+    echo "Reusing $dmg: built and notarized from this commit by the dry-run."
+else
+    # The Team ID is the certificate's organizational unit.
+    team=$(security find-certificate -c "$identity" -p 2>/dev/null | openssl x509 -noout -subject -nameopt multiline 2>/dev/null \
+        | sed -n 's/^ *organizationalUnitName *= *//p')
+    if [[ -z $team ]]; then
+        echo "No \"$identity\" certificate in the keychain: create it in Xcode → Settings → Accounts → Manage Certificates." >&2
         exit 1
     fi
-}
+    if [[ -e /Volumes/Takku ]]; then
+        echo "Eject /Volumes/Takku first: the disk image is laid out there." >&2
+        exit 1
+    fi
+    if ! xcrun notarytool history --keychain-profile "$notary" >/dev/null 2>&1; then
+        echo "No notarytool profile \"$notary\": run xcrun notarytool store-credentials $notary --apple-id <Apple ID> --team-id $team" >&2
+        exit 1
+    fi
 
-# The app is notarized as a zip and the ticket stapled to it, so Gatekeeper accepts it offline
-# once it is in Applications too. Then the disk image around it is signed, notarized and stapled.
-ditto -c -k --keepParent "$app" "$zip"
-notarize "$zip"
-rm "$zip"
-xcrun stapler staple -q "$app"
-spctl --assess --type execute "$app" || { echo "Gatekeeper refuses the notarized app." >&2; exit 1; }
-scripts/dmg/make-dmg.sh "$app" "$dmg"
-codesign --sign "$identity" --timestamp "$dmg"
-notarize "$dmg"
-xcrun stapler staple -q "$dmg"
-spctl --assess --type open --context context:primary-signature "$dmg" || { echo "Gatekeeper refuses the disk image." >&2; exit 1; }
-cp "$dmg" "$latest"
-echo "Ready: $dmg (notarized)"
+    rm -rf build/release
+    # No get-task-allow entitlement: it is only for debugging (and notarization refuses it).
+    # A secure timestamp is required by notarization.
+    xcodebuild -project Takku.xcodeproj -scheme Takku -configuration Release \
+        -derivedDataPath build/release/DerivedData \
+        CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="$identity" DEVELOPMENT_TEAM="$team" \
+        CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO OTHER_CODE_SIGN_FLAGS=--timestamp \
+        clean build | grep -E "error: |BUILD"
+
+    codesign --verify --strict --deep "$app"
+    [[ $(codesign -dvv "$app" 2>&1) == *"Authority=$identity"* ]] || { echo "Not signed with the $identity certificate." >&2; exit 1; }
+
+    notarize() {
+        xcrun notarytool submit "$1" --keychain-profile "$notary" --wait --output-format json > build/release/notary.json || true
+        if [[ $(plutil -extract status raw -o - build/release/notary.json 2>/dev/null) != Accepted ]]; then
+            cat build/release/notary.json >&2
+            id=$(plutil -extract id raw -o - build/release/notary.json 2>/dev/null)
+            [[ -n $id ]] && xcrun notarytool log "$id" --keychain-profile "$notary" >&2
+            echo "Notarization of $1 failed." >&2
+            exit 1
+        fi
+    }
+
+    # The app is notarized as a zip and the ticket stapled to it, so Gatekeeper accepts it offline
+    # once it is in Applications too. Then the disk image around it is signed, notarized and stapled.
+    ditto -c -k --keepParent "$app" "$zip"
+    notarize "$zip"
+    rm "$zip"
+    xcrun stapler staple -q "$app"
+    spctl --assess --type execute "$app" || { echo "Gatekeeper refuses the notarized app." >&2; exit 1; }
+    scripts/dmg/make-dmg.sh "$app" "$dmg"
+    codesign --sign "$identity" --timestamp "$dmg"
+    notarize "$dmg"
+    xcrun stapler staple -q "$dmg"
+    spctl --assess --type open --context context:primary-signature "$dmg" || { echo "Gatekeeper refuses the disk image." >&2; exit 1; }
+    cp "$dmg" "$latest"
+    git rev-parse HEAD > "$built"
+    echo "Ready: $dmg (notarized)"
+fi
 
 [[ ${1:-} == --dry-run ]] && exit 0
 read -r -p "Publish $tag on GitHub? [y/N] " answer
