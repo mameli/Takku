@@ -561,30 +561,30 @@
         }
       }
     },
-    "Nobody has spoken for 30 minutes, so Takku stopped recording and is writing the note.": {
+    "Nobody has spoken for 15 minutes, so Takku stopped recording and is writing the note.": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nessuno parla da 30 minuti: Takku ha fermato la registrazione e sta scrivendo la nota."
+            "value": "Nessuno parla da 15 minuti: Takku ha fermato la registrazione e sta scrivendo la nota."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Seit 30 Minuten hat niemand gesprochen: Takku hat die Aufnahme beendet und schreibt die Notiz."
+            "value": "Seit 15 Minuten hat niemand gesprochen: Takku hat die Aufnahme beendet und schreibt die Notiz."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nadie ha hablado en 30 minutos: Takku ha detenido la grabación y está escribiendo la nota."
+            "value": "Nadie ha hablado en 15 minutos: Takku ha detenido la grabación y está escribiendo la nota."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Personne n’a parlé depuis 30 minutes : Takku a arrêté l’enregistrement et rédige la note."
+            "value": "Personne n’a parlé depuis 15 minutes : Takku a arrêté l’enregistrement et rédige la note."
           }
         }
       }

@@ -21,11 +21,11 @@ struct LongRecordingTests {
         #expect(LongRecording.reminderHours(elapsed: 14 * 3600 + 120, reminded: 3) == 14)
     }
 
-    @Test("half an hour transcribed without anyone speaking stops the Meeting")
+    @Test("a quarter of an hour transcribed without anyone speaking stops the Meeting")
     func silence() {
-        #expect(LongRecording.nobodySpeaks(lastSpeech: 600, transcribedUntil: 600 + 30 * 60))
-        #expect(!LongRecording.nobodySpeaks(lastSpeech: 600, transcribedUntil: 600 + 29 * 60))
-        #expect(LongRecording.nobodySpeaks(lastSpeech: nil, transcribedUntil: 30 * 60))
-        #expect(!LongRecording.nobodySpeaks(lastSpeech: nil, transcribedUntil: 25 * 60))
+        #expect(LongRecording.nobodySpeaks(lastSpeech: 600, transcribedUntil: 600 + 15 * 60))
+        #expect(!LongRecording.nobodySpeaks(lastSpeech: 600, transcribedUntil: 600 + 14 * 60))
+        #expect(LongRecording.nobodySpeaks(lastSpeech: nil, transcribedUntil: 15 * 60))
+        #expect(!LongRecording.nobodySpeaks(lastSpeech: nil, transcribedUntil: 10 * 60))
     }
 }

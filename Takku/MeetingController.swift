@@ -25,7 +25,7 @@ final class MeetingController {
     private var now = Date()
     private var isRequestingPermission = false
     private var ticker: Task<Void, Never>?
-    /// Stops the Meeting in progress once nobody has spoken for half an hour (`LongRecording`).
+    /// Stops the Meeting in progress once nobody has spoken for 15 minutes (`LongRecording`).
     private var silenceWatch: Task<Void, Never>?
     /// The hours of the last "still recording" reminder, 0 before the first.
     @ObservationIgnored private var remindedHours = 0
@@ -789,7 +789,7 @@ final class MeetingController {
         return LongRecording.stopAfterSilence
     }
 
-    /// Every minute, from what is already transcribed: half an hour with nobody speaking on either
+    /// Every minute, from what is already transcribed: 15 minutes with nobody speaking on either
     /// Track stops the Meeting and processes it. Time asleep does not count: the Mac records nothing.
     private func watchForSilence(_ transcription: MeetingTranscription, takkuID: UUID) {
         silenceWatch?.cancel()
@@ -806,7 +806,7 @@ final class MeetingController {
                 self.stop()
                 Notifications.shared.notify(
                     title: String(localized: "Meeting stopped"),
-                    body: String(localized: "Nobody has spoken for 30 minutes, so Takku stopped recording and is writing the note."),
+                    body: String(localized: "Nobody has spoken for 15 minutes, so Takku stopped recording and is writing the note."),
                     note: note
                 )
                 return
