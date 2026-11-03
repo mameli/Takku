@@ -12,16 +12,9 @@ struct TranscriptionSection: View {
         Section {
             VStack(alignment: .leading, spacing: 2) {
                 LabeledContent("Meeting languages") {
-                    Menu(languages.map(Self.name).formatted(.list(type: .and))) {
-                        ForEach(MeetingLanguages.offered, id: \.self) { code in
-                            Toggle(Self.name(code), isOn: isTicked(code))
-                        }
-                    }
-                    .fixedSize()
+                    MeetingLanguagesMenu(languages: $languages).fixedSize()
                 }
-                Text(languages.count == 1
-                    ? String(localized: "Every meeting is transcribed in this language.")
-                    : String(localized: "Takku detects which of these languages each meeting is in."))
+                Text(MeetingLanguagesMenu.explanation(languages))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -34,25 +27,6 @@ struct TranscriptionSection: View {
         } footer: {
             Text("Models run on this Mac and are downloaded once from Hugging Face; no audio or text is sent. The selected model is used for new meetings and when reprocessing a recording.")
                 .foregroundStyle(.secondary)
-        }
-    }
-
-    /// The language's name in the interface language: "Italiano", "French"…
-    private static func name(_ code: String) -> String {
-        let name = Locale.current.localizedString(forLanguageCode: code) ?? code
-        return name.prefix(1).uppercased(with: .current) + name.dropFirst()
-    }
-
-    /// At least one language stays ticked.
-    private func isTicked(_ code: String) -> Binding<Bool> {
-        Binding {
-            languages.contains(code)
-        } set: { isOn in
-            var ticked = languages.filter { $0 != code }
-            if isOn { ticked.append(code) }
-            guard !ticked.isEmpty else { return }
-            AppSettings.meetingLanguages = ticked
-            languages = AppSettings.meetingLanguages
         }
     }
 
@@ -116,6 +90,38 @@ struct TranscriptionSection: View {
             error = nil
         } catch {
             self.error = error.localizedDescription
+        }
+    }
+}
+
+/// The Meeting languages ticked, as a menu of the offered ones: in Settings and in the welcome window.
+struct MeetingLanguagesMenu: View {
+    @Binding var languages: [String]
+
+    var body: some View {
+        Menu(languages.map(MeetingLanguages.name).formatted(.list(type: .and))) {
+            ForEach(MeetingLanguages.offered, id: \.self) { code in
+                Toggle(MeetingLanguages.name(code), isOn: isTicked(code))
+            }
+        }
+    }
+
+    static func explanation(_ languages: [String]) -> String {
+        languages.count == 1
+            ? String(localized: "Every meeting is transcribed in this language.")
+            : String(localized: "Takku detects which of these languages each meeting is in.")
+    }
+
+    /// At least one language stays ticked.
+    private func isTicked(_ code: String) -> Binding<Bool> {
+        Binding {
+            languages.contains(code)
+        } set: { isOn in
+            var ticked = languages.filter { $0 != code }
+            if isOn { ticked.append(code) }
+            guard !ticked.isEmpty else { return }
+            AppSettings.meetingLanguages = ticked
+            languages = AppSettings.meetingLanguages
         }
     }
 }

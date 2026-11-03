@@ -16,14 +16,16 @@ final class SettingsRequest {
 
 /// The tabs of the Settings window, in the toolbar as in the Mac's own apps.
 enum SettingsTab: Hashable {
-    case general, notes, transcription, summary, recordings
+    case general, notes, transcription, summary, recordings, about
 }
 
 /// Settings window, one tab per subject: General (start at login, calendar, call suggestions,
-/// updates, keyboard shortcuts), Notes (notes folder, Templates, Vocabulary), Transcription (Meeting languages and models),
-/// Summary (Provider Profiles) and Recordings (audio and Summary log kept on this Mac).
+/// keyboard shortcuts), Notes (notes folder, Templates, Vocabulary), Transcription (Meeting languages and models),
+/// Summary (Provider Profiles), Recordings (audio and Summary log kept on this Mac) and About
+/// (version, updates, the welcome tour, links).
 struct SettingsView: View {
     let models: TranscriptionModels
+    let updates: UpdateChecker
     @State private var tab = SettingsTab.general
     private let request = SettingsRequest.shared
 
@@ -55,6 +57,10 @@ struct SettingsView: View {
                 .fittingContent()
                 .tabItem { Label("Recordings", systemImage: "internaldrive") }
                 .tag(SettingsTab.recordings)
+            AboutTab(updates: updates)
+                .fittingContent()
+                .tabItem { Label("About", systemImage: "info.circle") }
+                .tag(SettingsTab.about)
         }
         .onAppear { showProfilesIfRequested() }
         .onChange(of: request.showsProfiles) { showProfilesIfRequested() }
@@ -109,12 +115,53 @@ private struct GeneralTab: View {
                 LaunchAtLoginToggle()
                 CalendarToggle()
                 SuggestCallsToggle()
+            }
+
+            ShortcutsSection()
+        }
+        .formStyle(.grouped)
+    }
+}
+
+/// Which Takku this is and whether a newer one is out, the welcome tour again (for those who
+/// skipped it), and where to read more or ask for help.
+private struct AboutTab: View {
+    let updates: UpdateChecker
+    @Environment(\.openWindow) private var openWindow
+
+    var body: some View {
+        Form {
+            Section {
                 UpdatesToggle()
+                if let release = updates.available {
+                    LabeledContent("Takku \(release.version) is available") {
+                        Button("Download…") { updates.openUpdatePage() }
+                    }
+                }
             } header: {
                 AppIdentity().frame(maxWidth: .infinity).padding(.bottom, 8)
             }
 
-            ShortcutsSection()
+            Section {
+                LabeledContent {
+                    Button("Show") {
+                        NSApplication.shared.activate()
+                        openWindow(id: WelcomeView.windowID)
+                    }
+                } label: {
+                    Text("Welcome tour")
+                    Text("What Takku does, and what to set up before the first meeting.")
+                }
+                LabeledContent("Website") {
+                    Link(destination: URL(string: "https://takku.app")!) { Text(verbatim: "takku.app") }
+                }
+                LabeledContent("What's new") {
+                    Link("Changes in every version", destination: URL(string: "https://github.com/mameli/Takku/blob/main/CHANGELOG.md")!)
+                }
+                LabeledContent("Something not working?") {
+                    Button("Report a problem…") { ProblemReporter.report() }
+                }
+            }
 
             // At the bottom, in grey: seen by those who look, not first thing.
             Section {

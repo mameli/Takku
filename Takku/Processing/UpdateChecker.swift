@@ -12,10 +12,11 @@ private let logger = Logger(subsystem: "app.takku.takku", category: "updates")
 final class UpdateChecker {
     struct Release: Equatable {
         let version: String
-        let page: URL
     }
 
     private static let latestRelease = URL(string: "https://api.github.com/repos/mameli/Takku/releases/latest")!
+    /// How to update, step by step: not GitHub's release page, which puts off those who never saw GitHub.
+    private static let updatePage = URL(string: "https://takku.app/update")!
 
     /// A release newer than the running app, shown in the menu.
     private(set) var available: Release?
@@ -30,18 +31,16 @@ final class UpdateChecker {
         }
     }
 
-    func openReleasePage() {
-        if let available { NSWorkspace.shared.open(available.page) }
+    func openUpdatePage() {
+        NSWorkspace.shared.open(Self.updatePage)
     }
 
     private func check() async {
         struct Reply: Decodable {
             let tag: String
-            let page: URL
 
             enum CodingKeys: String, CodingKey {
                 case tag = "tag_name"
-                case page = "html_url"
             }
         }
         var request = URLRequest(url: Self.latestRelease)
@@ -54,7 +53,7 @@ final class UpdateChecker {
                 available = nil
                 return
             }
-            available = Release(version: version, page: reply.page)
+            available = Release(version: version)
         } catch {
             // Offline or rate-limited: nothing to show, tried again tomorrow.
             logger.notice("Update check failed: \(error, privacy: .public)")

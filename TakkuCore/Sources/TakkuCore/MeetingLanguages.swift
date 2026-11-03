@@ -11,13 +11,25 @@ public enum MeetingLanguages {
         "ru", "sk", "sl", "es", "sv", "uk",
     ]
 
-    /// What v1 did: Italian or English.
-    public static let defaults = ["it", "en"]
+    /// What v1 did: Italian or English. Also what is left when nothing offered is ticked.
+    public static let v1 = ["it", "en"]
 
-    /// Only offered languages, once each, in the Settings order; the defaults if none is left.
+    /// Only offered languages, once each, in the Settings order; v1's if none is left.
     public static func normalized(_ codes: [String]) -> [String] {
         let ticked = offered.filter(codes.contains)
-        return ticked.isEmpty ? defaults : ticked
+        return ticked.isEmpty ? v1 : ticked
+    }
+
+    /// For a Mac that never chose them: those of the Mac's languages (`Locale.preferredLanguages`,
+    /// such as `es-ES`) that Takku offers, and English, spoken in many meetings whatever the Mac's language.
+    public static func defaults(macLanguages: [String]) -> [String] {
+        normalized(macLanguages.compactMap { Locale.Language(identifier: $0).languageCode?.identifier } + ["en"])
+    }
+
+    /// The language's name in the interface language: "Italiano", "French"…
+    public static func name(_ code: String) -> String {
+        let name = Locale.current.localizedString(forLanguageCode: code) ?? code
+        return name.prefix(1).uppercased(with: .current) + name.dropFirst()
     }
 
     /// The language to force, when only one is ticked.
@@ -31,9 +43,10 @@ public enum MeetingLanguages {
         normalized(codes)[0]
     }
 
-    /// The languages from v1's `language` setting: `it` or `en` forced, otherwise (`auto`) both.
-    public static func migrated(fromLanguageSetting value: String?) -> [String] {
-        guard let value, defaults.contains(value) else { return defaults }
+    /// The languages of a Takku set up before the defaults followed the Mac: v1's `language`
+    /// setting, `it` or `en` forced, otherwise (`auto`, or never chosen) both, with the Mac's languages added.
+    public static func migrated(fromLanguageSetting value: String?, macLanguages: [String]) -> [String] {
+        guard let value, v1.contains(value) else { return normalized(v1 + defaults(macLanguages: macLanguages)) }
         return [value]
     }
 }

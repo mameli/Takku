@@ -121,18 +121,29 @@ fi
 if [[ $released != $(date -u +%F) ]]; then
     echo "Note: CHANGELOG.md dates $version $released, but today is $(date -u +%F) (UTC): fix it in a later commit." >&2
 fi
+# What's new first, then how to update in plain words: Takku's menu brought here people who
+# never saw GitHub up to 1.16.0 (from 1.16.1 it opens takku.app/update).
 gh release create "$tag" "$dmg" "$latest" --target main --title "Takku $version" --notes-file - <<NOTES
+### What's new
+
 $changes
 
 All versions: [CHANGELOG.md](https://github.com/mameli/Takku/blob/main/CHANGELOG.md)
 
 ---
 
-Apple Silicon Mac, macOS 15 or later.
+### How to update
 
-With Homebrew: \`brew install --cask mameli/takku/takku\` (or \`brew upgrade --cask takku\`). Otherwise download \`Takku-$version.dmg\` (\`Takku.dmg\` is the same file), open it and drag **Takku** into **Applications**.
+1. Download **[Takku-$version.dmg](https://github.com/mameli/Takku/releases/download/$tag/Takku-$version.dmg)**.
+2. Quit Takku: click its icon at the top of the screen, then **Quit Takku**.
+3. Open the downloaded file and drag **Takku** onto **Applications**. When your Mac asks, choose **Replace**.
+4. Open Takku again. Your notes, settings and models stay as they are.
 
-Takku is notarized by Apple: it opens like any other app. See [takku.app/setup](https://takku.app/setup) for the first setup.
+Step by step: [takku.app/update](https://takku.app/update). With Homebrew: \`brew upgrade --cask takku\`.
+
+---
+
+Apple Silicon Mac, macOS 15 or later. New to Takku? \`brew install --cask mameli/takku/takku\`, or download the disk image above, then see [takku.app/setup](https://takku.app/setup). Takku is notarized by Apple: it opens like any other app.
 NOTES
 
 # The cask points to this version's disk image. Pushed through gh, like the Release.

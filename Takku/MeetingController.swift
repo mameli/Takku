@@ -82,6 +82,7 @@ final class MeetingController {
         transcriber = LocalTranscriber(models: models)
         AppSettings.registerDefaults()
         models.keepPreviousDefault()
+        AppSettings.saveMeetingLanguagesIfNeeded()
         AppSettings.addReadyMadeProfilesIfNeeded()
         #if DEBUG
         let hasTestIsolation = !Self.isAutomatedTest || Self.hasAutomatedTestIsolation

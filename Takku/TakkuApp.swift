@@ -30,7 +30,7 @@ struct TakkuApp: App {
         }
 
         Settings {
-            SettingsView(models: controller.models)
+            SettingsView(models: controller.models, updates: controller.updates)
         }
 
         Window("Welcome to Takku", id: WelcomeView.windowID) {
@@ -192,7 +192,7 @@ private struct MeetingMenu: View {
 
         if let release = controller.updates.available {
             Divider()
-            Button("Takku \(release.version) is available…") { controller.updates.openReleasePage() }
+            Button("Takku \(release.version) is available…") { controller.updates.openUpdatePage() }
         }
 
         Divider()

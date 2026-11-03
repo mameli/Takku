@@ -513,6 +513,10 @@ final class MeetingProcessor {
             if let speakersProblem = finished?.speakersProblem {
                 warnings.append(String(localized: "Speakers not told apart: \(speakersProblem)"))
             }
+            if let language = finished?.untickedLanguage {
+                let name = MeetingLanguages.name(language)
+                warnings.append(String(localized: "Some of the meeting is in \(name), not among the meeting languages: it is transcribed anyway. Tick \(name) in Settings → Transcription."))
+            }
             if let cacheProblems = finished?.cacheProblems, !cacheProblems.isEmpty {
                 warnings.append(String(localized: "Cache not saved; this Processing's result is preserved: \(cacheProblems.joined(separator: "; "))"))
             }

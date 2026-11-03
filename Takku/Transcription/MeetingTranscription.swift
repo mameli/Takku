@@ -19,6 +19,8 @@ actor MeetingTranscription {
         let url: URL
         let transcript: Transcript
         let language: String?
+        /// The language of Segments spoken in one not ticked in Settings, kept anyway: the user is told.
+        let untickedLanguage: String?
         let failedSegments: [String]
         let speakersProblem: String?
         /// Cache writes that failed after the result was safely produced in memory.
@@ -56,6 +58,8 @@ actor MeetingTranscription {
         var signalVersion: Int? = CachedSegment.currentSignalVersion
         /// Bump when `SegmentSignal` is measured another way: it is measured again.
         static let currentSignalVersion = 1
+        /// Set when the Segment is spoken in a language not ticked in Settings (see `untickedLanguage`).
+        var untickedLanguage: String? = nil
 
         /// The signal if measured the current way with speech probabilities, `nil` otherwise: a
         /// Segment measured while the speech detector was not available is measured again.
@@ -201,12 +205,16 @@ actor MeetingTranscription {
         let transcript = Transcript(utterances: utterances, vocabulary: vocabulary)
             .marking(Marks.load(fromFolder: directory))
         try transcript.markdown.write(to: url, atomically: true, encoding: .utf8)
-        let language = locked ?? provisionalSegments.values.first?.language
+        // Mostly in a language not ticked: the Meeting is in that language, for the Summary too.
+        let withSpeech = bySegment.values.filter { !$0.utterances.isEmpty }
+        let unticked = withSpeech.compactMap(\.untickedLanguage)
+        let untickedLanguage = Dictionary(grouping: unticked) { $0 }.max { $0.value.count < $1.value.count }?.key
+        let language = (unticked.count * 2 > withSpeech.count ? untickedLanguage : nil) ?? locked ?? provisionalSegments.values.first?.language
         logger.notice("Transcript written in \(secondsSince(started), privacy: .public), language \(language ?? "none", privacy: .public)")
         let done = recording.segments.map(\.fileName).filter { bySegment[$0] != nil }
         let fromCache = done.filter(fromCacheSegments.contains).count
         return Finished(
-            url: url, transcript: transcript, language: language, failedSegments: failed,
+            url: url, transcript: transcript, language: language, untickedLanguage: untickedLanguage, failedSegments: failed,
             speakersProblem: speakersProblem, cacheProblems: cacheProblems,
             segmentsFromCache: fromCache, segmentsTranscribed: done.count - fromCache
         )
@@ -360,29 +368,36 @@ actor MeetingTranscription {
         }
 
         var utterances: [Utterance] = []
+        var inAnotherLanguage: [Utterance] = []
         for range in ranges {
             let offset = segment.start + Double(range.lowerBound) / sampleRate
-            var recognized = try await transcriber.transcribe(Array(samples[range]), language: language, model: model)
+            let recognized = try await transcriber.transcribe(Array(samples[range]), language: language, model: model)
             let speech = speechSeconds(in: samples, range: range, sampleRate: sampleRate)
             if isLikelyHallucination(recognized.map(\.text), speechDuration: speech) { continue }
-            if case .parakeet = model.engine {
+            for text in recognized {
+                let utterance = Utterance(track: segment.track, start: offset + text.start, end: offset + text.end, text: text.text)
                 // Parakeet is not held to a language: on faint audio it can write made-up
                 // sentences in another one.
-                let count = recognized.count
-                recognized.removeAll { isInAnotherLanguage($0.text, meetingLanguages: languages) }
-                if recognized.count < count {
-                    logger.notice("\(segment.fileName, privacy: .public): \(count - recognized.count) sentences in another language dropped")
+                if case .parakeet = model.engine, isInAnotherLanguage(text.text, meetingLanguages: languages) {
+                    inAnotherLanguage.append(utterance)
+                } else {
+                    utterances.append(utterance)
                 }
             }
-            utterances += recognized.map {
-                Utterance(track: segment.track, start: offset + $0.start, end: offset + $0.end, text: $0.text)
-            }
+        }
+        // A whole Segment in a language not ticked in Settings is real speech: kept, not left empty.
+        let unticked = untickedLanguage(dropped: inAnotherLanguage.map(\.text), kept: utterances.map(\.text))
+        if let unticked {
+            utterances = (utterances + inAnotherLanguage).sorted { $0.start < $1.start }
+            logger.notice("\(segment.fileName, privacy: .public): in \(unticked, privacy: .public), not a Meeting language: kept")
+        } else if !inAnotherLanguage.isEmpty {
+            logger.notice("\(segment.fileName, privacy: .public): \(inAnotherLanguage.count) sentences in another language dropped")
         }
         let levels = segment.track == .me ? Self.levels(of: utterances, in: samples, startingAt: segment.start) : nil
         let signal = utterances.isEmpty ? nil : await Self.signal(of: samples, speechDetector: speechDetector)
         let result = CachedSegment(
             model: model.id, language: language, isLanguageReliable: isReliable, utterances: utterances, levels: levels,
-            signal: signal
+            signal: signal, untickedLanguage: unticked
         )
         saveCache(result, to: cacheURL)
         return result

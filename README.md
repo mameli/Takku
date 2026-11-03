@@ -225,7 +225,7 @@ Notes are plain Markdown. Takku opens them in Obsidian by default if installed (
 - **Known voices** (if *Recognise voices* is on): stored locally on your Mac; manage or forget them in *Settings → Transcription*.
 - **Summary log**: `~/.takku/summary-log/` (one JSON file per summary with requests and replies, up to 5 MB, to help you tune Templates by adding a `comment` field and asking a trusted model for improvements). Never read back by Takku or included in bug reports; disable or delete in *Settings → Recordings*.
 - **API keys**: stored in the macOS Keychain.
-- **External requests**: only what you enable—your chosen Summary provider (receives transcript, personal notes, template, vocabulary terms and calendar participants; never audio or screenshots; Apple Intelligence stays on-device), your Hook script, your MCP assistant, and the daily GitHub update check (*Settings → General → Check for updates*, sends no personal data).
+- **External requests**: only what you enable—your chosen Summary provider (receives transcript, personal notes, template, vocabulary terms and calendar participants; never audio or screenshots; Apple Intelligence stays on-device), your Hook script, your MCP assistant, and the daily GitHub update check (*Settings → About → Check for updates*, sends no personal data).
 
 Recording a meeting may require the consent of the other participants: tell them, and follow the rules that apply to you.
 

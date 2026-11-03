@@ -92,13 +92,24 @@ enum AppSettings {
     #endif
 
     /// The languages a Meeting can be in (see `MeetingLanguages`); until the user changes them,
-    /// those of v1's `language` setting.
+    /// those saved by `saveMeetingLanguagesIfNeeded`.
     static var meetingLanguages: [String] {
         get {
             UserDefaults.standard.stringArray(forKey: meetingLanguagesKey).map(MeetingLanguages.normalized)
-                ?? MeetingLanguages.migrated(fromLanguageSetting: UserDefaults.standard.string(forKey: languageKey))
+                ?? MeetingLanguages.defaults(macLanguages: Locale.preferredLanguages)
         }
         set { UserDefaults.standard.set(MeetingLanguages.normalized(newValue), forKey: meetingLanguagesKey) }
+    }
+
+    /// At launch, on a Mac that never chose the Meeting languages, saves them: the Mac's languages
+    /// and English; a Takku already set up keeps Italian and English, or v1's `language`, with
+    /// the Mac's languages added. Saved, they do not change behind the user's back with the Mac's.
+    static func saveMeetingLanguagesIfNeeded() {
+        guard UserDefaults.standard.stringArray(forKey: meetingLanguagesKey) == nil else { return }
+        let mac = Locale.preferredLanguages
+        meetingLanguages = vaultPath == nil
+            ? MeetingLanguages.defaults(macLanguages: mac)
+            : MeetingLanguages.migrated(fromLanguageSetting: UserDefaults.standard.string(forKey: languageKey), macLanguages: mac)
     }
 
     /// Name the Meeting note after the calendar event in progress and list its participants.

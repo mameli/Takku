@@ -202,7 +202,7 @@ enum WelcomePage: Int, CaseIterable {
     var subtitle: LocalizedStringKey? {
         switch self {
         case .permissions: "Where the notes go, and what macOS asks once."
-        case .transcription: "The model that transcribes your meetings, on this Mac."
+        case .transcription: "The languages of your meetings, and the model that transcribes them on this Mac."
         case .summary: "An AI model writes it: on your Mac, or an external one you choose."
         default: nil
         }
@@ -585,15 +585,30 @@ struct PermissionsSetup: View {
     }
 }
 
-/// The transcription model and the optional switches.
+/// The Meeting languages, the transcription model and the optional switches.
 struct TranscriptionSetup: View {
     var model: ModelState
     var isModelReady: Bool
     var progress: String?
     var retry: () -> Void
+    @State private var languages = AppSettings.meetingLanguages
 
     var body: some View {
         VStack(spacing: 12) {
+            // Already ticked, from the Mac's languages: a sentence in a language not ticked is
+            // left out, so it is worth a look.
+            SetupRow(
+                seed: 665,
+                isDone: true,
+                title: "Meeting languages",
+                detail: Text("Tick every language your meetings are in.") + Text(verbatim: " ") + Text(MeetingLanguagesMenu.explanation(languages))
+            ) {
+                MeetingLanguagesMenu(languages: $languages)
+                    .menuStyle(.button)
+                    .buttonStyle(PaperButtonStyle(isPrimary: false))
+                    .fixedSize()
+            }
+
             let selected = TranscriptionModel.selected
             SetupRow(
                 seed: 670,
