@@ -557,6 +557,8 @@ final class MeetingController {
         title: String? = nil, folder: String? = nil
     ) async throws {
         importingFileName = url.lastPathComponent
+        // Without --folder, where the Template puts its notes (`folder:`), else Meetings/.
+        let folder = folder ?? TakkuFolder.template(named: templateName).folder
         let imported = try await AudioFileImport.run(
             url, meetingID: meetingID, into: MeetingRecorder.recordingsDirectory, segmentDuration: MeetingRecorder.segmentDuration
         )

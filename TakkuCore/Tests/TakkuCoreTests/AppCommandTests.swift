@@ -38,7 +38,7 @@ struct AppCommandTests {
     ) throws -> ProcessingRecord {
         var noteURL: URL?
         if let noteName {
-            let folder = folders.notes.appending(path: "Meetings").appending(path: noteFolder ?? "")
+            let folder = folders.notes.appending(path: noteFolder ?? "Meetings")
             try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
             let url = folder.appending(path: noteName + ".md")
             try """
@@ -182,7 +182,7 @@ struct AppCommandTests {
         #expect(request.kind == .importAudio && request.file == file.path(percentEncoded: false))
         #expect(request.template == "Lecture" && request.profile == .profile(local.id))
         #expect(request.title == "Lezione 3 ripasso" && request.folder == "YouTube/Corsi")
-        #expect(result.output.hasSuffix("Meetings/YouTube/Corsi/2026-11-03 2100 - Lezione 3 ripasso.md\n"))
+        #expect(result.output.hasSuffix("Notes/YouTube/Corsi/2026-11-03 2100 - Lezione 3 ripasso.md\n"))
         #expect(result.error.contains("lezione.m4a: completed"))
         #expect(!folders.requests.isWaiting(request.id))
     }
@@ -278,9 +278,39 @@ struct AppCommandTests {
         #expect(VaultNaming.noteFolder("Corsi//2026/") == .success("Corsi/2026"))
         #expect(VaultNaming.noteFolder("..") == .failure(.invalidName("..")))
         #expect(VaultNaming.noteFolder(".nascosta") == .failure(.invalidName(".nascosta")))
-        #expect(VaultNaming.noteFolder("screenshots/x") == .failure(.reserved("screenshots")))
-        #expect(VaultNaming.noteFolder("Archivio/Transcripts") == .success("Archivio/Transcripts"))
+        #expect(VaultNaming.noteFolder("screenshots/x") == .failure(.reserved("Screenshots")))
+        #expect(VaultNaming.noteFolder("Archivio/Transcripts") == .failure(.reserved("Transcripts")))
+        #expect(VaultNaming.noteFolder("meetings/Video") == .success("Meetings/Video"))
         #expect(VaultNaming.noteFolder("  ") == .failure(.invalidName("")))
+    }
+
+    @Test("a Template can say where its imports go; an invalid folder is ignored")
+    func templateFolder() {
+        let video = Template(fileName: "Video", content: "---\nname: Video\nfolder: YouTube/Talk\n---\nNotes on a video.")
+        let wrong = Template(fileName: "X", content: "---\nfolder: ../fuori\n---\nx")
+
+        #expect(video.folder == "YouTube/Talk")
+        #expect(wrong.folder == nil && Template(fileName: "Notes", content: Template.defaultFileContent).folder == nil)
+    }
+
+    @Test("the library reads the import folders too, with their Transcripts, and shows them from the notes folder")
+    func libraryOtherFolders() throws {
+        let folders = try folders()
+        let id = UUID()
+        let youtube = folders.notes.appending(path: "YouTube")
+        try FileManager.default.createDirectory(at: youtube.appending(path: "Transcripts"), withIntermediateDirectories: true)
+        try "---\ntakku_id: \(id.uuidString)\ndate: 2026-11-04T10:00\n---\nnota".write(to: youtube.appending(path: "2026-11-04 1000 - Talk.md"), atomically: true, encoding: .utf8)
+        try "---\ntakku_id: \(id.uuidString)\nmeeting: \"[[2026-11-04 1000 - Talk]]\"\n---\ntesto".write(to: youtube.appending(path: "Transcripts/t.md"), atomically: true, encoding: .utf8)
+        try "Una nota mia".write(to: youtube.appending(path: "Mia.md"), atomically: true, encoding: .utf8)
+
+        let without = MeetingLibrary(notesFolder: folders.notes)
+        let with = MeetingLibrary(notesFolder: folders.notes, otherFolders: ["YouTube", "YouTube/Corsi", "Meetings/Video"])
+        let meeting = try #require(with.meeting(id: id))
+
+        #expect(without.meeting(id: id) == nil)
+        #expect(with.otherFolders.map(\.lastPathComponent) == ["YouTube"])
+        #expect(meeting.folder == "YouTube" && meeting.transcript?.lastPathComponent == "t.md")
+        #expect(with.meetings().count == 1)
     }
 
     @Test("the Summary of a note: without the Transcript link, nil for placeholders, errors and Transcript only")

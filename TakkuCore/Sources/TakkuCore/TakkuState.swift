@@ -12,11 +12,14 @@ public struct TakkuState: Sendable {
     public var activeProfileID: UUID?
     /// `~/Library/Application Support/Takku/Recordings/`, one folder per Meeting.
     public var recordingsFolder: URL
+    /// The folders of the notes folder Takku wrote imported notes in, outside `Meetings/`.
+    public var noteFolders: [String]
 
     public init(
         templates: [String], defaultTemplate: String, profiles: [ProviderProfile], activeProfileID: UUID?,
-        recordingsFolder: URL
+        recordingsFolder: URL, noteFolders: [String] = []
     ) {
+        self.noteFolders = noteFolders
         self.templates = templates
         self.defaultTemplate = defaultTemplate
         self.profiles = profiles

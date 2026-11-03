@@ -1,8 +1,9 @@
 import Foundation
 
 /// The Meetings in the notes folder as an agent sees them through `takku mcp`: every Meeting note
-/// and Transcript under `Meetings/`, wherever the user moved them inside it, told apart by their
-/// frontmatter (a Transcript links its note with `meeting:`). Read only: it never writes.
+/// and Transcript under `Meetings/`, wherever the user moved them inside it, and in the folders
+/// imports were written to (`otherFolders`), told apart by their frontmatter (a Transcript links
+/// its note with `meeting:`). Read only: it never writes.
 public struct MeetingLibrary: Sendable {
     public struct Meeting: Equatable, Sendable {
         public let id: UUID
@@ -16,7 +17,8 @@ public struct MeetingLibrary: Sendable {
         public let participants: [String]
         /// Names the user gave the Speakers, as `Speaker N = Name`.
         public let speakers: [String]
-        /// The folder of the note relative to `Meetings/`, empty when it is there.
+        /// The folder of the note relative to `Meetings/`, empty when it is there; for a note outside
+        /// `Meetings/` (an import with `--folder`), relative to the notes folder.
         public let folder: String
         public let note: URL
         public let transcript: URL?
@@ -29,11 +31,26 @@ public struct MeetingLibrary: Sendable {
         public let occurrences: Int
     }
 
+    public let notesFolder: URL
     public let meetingsFolder: URL
+    /// The folders outside `Meetings/` with imported notes, as the app remembers them.
+    public let otherFolders: [URL]
 
-    /// `notesFolder`: the folder chosen in Settings; the Meetings are in its `Meetings` folder.
-    public init(notesFolder: URL) {
-        meetingsFolder = notesFolder.appending(path: "Meetings", directoryHint: .isDirectory)
+    /// `notesFolder`: the folder chosen in Settings; the Meetings are in its `Meetings` folder, the
+    /// imports also in `otherFolders` (relative to it, as `TakkuState.noteFolders`).
+    public init(notesFolder: URL, otherFolders: [String] = []) {
+        self.notesFolder = notesFolder
+        meetingsFolder = notesFolder.appending(path: VaultNaming.meetingsFolder, directoryHint: .isDirectory)
+        let meetings = meetingsFolder.standardizedFileURL.pathComponents
+        var seen: Set<String> = []
+        self.otherFolders = otherFolders
+            .map { notesFolder.appending(path: $0, directoryHint: .isDirectory).standardizedFileURL }
+            .filter { !$0.pathComponents.starts(with: meetings) && seen.insert($0.path(percentEncoded: false)).inserted }
+            // A folder inside another is read with it.
+            .sorted { $0.pathComponents.count < $1.pathComponents.count }
+            .reduce(into: [URL]()) { kept, folder in
+                if !kept.contains(where: { folder.pathComponents.starts(with: $0.pathComponents) }) { kept.append(folder) }
+            }
     }
 
     /// Every Meeting with a note, newest first. A Transcript without a note is left out; of Sync
@@ -41,21 +58,26 @@ public struct MeetingLibrary: Sendable {
     public func meetings() -> [Meeting] {
         var notes: [UUID: (URL, MarkdownLines)] = [:]
         var transcripts: [UUID: URL] = [:]
-        let files = FileManager.default.enumerator(at: meetingsFolder, includingPropertiesForKeys: nil)
-        while let url = files?.nextObject() as? URL {
-            guard url.pathExtension == "md", let content = try? String(contentsOf: url, encoding: .utf8) else { continue }
-            let markdown = MarkdownLines(content)
-            guard let id = markdown.value(MeetingNote.TakkuKey.takkuID.rawValue).flatMap(UUID.init(uuidString:)) else { continue }
-            if markdown.value("meeting") != nil {
-                if transcripts[id] == nil { transcripts[id] = url }
-            } else if notes[id] == nil {
-                notes[id] = (url, markdown)
+        for folder in [meetingsFolder] + otherFolders {
+            let files = FileManager.default.enumerator(at: folder, includingPropertiesForKeys: nil)
+            while let url = files?.nextObject() as? URL {
+                guard url.pathExtension == "md", let content = try? String(contentsOf: url, encoding: .utf8) else { continue }
+                let markdown = MarkdownLines(content)
+                guard let id = markdown.value(MeetingNote.TakkuKey.takkuID.rawValue).flatMap(UUID.init(uuidString:)) else { continue }
+                if markdown.value("meeting") != nil {
+                    if transcripts[id] == nil { transcripts[id] = url }
+                } else if notes[id] == nil {
+                    notes[id] = (url, markdown)
+                }
             }
         }
-        let rootComponents = meetingsFolder.standardizedFileURL.pathComponents
+        let meetingsComponents = meetingsFolder.standardizedFileURL.pathComponents
+        let rootComponents = notesFolder.standardizedFileURL.pathComponents
         return notes.map { id, entry in
             let (url, markdown) = entry
-            let folder = url.deletingLastPathComponent().standardizedFileURL.pathComponents.dropFirst(rootComponents.count)
+            let components = url.deletingLastPathComponent().standardizedFileURL.pathComponents
+            let folder = components.starts(with: meetingsComponents)
+                ? components.dropFirst(meetingsComponents.count) : components.dropFirst(rootComponents.count)
             return Meeting(
                 id: id,
                 title: Self.title(fromNoteName: url.deletingPathExtension().lastPathComponent),

@@ -17,7 +17,7 @@ enum TerminalCommand {
         let state = TakkuState(
             templates: TakkuFolder.templateNames(), defaultTemplate: AppSettings.defaultTemplate,
             profiles: AppSettings.summaryProfiles, activeProfileID: AppSettings.activeProviderProfileID,
-            recordingsFolder: MeetingRecorder.recordingsDirectory
+            recordingsFolder: MeetingRecorder.recordingsDirectory, noteFolders: AppSettings.noteFolders
         )
         let command = MeetingCommand(
             arguments: arguments, notesFolder: AppSettings.vaultPath, version: version, state: state,

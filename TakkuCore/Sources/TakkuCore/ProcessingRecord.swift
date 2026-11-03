@@ -56,8 +56,9 @@ public struct ProcessingRecord: Codable, Equatable, Sendable {
     /// The status before a Retry or a Regeneration, while it is queued or running: stopping it, or
     /// a restart in the middle of a Regeneration, gives the Meeting back as it was.
     public var statusBeforeRetry: Status?
-    /// The folder inside `Meetings/` where Takku creates the note (`takku import --folder`), `nil`
-    /// for `Meetings/` itself. A note still there is where Takku put it, and gets its title.
+    /// The folder of the notes folder where Takku creates the note of an import (`takku import
+    /// --folder`, or the Template's `folder:`), `nil` for `Meetings/`. A note still there is where
+    /// Takku put it, and gets its title.
     public var noteFolder: String?
     /// The title given at the import (`--title`), for a note created only at the end of Processing.
     public var noteTitle: String?

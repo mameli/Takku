@@ -5,8 +5,17 @@ import TakkuCore
 /// Vault or not. In the code it is still the Vault.
 struct Vault {
     let root: URL
+    /// The folders outside `Meetings/` where imports were written (`AppSettings.noteFolders`): their
+    /// notes are looked for there too, their Transcripts in a `Transcripts` folder next to them.
+    let otherFolders: [URL]
 
-    var meetingsFolder: URL { root.appending(path: "Meetings", directoryHint: .isDirectory) }
+    init(root: URL, otherFolders: [String] = []) {
+        self.root = root
+        let library = MeetingLibrary(notesFolder: root, otherFolders: otherFolders)
+        self.otherFolders = library.otherFolders
+    }
+
+    var meetingsFolder: URL { root.appending(path: VaultNaming.meetingsFolder, directoryHint: .isDirectory) }
     var transcriptsFolder: URL { meetingsFolder.appending(path: "Transcripts", directoryHint: .isDirectory) }
     var screenshotsFolder: URL { meetingsFolder.appending(path: "Screenshots", directoryHint: .isDirectory) }
 
@@ -16,7 +25,7 @@ struct Vault {
     static let settleAfterRename: Duration = .milliseconds(1500)
 
     static var configured: Vault? {
-        AppSettings.vaultPath.map { Vault(root: URL(filePath: $0, directoryHint: .isDirectory)) }
+        AppSettings.vaultPath.map { Vault(root: URL(filePath: $0, directoryHint: .isDirectory), otherFolders: AppSettings.noteFolders) }
     }
 
     /// Where the welcome window offers to put the notes, for those with no folder in mind.
@@ -58,8 +67,9 @@ struct Vault {
     /// Vault folder: if it is missing (volume not mounted) it fails, and the note is created at the
     /// end of Processing.
     ///
-    /// `folder` (`takku import --folder`, already checked by `VaultNaming.noteFolder`) puts it in a
-    /// folder inside `Meetings/`, made if missing; `title` (`--title`) names it instead of the event.
+    /// `folder` (`takku import --folder` or the Template's `folder:`, already checked by
+    /// `VaultNaming.noteFolder`) puts it in that folder of the notes folder, made if missing and
+    /// remembered so the note is found there; `title` (`--title`) names it instead of the event.
     func createMeetingNote(
         takkuID: UUID, startedAt: Date, event: CalendarEvent? = nil, isImport: Bool = false,
         folder: String? = nil, title: String? = nil
@@ -69,6 +79,7 @@ struct Vault {
         }
         let noteFolder = noteFolder(folder)
         try FileManager.default.createDirectory(at: noteFolder, withIntermediateDirectories: true)
+        if let folder { AppSettings.rememberNoteFolder(folder) }
         // Also the names in Meetings/ itself: `[[…]]` links find a note by its name alone.
         let name = VaultNaming.available(
             VaultNaming.noteName(startedAt: startedAt, title: title ?? event?.title ?? VaultNaming.defaultTitle),
@@ -94,29 +105,61 @@ struct Vault {
     }
 
     /// The Meeting note: at the known path or, if the user renamed or moved it, by looking
-    /// for its `takku_id` in the Meetings folder (Transcripts excluded). Sync copies with the
+    /// for its `takku_id` in the Meetings folder and the import folders (Transcripts excluded). Sync copies with the
     /// same ID are an error unless the expected path identifies one; the first one is never chosen.
     func findMeetingNote(takkuID: UUID, expected: URL?) throws -> URL? {
         // Only inside this Vault: a note left in another Vault (or a test's copy of a real Meeting) is not touched.
         if let expected, contains(expected), Self.takkuID(of: expected) == takkuID { return expected }
-        let matches = files(in: meetingsFolder, excluding: transcriptsFolder).filter { Self.takkuID(of: $0) == takkuID }
+        let matches = noteFiles().filter { Self.takkuID(of: $0) == takkuID }
         return try uniqueMatch(matches, takkuID: takkuID)
     }
 
     /// Every Meeting note by `takku_id`, duplicates included, in one pass.
     func meetingNotesByTakkuID() -> [UUID: [URL]] {
-        Self.byTakkuID(files(in: meetingsFolder, excluding: transcriptsFolder))
+        Self.byTakkuID(noteFiles())
     }
 
     /// Every Transcript by `takku_id`, duplicates included, in one pass.
     func transcriptsByTakkuID() -> [UUID: [URL]] {
-        Self.byTakkuID(files(in: transcriptsFolder))
+        Self.byTakkuID(transcriptFiles())
+    }
+
+    /// The notes of `Meetings/` and of the import folders, without their Transcripts.
+    private func noteFiles() -> [URL] {
+        files(in: meetingsFolder, excluding: transcriptsFolder)
+            + otherFolders.flatMap { folder in files(in: folder).filter { !Self.isInTranscriptsFolder($0, under: folder) } }
+    }
+
+    /// `Meetings/Transcripts/` and the `Transcripts` folders of the import folders.
+    private func transcriptFiles() -> [URL] {
+        files(in: transcriptsFolder) + otherFolders.flatMap { folder in
+            files(in: folder).filter { Self.isInTranscriptsFolder($0, under: folder) }
+        }
+    }
+
+    /// No note folder is named `Transcripts` (`VaultNaming.reservedFolders`): a file under one is a Transcript.
+    private static func isInTranscriptsFolder(_ url: URL, under folder: URL) -> Bool {
+        let components = url.standardizedFileURL.deletingLastPathComponent().pathComponents
+            .dropFirst(folder.standardizedFileURL.pathComponents.count)
+        return components.contains { $0.caseInsensitiveCompare("Transcripts") == .orderedSame }
+    }
+
+    /// Where the Transcript of a note goes: `Meetings/Transcripts/` for a note in `Meetings/`, a
+    /// `Transcripts` folder next to the note for one written elsewhere by an import.
+    private func transcriptsFolder(forNote note: URL?) -> URL {
+        guard let note, !isInside(note, meetingsFolder) else { return transcriptsFolder }
+        return note.deletingLastPathComponent().appending(path: "Transcripts", directoryHint: .isDirectory)
+    }
+
+    private func isInside(_ url: URL, _ folder: URL) -> Bool {
+        let normalized = normalizer()
+        return normalized(url).starts(with: normalized(folder))
     }
 
     /// The Transcript file of a Meeting. If Sync created several files with the same ID, the
     /// Meeting note's own Transcript link identifies the right one; otherwise this is a conflict.
     func findTranscript(takkuID: UUID, expectedNote: URL?) throws -> URL? {
-        let matches = files(in: transcriptsFolder).filter { Self.takkuID(of: $0) == takkuID }
+        let matches = transcriptFiles().filter { Self.takkuID(of: $0) == takkuID }
         if matches.count > 1,
            let noteURL = try findMeetingNote(takkuID: takkuID, expected: expectedNote),
            let linkedName = try? meetingNote(at: noteURL).transcriptName {
@@ -131,10 +174,15 @@ struct Vault {
     func writeTranscript(
         _ transcript: Transcript, takkuID: UUID, meetingNote: URL?, meetingNoteName: String, language: String?
     ) throws -> URL {
-        try FileManager.default.createDirectory(at: transcriptsFolder, withIntermediateDirectories: true)
+        let folder = transcriptsFolder(forNote: meetingNote)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         let url = try findTranscript(takkuID: takkuID, expectedNote: meetingNote) ?? {
-            let name = VaultNaming.available("\(meetingNoteName) (transcript)", taken: Self.noteNames(in: transcriptsFolder))
-            return transcriptsFolder.appending(path: name + ".md")
+            // Also the names in Meetings/Transcripts/: `[[…]]` links find a Transcript by its name alone.
+            let name = VaultNaming.available(
+                "\(meetingNoteName) (transcript)",
+                taken: Self.noteNames(in: folder).union(Self.noteNames(in: transcriptsFolder))
+            )
+            return folder.appending(path: name + ".md")
         }()
         let content = transcript.vaultFile(takkuID: takkuID, meetingNoteName: meetingNoteName, language: language)
         try content.write(to: url, atomically: true, encoding: .utf8)
@@ -166,15 +214,15 @@ struct Vault {
         isInNoteFolder(noteURL, folder: nil)
     }
 
-    /// The note is still in the folder Takku created it in: `Meetings/` or, for `takku import
-    /// --folder`, that folder inside it.
+    /// The note is still in the folder Takku created it in: `Meetings/` or, for an import with a
+    /// folder, that folder of the notes folder.
     func isInNoteFolder(_ noteURL: URL, folder: String?) -> Bool {
         let normalized = normalizer()
         return normalized(noteURL.deletingLastPathComponent()) == normalized(noteFolder(folder))
     }
 
     private func noteFolder(_ folder: String?) -> URL {
-        folder.map { meetingsFolder.appending(path: $0, directoryHint: .isDirectory) } ?? meetingsFolder
+        folder.map { root.appending(path: $0, directoryHint: .isDirectory) } ?? meetingsFolder
     }
 
     /// Path components with symlinks resolved, lowercased unless the Vault's volume tells names apart
@@ -270,7 +318,8 @@ struct Vault {
             components.queryItems = [
                 // Obsidian knows a Vault by its folder name.
                 URLQueryItem(name: "vault", value: root.lastPathComponent),
-                URLQueryItem(name: "query", value: "[takku_id] -path:\"Meetings/Transcripts\""),
+                // Transcripts are in `Meetings/Transcripts/` and in the import folders' `Transcripts/`.
+                URLQueryItem(name: "query", value: "[takku_id] -path:\"Transcripts/\""),
             ]
             NSWorkspace.shared.open(components.url!)
         case .vault(let app):

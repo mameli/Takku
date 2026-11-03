@@ -160,7 +160,10 @@ extension MeetingCommand {
                 failed = true
                 streams.error("\(item.label): \(why)")
             }
-            let meeting = library.meeting(id: item.request.meetingID)
+            // A folder new to this command (`--folder`, or the Template's `folder:`) was not read yet.
+            let meeting = library.meeting(id: item.request.meetingID) ?? record.noteFolder.flatMap {
+                MeetingLibrary(notesFolder: library.notesFolder, otherFolders: [$0]).meeting(id: item.request.meetingID)
+            }
             if options.json {
                 var object = meeting?.fullFields(includeTranscript: true) ?? ["id": item.request.meetingID.uuidString]
                 object["status"] = TakkuState.statusName(record.status)

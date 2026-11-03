@@ -27,7 +27,7 @@ public struct MeetingCommand: Sendable {
                  [--folder FOLDER] [--no-wait]
                               audio or video files made meetings by Takku, which opens
                               if needed; waits for each note and prints its path.
-                              --folder is inside Meetings/, e.g. YouTube
+                              --folder is inside the notes folder, e.g. YouTube
           regenerate ID [--template NAME] [--profile NAME|transcript] [--no-wait]
                               a new Summary from the meeting's current transcript;
                               by default with the meeting's own Template and Profile
@@ -117,7 +117,7 @@ public struct MeetingCommand: Sendable {
             return 2
         }
         let library = (options.notesFolder ?? notesFolder)
-            .map { MeetingLibrary(notesFolder: URL(filePath: $0, directoryHint: .isDirectory)) }
+            .map { MeetingLibrary(notesFolder: URL(filePath: $0, directoryHint: .isDirectory), otherFolders: state?.noteFolders ?? []) }
         if command == "mcp" {
             MCPServer(library: library, version: version, state: state).run(readLine: readLine, write: output)
             return 0

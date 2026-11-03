@@ -32,7 +32,8 @@ public struct AppRequest: Codable, Equatable, Sendable {
     public var profile: ProfileChoice?
     /// The note's title at creation, already valid as a file name.
     public var title: String?
-    /// The note's folder inside `Meetings/`, already checked (`VaultNaming.noteFolder`).
+    /// The note's folder inside the notes folder, already checked (`VaultNaming.noteFolder`); `nil`
+    /// leaves it to the Template (`folder:`), else `Meetings/`.
     public var folder: String?
 
     public init(

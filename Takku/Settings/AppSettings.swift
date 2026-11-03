@@ -176,6 +176,20 @@ enum AppSettings {
         return summaryProfiles.first { $0.id == activeProviderProfileID }
     }
 
+    /// The folders of the notes folder, outside `Meetings/`, where imports were written (`takku import
+    /// --folder`, a Template's `folder:`): Takku and `takku` look for notes there too.
+    static var noteFolders: [String] {
+        UserDefaults.standard.stringArray(forKey: noteFoldersKey) ?? []
+    }
+
+    static func rememberNoteFolder(_ folder: String) {
+        let isMeetings = folder.split(separator: "/").first.map { $0.caseInsensitiveCompare(VaultNaming.meetingsFolder) == .orderedSame } ?? true
+        guard !isMeetings, !noteFolders.contains(folder) else { return }
+        UserDefaults.standard.set(noteFolders + [folder], forKey: noteFoldersKey)
+    }
+
+    private static let noteFoldersKey = "noteFolders"
+
     /// Name (without `.md`) of the Template proposed when every Meeting starts.
     static var defaultTemplate: String {
         get { UserDefaults.standard.string(forKey: defaultTemplateKey) ?? Template.defaultName }

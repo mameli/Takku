@@ -40,12 +40,16 @@ public enum VaultNaming {
         return "\(name) (\(suffix))"
     }
 
-    /// Folders of `Meetings/` that are Takku's own, never a folder for notes.
+    /// The folder of the Meetings recorded with Takku, inside the notes folder.
+    public static let meetingsFolder = "Meetings"
+    /// Folders Takku writes in next to the notes: never a folder for notes, at any level.
     public static let reservedFolders = ["Transcripts", "Screenshots", "_Templates"]
 
-    /// A folder for a note inside `Meetings/` (`takku import --folder`), as `YouTube/Corsi`, or why
-    /// it is not one: relative, no `.` or `..`, no character a note name cannot have, not one of
-    /// Takku's own folders. Slashes at the ends and doubled ones are ignored.
+    /// A folder for imported notes inside the notes folder (`takku import --folder`, `folder:` in a
+    /// Template), as `YouTube` or `Courses/2026`, or why it is not one: relative, no `.` or `..`, no
+    /// hidden names or characters a note name cannot have, no folder named like Takku's own
+    /// (`Transcripts`, `Screenshots`, `_Templates`). `Meetings` is the folder of the recorded
+    /// Meetings, also allowed. Slashes at the ends and doubled ones are ignored.
     public static func noteFolder(_ text: String) -> Result<String, InvalidFolder> {
         guard !text.hasPrefix("/"), !text.hasPrefix("~") else { return .failure(.absolute) }
         let components = text.split(separator: "/").map { $0.trimmingCharacters(in: .whitespaces) }
@@ -55,11 +59,14 @@ public enum VaultNaming {
                 return .failure(.invalidName(component))
             }
             if fileName(component) != component { return .failure(.invalidName(component)) }
+            if let reserved = reservedFolders.first(where: { $0.caseInsensitiveCompare(component) == .orderedSame }) {
+                return .failure(.reserved(reserved))
+            }
         }
-        if reservedFolders.contains(where: { $0.caseInsensitiveCompare(components[0]) == .orderedSame }) {
-            return .failure(.reserved(components[0]))
-        }
-        return .success(components.joined(separator: "/"))
+        // `meetings/x` and `Meetings/x` are the same folder on the Mac: written as Takku's.
+        var folder = components
+        if folder[0].caseInsensitiveCompare(meetingsFolder) == .orderedSame { folder[0] = meetingsFolder }
+        return .success(folder.joined(separator: "/"))
     }
 
     public enum InvalidFolder: Error, Equatable {
@@ -70,9 +77,9 @@ public enum VaultNaming {
         public var message: String {
             switch self {
             case .empty: "the folder is empty."
-            case .absolute: "the folder is inside Meetings/: give it as YouTube or Courses/2026, not as a full path."
+            case .absolute: "the folder is inside the notes folder: give it as YouTube or Courses/2026, not as a full path."
             case .invalidName(let name): "\"\(name)\" cannot be a folder name (no ., .., hidden names or * \" \\ < > : | ? # ^ [ ])."
-            case .reserved(let name): "\(name) is Takku's own folder."
+            case .reserved(let name): "\(name) is a folder Takku writes in itself, not one for notes."
             }
         }
     }

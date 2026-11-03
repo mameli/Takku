@@ -10,6 +10,10 @@ public struct Template: Equatable, Sendable {
     /// `full_text: true`: the whole Transcript rewritten with the Template (e.g. the full text of
     /// a lecture), in blocks of about 10 minutes joined in order, instead of a Summary.
     public let isFullText: Bool
+    /// `folder: YouTube`: where a file imported with this Template gets its note, inside the notes
+    /// folder (checked as `VaultNaming.noteFolder`; an invalid one is ignored). `nil`: `Meetings/`.
+    /// Recorded Meetings always go in `Meetings/`.
+    public let folder: String?
 
     /// The Template Takku creates when the Templates folder is empty: notes by
     /// topic, in Meeting order, and Next steps at the end (like Granola).
@@ -120,6 +124,7 @@ public struct Template: Equatable, Sendable {
         name = markdown.value("name").flatMap { $0.isEmpty ? nil : $0 } ?? fileName
         summaryLanguage = markdown.value("summary_language").flatMap(Language.code)
         isFullText = markdown.value("full_text").map { ["true", "yes"].contains($0.lowercased()) } ?? false
+        folder = markdown.value("folder").flatMap { try? VaultNaming.noteFolder($0).get() }
         body = markdown.lines[markdown.bodyStart...].joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }

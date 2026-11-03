@@ -216,13 +216,13 @@ takku regenerate 11111111-2222-3333-4444-555555555555 --template Notes
 takku status                                   # what is being recorded or processed
 ```
 
-`import` takes any file *Import audio…* takes, with `--template`, `--profile NAME` (or `transcript`, for no summary), `--title` and `--folder` (a folder inside `Meetings/`); without them it uses what is chosen in the menu. It waits for each note and prints its path (`--json` prints the note, summary and transcript; `--no-wait` prints the meeting ids and returns). For example, to summarise a YouTube video with [yt-dlp](https://github.com/yt-dlp/yt-dlp):
+`import` takes any file *Import audio…* takes, with `--template`, `--profile NAME` (or `transcript`, for no summary), `--title` and `--folder` (a folder of your notes folder, such as `Lectures/Law`; the transcript goes in a `Transcripts` folder next to the note); without them it uses what is chosen in the menu, and the note goes in `Meetings/`. A Template can say where its imports go with `folder: YouTube` in its frontmatter, also for *Import audio…*. It waits for each note and prints its path (`--json` prints the note, summary and transcript; `--no-wait` prints the meeting ids and returns). For example, to summarise a YouTube video with [yt-dlp](https://github.com/yt-dlp/yt-dlp):
 
 ```sh
 yts() {
   local file
   file=$(yt-dlp -f 'ba[ext=m4a]/ba' -x --audio-format m4a -o "$HOME/Movies/YouTube/%(title)s.%(ext)s" --print after_move:filepath "$1") || return
-  takku import "$file" --template Lecture --title "$(basename "$file" .m4a)" --folder YouTube
+  takku import "$file" --template Video --title "$(basename "$file" .m4a)" --folder YouTube
 }
 ```
 
@@ -242,7 +242,7 @@ Notes are plain Markdown. Takku opens them in Obsidian by default if installed (
 
 ### Where your data is
 
-- **Notes & Transcripts**: `<notes-folder>/Meetings/` and `Meetings/Transcripts/` (plain Markdown).
+- **Notes & Transcripts**: `<notes-folder>/Meetings/` and `Meetings/Transcripts/` (plain Markdown); imports with a folder in that folder and its `Transcripts/`.
 - **Screenshots**: `<notes-folder>/Meetings/Screenshots/` (JPEG, ~0.5–1 MB each; never deleted or uploaded by Takku).
 - **Templates & Vocabulary**: `~/.takku/templates/` and `~/.takku/vocabulary.md` (plain Markdown).
 - **Audio**: `~/Library/Application Support/Takku/Models/` (models, downloaded once from Hugging Face) and `~/Library/Application Support/Takku/Recordings/` (~20 MB/hour, deleted after 7 days by default; configurable or kept forever in *Settings → Recordings*).
