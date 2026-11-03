@@ -40,6 +40,43 @@ public enum VaultNaming {
         return "\(name) (\(suffix))"
     }
 
+    /// Folders of `Meetings/` that are Takku's own, never a folder for notes.
+    public static let reservedFolders = ["Transcripts", "Screenshots", "_Templates"]
+
+    /// A folder for a note inside `Meetings/` (`takku import --folder`), as `YouTube/Corsi`, or why
+    /// it is not one: relative, no `.` or `..`, no character a note name cannot have, not one of
+    /// Takku's own folders. Slashes at the ends and doubled ones are ignored.
+    public static func noteFolder(_ text: String) -> Result<String, InvalidFolder> {
+        guard !text.hasPrefix("/"), !text.hasPrefix("~") else { return .failure(.absolute) }
+        let components = text.split(separator: "/").map { $0.trimmingCharacters(in: .whitespaces) }
+        guard !components.isEmpty else { return .failure(.empty) }
+        for component in components {
+            if component.isEmpty || component == "." || component == ".." || component.hasPrefix(".") {
+                return .failure(.invalidName(component))
+            }
+            if fileName(component) != component { return .failure(.invalidName(component)) }
+        }
+        if reservedFolders.contains(where: { $0.caseInsensitiveCompare(components[0]) == .orderedSame }) {
+            return .failure(.reserved(components[0]))
+        }
+        return .success(components.joined(separator: "/"))
+    }
+
+    public enum InvalidFolder: Error, Equatable {
+        case empty, absolute
+        case invalidName(String)
+        case reserved(String)
+
+        public var message: String {
+            switch self {
+            case .empty: "the folder is empty."
+            case .absolute: "the folder is inside Meetings/: give it as YouTube or Courses/2026, not as a full path."
+            case .invalidName(let name): "\"\(name)\" cannot be a folder name (no ., .., hidden names or * \" \\ < > : | ? # ^ [ ])."
+            case .reserved(let name): "\(name) is Takku's own folder."
+            }
+        }
+    }
+
     private static func sanitized(_ title: String) -> String {
         fileName(title) ?? defaultTitle
     }

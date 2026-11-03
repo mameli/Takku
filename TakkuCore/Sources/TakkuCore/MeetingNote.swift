@@ -185,6 +185,21 @@ public struct MeetingNote: Equatable, Sendable {
         return kept.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+    /// The Summary as the Managed section holds it, without the Transcript link: `nil` when no
+    /// Summary was written (recording or import placeholder, an error, *Transcript* as Profile).
+    public var summary: String? {
+        let markdown = MarkdownLines(content)
+        guard let managed = Self.managedRange(in: markdown) else { return nil }
+        var lines = Array(markdown.lines[(managed.lowerBound + 1)..<managed.upperBound])
+        if let link = lines.lastIndex(where: { $0.hasPrefix("Full transcript: [[") }) { lines.remove(at: link) }
+        let body = lines.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+        // With *Transcript* as Profile the section can still hold the Screenshots, and nothing else.
+        guard !body.isEmpty, !["⚠️", "⏺", "⏳", Self.screenshotsHeading].contains(where: { body.hasPrefix($0) }) else {
+            return nil
+        }
+        return body
+    }
+
     /// Whether the Managed section holds a completed Summary or Transcript, rather than the
     /// recording or import placeholder, an error or no result. A failed Retry must leave that result intact.
     public var hasSuccessfulOutcome: Bool {

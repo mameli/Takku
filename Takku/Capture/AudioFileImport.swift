@@ -24,7 +24,10 @@ enum AudioFileImport {
     /// Frames read at a time after a read error: one AAC packet, the smallest stretch skipped.
     private static let framesPerCarefulRead: AVAudioFrameCount = 1024
 
-    static func run(_ url: URL, into recordingsDirectory: URL, segmentDuration: TimeInterval) async throws -> Imported {
+    /// `meetingID`: chosen by `takku import`, so the command can follow the Meeting (ADR 0015).
+    static func run(
+        _ url: URL, meetingID: UUID = UUID(), into recordingsDirectory: URL, segmentDuration: TimeInterval
+    ) async throws -> Imported {
         let name = url.lastPathComponent
         let file: AVAudioFile
         do {
@@ -36,7 +39,6 @@ enum AudioFileImport {
         let sampleRate = file.processingFormat.sampleRate
         let (startedAt, isRecordingDate) = await startDate(of: url)
 
-        let meetingID = UUID()
         let directory = recordingsDirectory.appending(path: meetingID.uuidString, directoryHint: .isDirectory)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         do {

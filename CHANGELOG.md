@@ -4,6 +4,12 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
+## Unreleased
+
+- **Import from the terminal**: `takku import FILE…` makes audio or video files meetings, as *Import audio…* does, with the Template, Summary Profile, title and folder you give it (`--template`, `--profile`, `--title`, `--folder`, a folder inside `Meetings/`). It opens Takku if needed, waits for each note and prints its path, or the note and its summary with `--json`. With yt-dlp, a YouTube video becomes a summary in one command: [README → Your meetings in the terminal](README.md#your-meetings-in-the-terminal).
+- **More from the terminal**: `takku regenerate ID` writes a new summary, with the meeting's own Template and Profile or others you give it; `takku templates`, `takku profiles` and `takku status` show the Templates, the Summary Profiles and what Takku is recording or processing. `takku get --json` now has the summary alone, in `summary`.
+- **The MCP server sees more, still read only**: an assistant can list your Templates and Summary Profiles (never their addresses or keys) and see whether a meeting is still being processed. It still cannot import or change anything.
+
 ## 1.17.0 (2026-11-03)
 
 - **A meeting left recording stops by itself**: Takku had no limit, and a meeting forgotten after the call kept recording for days. Now, after 15 minutes with nobody speaking, Takku stops it and writes the note; and from the second hour of a meeting a notification reminds you every hour that it is still recording, with a button to stop it.

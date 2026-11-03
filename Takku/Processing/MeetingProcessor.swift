@@ -153,14 +153,15 @@ final class MeetingProcessor {
     }
 
     /// A Meeting made from an imported audio file: its Recording is already complete, so it is queued at once.
+    /// `noteFolder` and `noteTitle` come from `takku import --folder` and `--title`.
     func meetingImported(
         takkuID: UUID, startedAt: Date, templateName: String, summaryProfile: ProviderProfile?, noteURL: URL?,
-        warnings: [String]
+        warnings: [String], noteFolder: String? = nil, noteTitle: String? = nil
     ) {
         let record = ProcessingRecord(
             takkuID: takkuID, startedAt: startedAt, status: .queued,
             templateName: templateName, summaryProfile: summaryProfile, noteURL: noteURL,
-            importedAt: Date(), importWarnings: warnings
+            importedAt: Date(), importWarnings: warnings, noteFolder: noteFolder, noteTitle: noteTitle
         )
         save(record)
         enqueueProcessing(record)
@@ -294,8 +295,14 @@ final class MeetingProcessor {
     /// Retry, with the Template and Profile chosen in the menu now: they become the Meeting's.
     /// `.summary` always uses the current Transcript in the Vault; `.recording` rebuilds it from
     /// the audio. Only for concluded Meetings: one being recorded or already queued is left alone.
-    func retry(_ takkuID: UUID, templateName: String, profile: ProviderProfile?, mode: RetryMode = .automatic) {
-        guard var record = record(takkuID) else { return }
+    /// `forcingTemplate` (`takku regenerate`) uses `templateName` even for a failed Meeting.
+    /// Returns whether the Retry was queued.
+    @discardableResult
+    func retry(
+        _ takkuID: UUID, templateName: String, profile: ProviderProfile?, mode: RetryMode = .automatic,
+        forcingTemplate: Bool = false
+    ) -> Bool {
+        guard var record = record(takkuID) else { return false }
         let hasAudio = hasRecording(takkuID)
         let regenerating: Bool
         let reprocessing: ProcessingRecord.Reprocessing?
@@ -307,17 +314,17 @@ final class MeetingProcessor {
         case .recording(let fromScratch):
             guard hasAudio else {
                 lastError = String(localized: "Recording not found: regenerate the Summary from the current Transcript instead.")
-                return
+                return false
             }
             (regenerating, reprocessing) = (false, fromScratch ? .fromScratch : .reusingCache)
         }
-        record.templateName = record.retryTemplate(chosen: templateName)
+        record.templateName = forcingTemplate ? templateName : record.retryTemplate(chosen: templateName)
         record.summaryProfile = profile
         record.reprocessing = reprocessing
         do {
             if regenerating { try record.beginRegeneration() } else { try record.queueForRetry() }
         } catch {
-            return
+            return false
         }
         lastError = nil
         // Once accepted and before enqueueing, so the count leaves this Retry out.
@@ -333,6 +340,12 @@ final class MeetingProcessor {
         } else {
             enqueueProcessing(record)
         }
+        return true
+    }
+
+    /// The Processing state of a Meeting, as saved (`takku regenerate`).
+    func processingRecord(_ takkuID: UUID) -> ProcessingRecord? {
+        record(takkuID)
     }
 
     /// *Stop processing*: a queued Meeting leaves the queue at once; the running one stops at the
@@ -689,7 +702,9 @@ final class MeetingProcessor {
         vocabulary: Vocabulary
     ) async throws -> (URL, String?) {
         let noteURL = try vault.findMeetingNote(takkuID: record.takkuID, expected: record.noteURL)
-            ?? vault.createMeetingNote(takkuID: record.takkuID, startedAt: record.startedAt)
+            ?? vault.createMeetingNote(
+                takkuID: record.takkuID, startedAt: record.startedAt, folder: record.noteFolder, title: record.noteTitle
+            )
         guard let finished else {
             try vault.update(noteURL) {
                 $0.recordFailure(
@@ -745,7 +760,7 @@ final class MeetingProcessor {
         let note = try vault.meetingNote(at: noteURL)
         let speakerNames = note.speakerNames
         // A note named after its calendar event, or renamed by the user, keeps its name: no title to ask for.
-        let wantsTitle = vault.isInMeetingsFolder(noteURL) && VaultNaming.renamedNoteName(
+        let wantsTitle = vault.isInNoteFolder(noteURL, folder: record.noteFolder) && VaultNaming.renamedNoteName(
             current: noteURL.deletingPathExtension().lastPathComponent, startedAt: record.startedAt, title: VaultNaming.defaultTitle
         ) != nil
         let template = TakkuFolder.template(named: record.templateName)
@@ -764,7 +779,7 @@ final class MeetingProcessor {
             }
             throw CancellationError()
         }
-        let rename = renameIfProvisional(noteURL, title: title, startedAt: record.startedAt, in: vault)
+        let rename = renameIfProvisional(noteURL, title: title, record: record, in: vault)
         if let log {
             await writeSummaryLog(log, summary: summary, noteURL: rename.url, template: template.name, record: record)
         }
@@ -788,11 +803,11 @@ final class MeetingProcessor {
     /// the note is and whether Obsidian must be shown the renamed note (it was showing it). If the
     /// rename fails the note stays as it is: the Summary must not be lost over a name.
     private func renameIfProvisional(
-        _ noteURL: URL, title: String?, startedAt: Date, in vault: Vault
+        _ noteURL: URL, title: String?, record: ProcessingRecord, in vault: Vault
     ) -> (url: URL, follow: Bool) {
-        guard let title, vault.isInMeetingsFolder(noteURL),
+        guard let title, vault.isInNoteFolder(noteURL, folder: record.noteFolder),
               let newName = VaultNaming.renamedNoteName(
-                  current: noteURL.deletingPathExtension().lastPathComponent, startedAt: startedAt, title: title
+                  current: noteURL.deletingPathExtension().lastPathComponent, startedAt: record.startedAt, title: title
               )
         else { return (noteURL, false) }
         // Read before the rename: afterwards Obsidian may already show another note.

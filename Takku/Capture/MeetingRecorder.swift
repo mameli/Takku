@@ -30,7 +30,7 @@ final class MeetingRecorder {
     private var active: Active?
 
     /// Where Recordings are kept, one folder per Meeting (named after its `takku_id`).
-    static var recordingsDirectory: URL {
+    nonisolated static var recordingsDirectory: URL {
         #if DEBUG
         // Automated tests: test Recordings stay outside the real folder.
         if let path = UserDefaults.standard.string(forKey: "dataDirectory") {

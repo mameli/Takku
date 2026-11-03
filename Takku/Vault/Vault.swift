@@ -57,16 +57,24 @@ struct Vault {
     /// provisional title (replaced by the generated one at the end of Processing). Never creates the
     /// Vault folder: if it is missing (volume not mounted) it fails, and the note is created at the
     /// end of Processing.
-    func createMeetingNote(takkuID: UUID, startedAt: Date, event: CalendarEvent? = nil, isImport: Bool = false) throws -> URL {
+    ///
+    /// `folder` (`takku import --folder`, already checked by `VaultNaming.noteFolder`) puts it in a
+    /// folder inside `Meetings/`, made if missing; `title` (`--title`) names it instead of the event.
+    func createMeetingNote(
+        takkuID: UUID, startedAt: Date, event: CalendarEvent? = nil, isImport: Bool = false,
+        folder: String? = nil, title: String? = nil
+    ) throws -> URL {
         guard FileManager.default.fileExists(atPath: root.path(percentEncoded: false)) else {
             throw VaultError.unreachable(root.path(percentEncoded: false))
         }
-        try FileManager.default.createDirectory(at: meetingsFolder, withIntermediateDirectories: true)
+        let noteFolder = noteFolder(folder)
+        try FileManager.default.createDirectory(at: noteFolder, withIntermediateDirectories: true)
+        // Also the names in Meetings/ itself: `[[…]]` links find a note by its name alone.
         let name = VaultNaming.available(
-            VaultNaming.noteName(startedAt: startedAt, title: event?.title ?? VaultNaming.defaultTitle),
-            taken: Self.noteNames(in: meetingsFolder)
+            VaultNaming.noteName(startedAt: startedAt, title: title ?? event?.title ?? VaultNaming.defaultTitle),
+            taken: Self.noteNames(in: noteFolder).union(Self.noteNames(in: meetingsFolder))
         )
-        let url = meetingsFolder.appending(path: name + ".md")
+        let url = noteFolder.appending(path: name + ".md")
         let note = MeetingNote.initial(takkuID: takkuID, startedAt: startedAt, participants: event?.participants ?? [], isImport: isImport)
         try note.content.write(to: url, atomically: true, encoding: .utf8)
         return url
@@ -155,8 +163,18 @@ struct Vault {
 
     /// The note is still in the Meetings folder, where Takku created it (it was not moved).
     func isInMeetingsFolder(_ noteURL: URL) -> Bool {
+        isInNoteFolder(noteURL, folder: nil)
+    }
+
+    /// The note is still in the folder Takku created it in: `Meetings/` or, for `takku import
+    /// --folder`, that folder inside it.
+    func isInNoteFolder(_ noteURL: URL, folder: String?) -> Bool {
         let normalized = normalizer()
-        return normalized(noteURL.deletingLastPathComponent()) == normalized(meetingsFolder)
+        return normalized(noteURL.deletingLastPathComponent()) == normalized(noteFolder(folder))
+    }
+
+    private func noteFolder(_ folder: String?) -> URL {
+        folder.map { meetingsFolder.appending(path: $0, directoryHint: .isDirectory) } ?? meetingsFolder
     }
 
     /// Path components with symlinks resolved, lowercased unless the Vault's volume tells names apart

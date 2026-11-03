@@ -192,7 +192,7 @@ Ask any MCP-compatible assistant (Claude Code, Claude Desktop, Codex, Cursor…)
   { "mcpServers": { "takku": { "command": "/Applications/Takku.app/Contents/MacOS/Takku", "args": ["mcp"] } } }
   ```
 
-The assistant can list meetings (by date, title, folder or participant), search them (case- and accent-insensitive) and read notes and transcripts from `<notes-folder>/Meetings/` (pass `--notes-folder PATH` after `mcp` to use another folder). It never accesses audio or modifies files. Remember that any meeting the assistant reads is sent to its AI provider.
+The assistant can list meetings (by date, title, folder or participant), search them (case- and accent-insensitive) and read notes and transcripts from `<notes-folder>/Meetings/` (pass `--notes-folder PATH` after `mcp` to use another folder). It can also see your Templates and Summary Profiles (names and models, never addresses or keys) and whether a meeting is still being processed. It never accesses audio, modifies files or imports anything: an assistant reading a web page could otherwise be tricked into transcribing any file on your Mac. Remember that any meeting the assistant reads is sent to its AI provider.
 
 ### Your meetings in the terminal
 
@@ -204,7 +204,31 @@ takku search release regression                # meetings containing every word,
 takku get 11111111-2222-3333-4444-555555555555 --no-transcript
 ```
 
-Add `--json` for scripts (the same fields the MCP tools return) and `--notes-folder PATH` for another folder; `takku help` lists every option. Homebrew installs `takku` with the app; otherwise link it once:
+Add `--json` for scripts (the same fields the MCP tools return, and with `get` the summary alone in `summary`) and `--notes-folder PATH` for another folder; `takku help` lists every option.
+
+It can also import audio or video and regenerate summaries. These go through the Takku app, which opens if needed:
+
+```sh
+takku templates                                # the Templates, the default marked
+takku profiles                                 # the Summary Profiles, the active one marked
+takku import lecture.m4a --template Lecture --title "Lecture 3" --folder Courses
+takku regenerate 11111111-2222-3333-4444-555555555555 --template Notes
+takku status                                   # what is being recorded or processed
+```
+
+`import` takes any file *Import audio…* takes, with `--template`, `--profile NAME` (or `transcript`, for no summary), `--title` and `--folder` (a folder inside `Meetings/`); without them it uses what is chosen in the menu. It waits for each note and prints its path (`--json` prints the note, summary and transcript; `--no-wait` prints the meeting ids and returns). For example, to summarise a YouTube video with [yt-dlp](https://github.com/yt-dlp/yt-dlp):
+
+```sh
+yts() {
+  local file
+  file=$(yt-dlp -f 'ba[ext=m4a]/ba' -x --audio-format m4a -o "$HOME/Movies/YouTube/%(title)s.%(ext)s" --print after_move:filepath "$1") || return
+  takku import "$file" --template Lecture --title "$(basename "$file" .m4a)" --folder YouTube
+}
+```
+
+A file in Desktop, Documents or Downloads is read by Takku, so macOS asks Takku for that folder the first time.
+
+Homebrew installs `takku` with the app; otherwise link it once:
 
 ```sh
 sudo mkdir -p /usr/local/bin && sudo ln -s /Applications/Takku.app/Contents/MacOS/Takku /usr/local/bin/takku

@@ -1,8 +1,9 @@
 import Foundation
 
 /// The Model Context Protocol server behind `Takku mcp`: JSON-RPC 2.0, one message per line on
-/// stdin and stdout, with three read-only tools over the `MeetingLibrary`. An agent (Claude Code,
-/// Claude Desktop…) starts it as a subprocess; it reads the notes folder and never writes.
+/// stdin and stdout, with read-only tools over the `MeetingLibrary` and, when the app gives it,
+/// the `TakkuState` (Templates, Profiles, Processing). An agent (Claude Code, Claude Desktop…)
+/// starts it as a subprocess; it reads and never writes, nor asks the app to (ADR 0015).
 public struct MCPServer: Sendable {
     public static let protocolVersion = "2025-06-18"
     /// Protocol versions the server answers with the client's own.
@@ -10,11 +11,14 @@ public struct MCPServer: Sendable {
 
     private let library: MeetingLibrary?
     private let version: String
+    private let state: TakkuState?
 
-    /// `library` is `nil` when no notes folder is chosen: every tool then says so.
-    public init(library: MeetingLibrary?, version: String) {
+    /// `library` is `nil` when no notes folder is chosen: every meeting tool then says so. Without
+    /// `state` the Template, Profile and status tools are not offered.
+    public init(library: MeetingLibrary?, version: String, state: TakkuState? = nil) {
         self.library = library
         self.version = version
+        self.state = state
     }
 
     /// Answers every line of `input` until it ends, writing each answer as one line.
@@ -45,13 +49,16 @@ public struct MCPServer: Sendable {
                     The user's meetings recorded with Takku: a Meeting note per meeting (summary, personal \
                     notes, participants) and its Transcript, with who spoke ("Me", "Speaker N" or the name \
                     the user gave). Use search_meetings to find what was said about something, \
-                    list_meetings to browse by date, get_meeting to read one in full.
+                    list_meetings to browse by date, get_meeting to read one in full. meeting_status tells \
+                    whether a meeting is still being recorded or processed; list_templates and \
+                    list_profiles show how summaries are written. Read only: importing and regenerating \
+                    are done by the user with the takku command.
                     """,
             ]]
         case "ping":
             response = ["result": [:] as [String: Any]]
         case "tools/list":
-            response = ["result": ["tools": Self.tools]]
+            response = ["result": ["tools": Self.tools + (state == nil ? [] : Self.stateTools)]]
         case "tools/call":
             response = ["result": call(params["name"] as? String ?? "", arguments: params["arguments"] as? [String: Any] ?? [:])]
         default:
@@ -94,11 +101,37 @@ public struct MCPServer: Sendable {
         ],
     ] }
 
+    static var stateTools: [[String: Any]] { [
+        [
+            "name": "list_templates",
+            "description": "Lists the Templates Takku writes summaries with (the files of ~/.takku/templates), the default one marked.",
+            "inputSchema": schema([:]),
+            "annotations": ["readOnlyHint": true],
+        ],
+        [
+            "name": "list_profiles",
+            "description": "Lists the Summary Profiles (who writes the summaries): name, model, whether it runs on this Mac, the active one marked. Never addresses or keys.",
+            "inputSchema": schema([:]),
+            "annotations": ["readOnlyHint": true],
+        ],
+        [
+            "name": "meeting_status",
+            "description": "Whether meetings are being recorded, queued or processed, with the failure reason of a failed one. Without an id, the meetings not concluded yet; with one, that meeting.",
+            "inputSchema": schema([
+                "id": ["type": "string", "description": "A meeting id, e.g. the one printed by takku import."],
+            ]),
+            "annotations": ["readOnlyHint": true],
+        ],
+    ] }
+
     private static func schema(_ properties: [String: Any], required: [String] = []) -> [String: Any] {
         ["type": "object", "properties": properties, "required": required]
     }
 
     private func call(_ name: String, arguments: [String: Any]) -> [String: Any] {
+        if let state, Self.stateTools.contains(where: { $0["name"] as? String == name }) {
+            return callState(name, arguments: arguments, state: state)
+        }
         guard let library else {
             return Self.toolResult("No notes folder is chosen in Takku: set one in Settings → Notes.", isError: true)
         }
@@ -126,6 +159,26 @@ public struct MCPServer: Sendable {
             return Self.toolResult(meeting.text(includeTranscript: arguments["include_transcript"] as? Bool ?? true))
         default:
             return Self.toolResult("Unknown tool: \(name).", isError: true)
+        }
+    }
+
+    private func callState(_ name: String, arguments: [String: Any], state: TakkuState) -> [String: Any] {
+        switch name {
+        case "list_templates":
+            return Self.toolResult(Self.json(state.templateFields))
+        case "list_profiles":
+            return Self.toolResult(Self.json(state.profileFields))
+        default:
+            guard let idText = arguments["id"] as? String else {
+                return Self.toolResult(Self.json(state.pendingRecords().map(state.statusFields)))
+            }
+            guard let id = UUID(uuidString: idText) else {
+                return Self.toolResult("The id is not a meeting id.", isError: true)
+            }
+            guard let record = state.record(id) else {
+                return Self.toolResult("No meeting with id \(idText) in Takku's recordings.", isError: true)
+            }
+            return Self.toolResult(Self.json(state.statusFields(record)))
         }
     }
 

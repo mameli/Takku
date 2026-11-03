@@ -146,6 +146,20 @@ extension MeetingLibrary.Meeting {
         return fields
     }
 
+    /// `takku get --json`: the metadata, the note's path and Markdown, its Summary alone (`null`
+    /// without one) and, with `includeTranscript`, the Transcript's Markdown.
+    func fullFields(includeTranscript: Bool) -> [String: Any] {
+        var fields = self.fields
+        let noteText = try? String(contentsOf: note, encoding: .utf8)
+        fields["path"] = note.path(percentEncoded: false)
+        fields["note"] = noteText
+        fields["summary"] = noteText.flatMap { MeetingNote(content: $0).summary } ?? NSNull()
+        if includeTranscript, let transcript {
+            fields["transcript"] = try? String(contentsOf: transcript, encoding: .utf8)
+        }
+        return fields
+    }
+
     /// Its Meeting note and, with `includeTranscript`, its Transcript, each under its path.
     func text(includeTranscript: Bool) -> String {
         var parts = ["# \(title)", "Meeting note (\(note.path(percentEncoded: false))):",

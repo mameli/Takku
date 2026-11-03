@@ -128,11 +128,12 @@ final class MeetingController {
         }
         if hasTestIsolation {
             processor.resumeAfterLaunch()
+            startHandlingRequests()
         }
         startDailyCleanUp()
         updates.isBusy = { [weak self] in
             guard let self else { return false }
-            return isInProgress || processor.pendingCount > 0 || importingFileName != nil
+            return isInProgress || processor.pendingCount > 0 || importingFileName != nil || isHandlingRequests
         }
         updates.start()
         keepTimerLiveWithoutRebuildingMenus()
@@ -536,21 +537,10 @@ final class MeetingController {
 
     private func importAudio(_ urls: [URL]) async {
         for (index, url) in urls.enumerated() {
-            importingFileName = url.lastPathComponent
             importingFileIndex = index + 1
             importingFileTotal = urls.count
             do {
-                let imported = try await AudioFileImport.run(
-                    url, into: MeetingRecorder.recordingsDirectory, segmentDuration: MeetingRecorder.segmentDuration
-                )
-                let recording = imported.recording
-                logger.notice("Imported \(recording.segments.count) Segments as Meeting \(recording.meetingID, privacy: .public)")
-                lastRecordingDirectory = imported.directory
-                processor.meetingImported(
-                    takkuID: recording.meetingID, startedAt: recording.startedAt, templateName: templateName,
-                    summaryProfile: AppSettings.activeProviderProfile, noteURL: createImportedNote(imported),
-                    warnings: imported.warnings
-                )
+                try await importFile(url, templateName: templateName, profile: AppSettings.activeProviderProfile)
             } catch {
                 logger.error("Import failed: \(error, privacy: .public)")
                 recordingError = String(localized: "Not imported: \(error.localizedDescription)")
@@ -561,18 +551,184 @@ final class MeetingController {
         importingFileTotal = 0
     }
 
+    /// One file made a Meeting and queued; `meetingID`, `title` and `folder` come from `takku import`.
+    private func importFile(
+        _ url: URL, meetingID: UUID = UUID(), templateName: String, profile: ProviderProfile?,
+        title: String? = nil, folder: String? = nil
+    ) async throws {
+        importingFileName = url.lastPathComponent
+        let imported = try await AudioFileImport.run(
+            url, meetingID: meetingID, into: MeetingRecorder.recordingsDirectory, segmentDuration: MeetingRecorder.segmentDuration
+        )
+        let recording = imported.recording
+        logger.notice("Imported \(recording.segments.count) Segments as Meeting \(recording.meetingID, privacy: .public)")
+        lastRecordingDirectory = imported.directory
+        processor.meetingImported(
+            takkuID: recording.meetingID, startedAt: recording.startedAt, templateName: templateName,
+            summaryProfile: profile, noteURL: createImportedNote(imported, title: title, folder: folder),
+            warnings: imported.warnings, noteFolder: folder, noteTitle: title
+        )
+    }
+
     /// The Meeting note of an imported file, not opened: the notification at the end of Processing
     /// opens it. If it cannot be created here, Processing creates it at the end.
-    private func createImportedNote(_ imported: AudioFileImport.Imported) -> URL? {
+    private func createImportedNote(_ imported: AudioFileImport.Imported, title: String?, folder: String?) -> URL? {
         guard let vault = Vault.configured else { return nil }
         let startedAt = imported.recording.startedAt
         // Only a date from the file's metadata says when it was recorded: the date of a copied or
         // downloaded file would name the note after an unrelated event.
         let event = imported.isRecordingDate ? MeetingCalendar.eventsInProgress(at: startedAt).first : nil
         do {
-            return try vault.createMeetingNote(takkuID: imported.recording.meetingID, startedAt: startedAt, event: event, isImport: true)
+            return try vault.createMeetingNote(
+                takkuID: imported.recording.meetingID, startedAt: startedAt, event: event, isImport: true,
+                folder: folder, title: title
+            )
         } catch {
             logger.error("Meeting note of the imported file not created: \(error, privacy: .public)")
+            return nil
+        }
+    }
+
+    // MARK: - Requests from the terminal (ADR 0015)
+
+    /// `takku import` and `takku regenerate` write their requests here.
+    nonisolated static var requestFolder: AppRequestFolder {
+        AppRequestFolder(url: MeetingRecorder.recordingsDirectory.deletingLastPathComponent()
+            .appending(path: "Requests", directoryHint: .isDirectory))
+    }
+
+    @ObservationIgnored private var requestWatch: DispatchSourceFileSystemObject?
+    /// Requests taken from the folder and not answered yet, in order.
+    @ObservationIgnored private var takenRequests: [AppRequest] = []
+    @ObservationIgnored private var isHandlingRequests = false
+
+    /// Reads the requests folder now and whenever a file is added to it.
+    private func startHandlingRequests() {
+        let folder = Self.requestFolder
+        do {
+            try FileManager.default.createDirectory(at: folder.url, withIntermediateDirectories: true)
+        } catch {
+            logger.error("Requests folder not created: \(error, privacy: .public)")
+            return
+        }
+        folder.removeStaleAnswers()
+        let descriptor = open(folder.url.path(percentEncoded: false), O_EVTONLY)
+        guard descriptor >= 0 else {
+            logger.error("Requests folder not watched: \(String(cString: strerror(errno)), privacy: .public)")
+            return
+        }
+        let source = DispatchSource.makeFileSystemObjectSource(fileDescriptor: descriptor, eventMask: .write, queue: .main)
+        source.setEventHandler { [weak self] in
+            MainActor.assumeIsolated { self?.takeRequests() }
+        }
+        source.setCancelHandler { close(descriptor) }
+        source.resume()
+        requestWatch = source
+        takeRequests()
+    }
+
+    /// Takes every request at once, so the command knows it was read, then answers them in order.
+    private func takeRequests() {
+        let folder = Self.requestFolder
+        while let next = folder.takeNext() {
+            switch next {
+            case .success(let request):
+                takenRequests.append(request)
+            case .failure(let unreadable):
+                logger.error("Unreadable request \(unreadable.id?.uuidString ?? "without id", privacy: .public)")
+                if let id = unreadable.id {
+                    try? folder.answer(id, AppRequestAnswer(error: "Takku could not read the request: quit Takku and open it again."))
+                }
+            }
+        }
+        guard !isHandlingRequests, !takenRequests.isEmpty else { return }
+        isHandlingRequests = true
+        Task {
+            while !takenRequests.isEmpty {
+                let request = takenRequests.removeFirst()
+                let error = await handle(request)
+                do {
+                    try folder.answer(request.id, AppRequestAnswer(error: error))
+                } catch {
+                    logger.error("Request \(request.id, privacy: .public) not answered: \(error, privacy: .public)")
+                }
+            }
+            isHandlingRequests = false
+        }
+    }
+
+    /// Does what the request asks, as the menu would; returns why not, or `nil` when it was queued.
+    /// In English, like the rest of the command's output.
+    private func handle(_ request: AppRequest) async -> String? {
+        guard request.version == AppRequest.currentVersion else {
+            return "This Takku is a different version from the takku command: quit Takku and open it again."
+        }
+        switch request.kind {
+        case .importAudio:
+            guard let path = request.file else { return "The request names no file." }
+            let profile: ProviderProfile?
+            switch request.profile {
+            case nil: profile = AppSettings.activeProviderProfile
+            case .transcript: profile = nil
+            case .profile(let id):
+                guard let found = AppSettings.summaryProfiles.first(where: { $0.id == id }) else {
+                    return "That Summary Profile no longer exists."
+                }
+                profile = found
+            }
+            // One file at a time, also with an import chosen from the menu.
+            while importingFileName != nil { try? await Task.sleep(for: .milliseconds(500)) }
+            importingFileIndex = 1
+            importingFileTotal = 1
+            defer {
+                importingFileName = nil
+                importingFileIndex = 0
+                importingFileTotal = 0
+            }
+            do {
+                try await importFile(
+                    URL(filePath: path), meetingID: request.meetingID, templateName: request.template ?? templateName,
+                    profile: profile, title: request.title, folder: request.folder
+                )
+                logger.notice("Imported from the terminal as Meeting \(request.meetingID, privacy: .public)")
+                return nil
+            } catch {
+                logger.error("Import from the terminal failed: \(error, privacy: .public)")
+                return "Not imported: \(error.localizedDescription)"
+            }
+        case .regenerate:
+            guard let record = processor.processingRecord(request.meetingID) else {
+                return "No meeting with this id in Takku's recordings."
+            }
+            guard record.status.canRetry else {
+                return "The meeting is still being recorded or processed."
+            }
+            let profile: ProviderProfile?
+            switch request.profile {
+            case nil:
+                // The Meeting's own Profile, as it is now in Settings.
+                if let own = record.summaryProfile {
+                    guard let current = AppSettings.summaryProfiles.first(where: { $0.id == own.id }) else {
+                        return "The meeting's Summary Profile no longer exists: choose one with --profile."
+                    }
+                    profile = current
+                } else {
+                    profile = nil
+                }
+            case .transcript: profile = nil
+            case .profile(let id):
+                guard let found = AppSettings.summaryProfiles.first(where: { $0.id == id }) else {
+                    return "That Summary Profile no longer exists."
+                }
+                profile = found
+            }
+            guard processor.retry(
+                request.meetingID, templateName: request.template ?? record.templateName, profile: profile,
+                mode: .summary, forcingTemplate: true
+            ) else {
+                return "The Summary cannot be regenerated now."
+            }
+            logger.notice("Regeneration asked from the terminal for Meeting \(request.meetingID, privacy: .public)")
             return nil
         }
     }

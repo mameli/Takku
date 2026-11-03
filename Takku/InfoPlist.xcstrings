@@ -57,6 +57,90 @@
         }
       }
     },
+    "NSDesktopFolderUsageDescription": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku liest die Audio- oder Videodateien, die du mit dem Befehl takku importierst."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku lee los archivos de audio o vídeo que importas con el comando takku."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku lit les fichiers audio ou vidéo que vous importez avec la commande takku."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku legge i file audio o video che importi con il comando takku."
+          }
+        }
+      }
+    },
+    "NSDocumentsFolderUsageDescription": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku schreibt deine Notizen in den gewählten Ordner und liest die Dateien, die du mit dem Befehl takku importierst."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku escribe tus notas en la carpeta que elegiste y lee los archivos que importas con el comando takku."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku écrit vos notes dans le dossier choisi et lit les fichiers que vous importez avec la commande takku."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku scrive le note nella cartella che hai scelto e legge i file che importi con il comando takku."
+          }
+        }
+      }
+    },
+    "NSDownloadsFolderUsageDescription": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku liest die Audio- oder Videodateien, die du mit dem Befehl takku importierst."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku lee los archivos de audio o vídeo que importas con el comando takku."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku lit les fichiers audio ou vidéo que vous importez avec la commande takku."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku legge i file audio o video che importi con il comando takku."
+          }
+        }
+      }
+    },
     "NSMicrophoneUsageDescription": {
       "localizations": {
         "de": {

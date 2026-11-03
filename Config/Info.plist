@@ -28,6 +28,12 @@
 	<string>Takku records the audio of the other meeting participants to transcribe it.</string>
 	<key>NSCalendarsFullAccessUsageDescription</key>
 	<string>Takku names the meeting note after the event in progress and lists who was invited.</string>
+	<key>NSDesktopFolderUsageDescription</key>
+	<string>Takku reads the audio or video files you import with the takku command.</string>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>Takku writes your notes in the folder you chose and reads the files you import with the takku command.</string>
+	<key>NSDownloadsFolderUsageDescription</key>
+	<string>Takku reads the audio or video files you import with the takku command.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Takku records your voice during meetings to transcribe it.</string>
 	<key>SUEnableAutomaticChecks</key>
