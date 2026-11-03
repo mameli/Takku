@@ -449,30 +449,58 @@
         }
       }
     },
-    "Download…": {
+    "Check Now": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Scarica…"
+            "value": "Controlla ora"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Laden…"
+            "value": "Jetzt prüfen"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Descargar…"
+            "value": "Comprobar ahora"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Télécharger…"
+            "value": "Vérifier maintenant"
+          }
+        }
+      }
+    },
+    "Install…": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installa…"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installieren…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instalar…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installer…"
           }
         }
       }
@@ -669,6 +697,34 @@
           "stringUnit": {
             "state": "translated",
             "value": "Cochez toutes les langues de vos réunions."
+          }
+        }
+      }
+    },
+    "Updates": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aggiornamenti"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Updates"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actualizaciones"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mises à jour"
           }
         }
       }

@@ -192,7 +192,7 @@ private struct MeetingMenu: View {
 
         if let release = controller.updates.available {
             Divider()
-            Button("Takku \(release.version) is available…") { controller.updates.openUpdatePage() }
+            Button("Takku \(release.version) is available…") { controller.updates.check() }
         }
 
         Divider()

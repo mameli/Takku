@@ -11,6 +11,7 @@
 		A10000000000000000000025 /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000000024 /* WhisperKit */; };
 		A10000000000000000000028 /* FluidAudio in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000000027 /* FluidAudio */; };
 		A1000000000000000000002B /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = A1000000000000000000002A /* KeyboardShortcuts */; };
+		A1000000000000000000002E /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = A1000000000000000000002D /* Sparkle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,7 @@
 				A10000000000000000000025 /* WhisperKit in Frameworks */,
 				A10000000000000000000028 /* FluidAudio in Frameworks */,
 				A1000000000000000000002B /* KeyboardShortcuts in Frameworks */,
+				A1000000000000000000002E /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -88,6 +90,7 @@
 				A10000000000000000000024 /* WhisperKit */,
 				A10000000000000000000027 /* FluidAudio */,
 				A1000000000000000000002A /* KeyboardShortcuts */,
+				A1000000000000000000002D /* Sparkle */,
 			);
 			productName = Takku;
 			productReference = A10000000000000000000005 /* Takku.app */;
@@ -121,6 +124,7 @@
 				A10000000000000000000023 /* XCRemoteSwiftPackageReference "WhisperKit" */,
 				A10000000000000000000026 /* XCRemoteSwiftPackageReference "FluidAudio" */,
 				A10000000000000000000029 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
+				A1000000000000000000002C /* XCRemoteSwiftPackageReference "Sparkle" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = A10000000000000000000002 /* Products */;
@@ -253,6 +257,14 @@
 				minimumVersion = 3.1.0;
 			};
 		};
+		A1000000000000000000002C /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMinorVersion;
+				minimumVersion = 2.10.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -274,6 +286,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A10000000000000000000029 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */;
 			productName = KeyboardShortcuts;
+		};
+		A1000000000000000000002D /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A1000000000000000000002C /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

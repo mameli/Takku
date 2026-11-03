@@ -132,10 +132,14 @@ private struct AboutTab: View {
     var body: some View {
         Form {
             Section {
-                UpdatesToggle()
+                UpdatesToggle(updates: updates)
                 if let release = updates.available {
                     LabeledContent("Takku \(release.version) is available") {
-                        Button("Download…") { updates.openUpdatePage() }
+                        Button("Install…") { updates.check() }
+                    }
+                } else {
+                    LabeledContent("Updates") {
+                        Button("Check Now") { updates.check() }
                     }
                 }
             } header: {

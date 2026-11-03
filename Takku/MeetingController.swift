@@ -126,6 +126,10 @@ final class MeetingController {
             processor.resumeAfterLaunch()
         }
         startDailyCleanUp()
+        updates.isBusy = { [weak self] in
+            guard let self else { return false }
+            return isInProgress || processor.pendingCount > 0 || importingFileName != nil
+        }
         updates.start()
         keepTimerLiveWithoutRebuildingMenus()
         Task { [transcriber] in

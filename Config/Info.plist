@@ -30,5 +30,11 @@
 	<string>Takku names the meeting note after the event in progress and lists who was invited.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Takku records your voice during meetings to transcribe it.</string>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUFeedURL</key>
+	<string>https://github.com/mameli/Takku/releases/latest/download/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>FOSpjLeu4bytU5Y1JyGH3iZZ+HUWKjRy8S68YnDSsrY=</string>
 </dict>
 </plist>

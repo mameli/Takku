@@ -39,7 +39,7 @@ Meetings can be in Italian, English, German, French, Spanish or 20 other Europea
    Or download `Takku-<version>.dmg` from the [latest release](https://github.com/mameli/Takku/releases/latest), open it and drag **Takku** into **Applications**.
 2. Open Takku. It is notarized by Apple and lives in the menu bar, not in the Dock. Continue with [First setup](#first-setup).
 
-**Updating**: run `brew upgrade --cask takku`, or quit Takku and replace it in Applications. Settings, profiles, API keys, permissions and downloaded models are kept. `brew uninstall --cask --zap takku` also deletes Takku's settings, recordings and models; your notes folder is never touched. See [CHANGELOG.md](CHANGELOG.md) for release notes.
+**Updating**: from 1.17.0 Takku updates itself: *Takku … is available…* in its menu, then *Install Update*. From an older version, run `brew upgrade --cask takku`, or quit Takku and replace it in Applications ([step by step](https://takku.app/update)). Settings, profiles, API keys, permissions and downloaded models are kept. `brew uninstall --cask --zap takku` also deletes Takku's settings, recordings and models; your notes folder is never touched. See [CHANGELOG.md](CHANGELOG.md) for release notes.
 
 **Coming from 0.x**: from 1.0 Takku is signed with an Apple Developer ID, so macOS treats it as a new app once. Re-allow microphone, system audio and calendar access, enter your password to let Takku read saved API keys (*Always Allow*), and turn *Open at login* back on if you used it.
 
@@ -225,7 +225,7 @@ Notes are plain Markdown. Takku opens them in Obsidian by default if installed (
 - **Known voices** (if *Recognise voices* is on): stored locally on your Mac; manage or forget them in *Settings → Transcription*.
 - **Summary log**: `~/.takku/summary-log/` (one JSON file per summary with requests and replies, up to 5 MB, to help you tune Templates by adding a `comment` field and asking a trusted model for improvements). Never read back by Takku or included in bug reports; disable or delete in *Settings → Recordings*.
 - **API keys**: stored in the macOS Keychain.
-- **External requests**: only what you enable—your chosen Summary provider (receives transcript, personal notes, template, vocabulary terms and calendar participants; never audio or screenshots; Apple Intelligence stays on-device), your Hook script, your MCP assistant, and the daily GitHub update check (*Settings → About → Check for updates*, sends no personal data).
+- **External requests**: only what you enable—your chosen Summary provider (receives transcript, personal notes, template, vocabulary terms and calendar participants; never audio or screenshots; Apple Intelligence stays on-device), your Hook script, your MCP assistant, and the daily GitHub update check (*Settings → About → Check for updates*: Sparkle reads the latest release's appcast, sends no personal data).
 
 Recording a meeting may require the consent of the other participants: tell them, and follow the rules that apply to you.
 
@@ -265,7 +265,7 @@ cd TakkuCore && swift test   # domain logic tests
 - `Takku/` is the macOS app (capture, transcription, Vault, Settings, menu); `TakkuCore/` is a pure Swift package with domain logic and tests (no AppKit/AVFoundation).
 - Architecture & specs: [docs/SPEC.md](docs/SPEC.md), glossary in [CONTEXT.md](CONTEXT.md), decisions in [docs/adr](docs/adr/), manual test checklist in [docs/TESTING.md](docs/TESTING.md).
 - Localization: English in code, Italian, German, French and Spanish in `Takku/Localizable.xcstrings` (errors in `TakkuCore` are also looked up there and added by hand). Test another UI language with `defaults write app.takku.takku AppleLanguages -array it` (or `de`, `fr`, `es`).
-- Releases: `scripts/release.sh` builds a Developer ID–signed and notarized Release, packages the DMG (`scripts/dmg/`), publishes the GitHub Release for `MARKETING_VERSION` (`Config/Base.xcconfig`) and updates the Homebrew cask ([mameli/homebrew-takku](https://github.com/mameli/homebrew-takku)). Never overwrite a published version (Homebrew verifies the DMG SHA-256). Pass `--dry-run` to stop after building the DMG.
+- Releases: `scripts/release.sh` builds a Developer ID–signed and notarized Release, packages the DMG (`scripts/dmg/`), publishes the GitHub Release for `MARKETING_VERSION` (`Config/Base.xcconfig`) with the Sparkle appcast (signed with the EdDSA key in the keychain, [ADR 0014](docs/adr/0014-updates-with-sparkle.md)) and updates the Homebrew cask ([mameli/homebrew-takku](https://github.com/mameli/homebrew-takku)). Never overwrite a published version (Homebrew verifies the DMG SHA-256). Pass `--dry-run` to stop after building the DMG.
 - Logs: `log stream --predicate 'subsystem == "app.takku.takku"'` (live) or `log show --last 1h --predicate 'subsystem == "app.takku.takku"'`.
 - Smoke tests (Debug builds only, require isolated `-vaultPath`, `-testSummaryBaseURL`, `-dataDirectory` and `-testTakkuFolder`): see `runSmokeTestIfRequested()` in `Takku/MeetingController.swift`.
 

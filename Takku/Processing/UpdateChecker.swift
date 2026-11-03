@@ -1,62 +1,116 @@
 import AppKit
 import Observation
-import TakkuCore
+import Sparkle
 import os
 
 private let logger = Logger(subsystem: "app.takku.takku", category: "updates")
 
-/// At launch and once a day, when the user leaves it on in Settings, asks GitHub for the latest
-/// release. The request carries nothing about the user or the Meetings.
+/// Updates through Sparkle (ADR 0014). At launch and once a day, when the user leaves it on in
+/// Settings, it reads the appcast published with the latest GitHub release; the request carries
+/// nothing about the user or the Meetings. A newer version shows in the menu and in Settings →
+/// About instead of a window popping up; choosing it opens Sparkle's window with what is new and
+/// *Install Update*: Takku downloads the disk image, checks its EdDSA signature and Developer ID,
+/// replaces itself and opens again. Never in the middle of a Meeting or its Processing: the
+/// relaunch waits for them to end.
 @MainActor
 @Observable
-final class UpdateChecker {
+final class UpdateChecker: NSObject {
     struct Release: Equatable {
         let version: String
     }
 
-    private static let latestRelease = URL(string: "https://api.github.com/repos/mameli/Takku/releases/latest")!
-    /// How to update, step by step: not GitHub's release page, which puts off those who never saw GitHub.
-    private static let updatePage = URL(string: "https://takku.app/update")!
-
     /// A release newer than the running app, shown in the menu.
     private(set) var available: Release?
 
+    /// True while a relaunch would interrupt a Meeting, its Processing or an import.
+    @ObservationIgnored var isBusy: () -> Bool = { false }
+
+    @ObservationIgnored private var controller: SPUStandardUpdaterController!
+
+    override init() {
+        super.init()
+        controller = SPUStandardUpdaterController(startingUpdater: false, updaterDelegate: self, userDriverDelegate: self)
+    }
+
     func start() {
-        Task { [weak self] in
-            while true {
-                guard let self else { return }
-                if AppSettings.checkForUpdates { await self.check() }
-                try? await Task.sleep(for: .seconds(24 * 60 * 60))
-            }
-        }
+        controller.updater.automaticallyChecksForUpdates = AppSettings.checkForUpdates
+        controller.startUpdater()
     }
 
-    func openUpdatePage() {
-        NSWorkspace.shared.open(Self.updatePage)
+    /// From the switch in Settings.
+    func setChecksAutomatically(_ isOn: Bool) {
+        controller.updater.automaticallyChecksForUpdates = isOn
     }
 
-    private func check() async {
-        struct Reply: Decodable {
-            let tag: String
+    /// Sparkle's window: the new version with what changed and *Install Update*, or "You're up to date".
+    func check() {
+        // Takku has no Dock icon: without activating it the window would stay behind the others.
+        NSApplication.shared.activate()
+        controller.checkForUpdates(nil)
+    }
 
-            enum CodingKeys: String, CodingKey {
-                case tag = "tag_name"
+    /// Runs `install` once nothing is recording or processing, checking every 30 seconds.
+    private func relaunchWhenIdle(_ install: @escaping () -> Void) {
+        Task {
+            while isBusy() {
+                try? await Task.sleep(for: .seconds(30))
             }
-        }
-        var request = URLRequest(url: Self.latestRelease)
-        request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
-        do {
-            let (data, _) = try await URLSession.shared.data(for: request)
-            let reply = try JSONDecoder().decode(Reply.self, from: data)
-            let current = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
-            guard let version = AppVersion.fromTag(reply.tag), AppVersion.isNewer(version, than: current) else {
-                available = nil
-                return
-            }
-            available = Release(version: version)
-        } catch {
-            // Offline or rate-limited: nothing to show, tried again tomorrow.
-            logger.notice("Update check failed: \(error, privacy: .public)")
+            logger.notice("Meeting over: installing the update")
+            install()
         }
     }
+}
+
+extension UpdateChecker: SPUUpdaterDelegate {
+    #if DEBUG
+    /// `-testUpdateFeed URL` reads another appcast, to try an update with a local one.
+    nonisolated func feedURLString(for updater: SPUUpdater) -> String? {
+        UserDefaults.standard.string(forKey: "testUpdateFeed")
+    }
+    #endif
+
+    nonisolated func updater(_ updater: SPUUpdater, didFindValidUpdate item: SUAppcastItem) {
+        let version = item.displayVersionString
+        logger.notice("Takku \(version, privacy: .public) is available")
+        MainActor.assumeIsolated { available = Release(version: version) }
+    }
+
+    nonisolated func updaterDidNotFindUpdate(_ updater: SPUUpdater) {
+        MainActor.assumeIsolated { available = nil }
+    }
+
+    nonisolated func updater(_ updater: SPUUpdater, didAbortWithError error: any Error) {
+        // Offline or rate-limited: nothing to show, tried again tomorrow.
+        logger.notice("Update check failed: \(error.localizedDescription, privacy: .public)")
+    }
+
+    nonisolated func updater(
+        _ updater: SPUUpdater, shouldPostponeRelaunchForUpdate item: SUAppcastItem,
+        untilInvokingBlock installHandler: @escaping () -> Void
+    ) -> Bool {
+        // Sparkle calls it on the main thread, and calls the handler there too.
+        nonisolated(unsafe) let install = installHandler
+        return MainActor.assumeIsolated {
+            guard isBusy() else { return false }
+            logger.notice("Update \(item.displayVersionString, privacy: .public) waits for the Meeting to end")
+            relaunchWhenIdle { install() }
+            return true
+        }
+    }
+}
+
+extension UpdateChecker: SPUStandardUserDriverDelegate {
+    /// A daily check that finds a version adds it to the menu: no window opens by itself.
+    nonisolated var supportsGentleScheduledUpdateReminders: Bool { true }
+
+    nonisolated func standardUserDriverShouldHandleShowingScheduledUpdate(
+        _ update: SUAppcastItem, andInImmediateFocus immediateFocus: Bool
+    ) -> Bool {
+        false
+    }
+
+    /// Required with the gentle reminders: the menu already shows the version (`available`).
+    nonisolated func standardUserDriverWillHandleShowingUpdate(
+        _ handleShowingUpdate: Bool, forUpdate update: SUAppcastItem, state: SPUUserUpdateState
+    ) {}
 }

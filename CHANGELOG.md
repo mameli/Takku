@@ -4,6 +4,10 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
+## Unreleased
+
+- **Takku updates itself**: when a new version is out, *Takku … is available…* in the menu (or *Install…* in Settings → About) shows what is new and *Install Update*: Takku downloads it, replaces itself and opens again, never in the middle of a meeting. *Check Now* in Settings → About looks right away. Updating from 1.16.1 or earlier still takes the steps at [takku.app/update](https://takku.app/update), once.
+
 ## 1.16.1 (2026-11-03)
 
 - **Meeting languages from your Mac**: on a new install the languages ticked are your Mac's (those Takku transcribes) and English, instead of always Italian and English; the welcome window shows them on the *Transcription* page, to tick the others your meetings are in. A Takku already set up keeps its languages, with your Mac's added.

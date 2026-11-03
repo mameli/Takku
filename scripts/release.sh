@@ -7,6 +7,8 @@
 # published version is never replaced: Homebrew checks the disk image's SHA-256. The Release
 # also carries a copy named Takku.dmg, so releases/latest/download/Takku.dmg (the download
 # button on takku.app) always gives the latest version. Releases up to 1.8.0 carry a zip instead.
+# From 1.17.0 the Release carries appcast.xml too: Takku reads releases/latest/download/appcast.xml
+# with Sparkle and installs the disk image after checking its EdDSA signature (ADR 0014).
 #
 #   scripts/release.sh            build, sign and pack into build/release/, then ask before publishing
 #                                 (a dry-run of the same commit is reused: no second build and notarization)
@@ -14,17 +16,23 @@
 #
 # Once per Mac: the certificate from Xcode → Settings → Accounts → Manage Certificates, and
 #   xcrun notarytool store-credentials takku --apple-id <Apple ID> --team-id <Team ID>
-# with an app-specific password from account.apple.com.
+# with an app-specific password from account.apple.com. The Sparkle signing key is in the
+# keychain too (account "takku", made with Sparkle's generate_keys; back it up with
+# generate_keys --account takku -x <file>): without it no Takku can install the update.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
 version=$(sed -n 's/^MARKETING_VERSION = //p' Config/Base.xcconfig)
+build=$(sed -n 's/^CURRENT_PROJECT_VERSION = //p' Config/Base.xcconfig)
+minimum_macos=$(sed -n 's/^MACOSX_DEPLOYMENT_TARGET = //p' Config/Base.xcconfig)
 tag="v$version"
 app=build/release/DerivedData/Build/Products/Release/Takku.app
 zip=build/release/Takku.zip
 dmg="build/release/Takku-$version.dmg"
 latest=build/release/Takku.dmg
 built=build/release/commit
+appcast=build/release/appcast.xml
+sparkle_bin=build/release/DerivedData/SourcePackages/artifacts/sparkle/Sparkle/bin
 tap=${TAKKU_TAP:-../homebrew-takku}
 cask="$tap/Casks/takku.rb"
 identity="Developer ID Application"
@@ -79,6 +87,17 @@ else
         CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO OTHER_CODE_SIGN_FLAGS=--timestamp \
         clean build | grep -E "error: |BUILD"
 
+    # Xcode signs Sparkle.framework but leaves its helpers ad-hoc, which notarization refuses:
+    # each is signed with the Developer ID, inside out, then the framework and the app again.
+    sparkle=$app/Contents/Frameworks/Sparkle.framework/Versions/B
+    sign() { codesign --force --sign "$identity" --timestamp --options runtime "$@"; }
+    sign "$sparkle/XPCServices/Installer.xpc"
+    sign --preserve-metadata=entitlements "$sparkle/XPCServices/Downloader.xpc"
+    sign "$sparkle/Autoupdate"
+    sign "$sparkle/Updater.app"
+    sign "$app/Contents/Frameworks/Sparkle.framework"
+    sign --preserve-metadata=entitlements,requirements,flags "$app"
+
     codesign --verify --strict --deep "$app"
     [[ $(codesign -dvv "$app" 2>&1) == *"Authority=$identity"* ]] || { echo "Not signed with the $identity certificate." >&2; exit 1; }
 
@@ -110,6 +129,30 @@ else
     echo "Ready: $dmg (notarized)"
 fi
 
+# The appcast Sparkle reads: this version only, with what's new and the disk image's EdDSA
+# signature. Made in the dry-run too, so a missing key shows before publishing.
+signature=$("$sparkle_bin/sign_update" --account takku "$dmg") \
+    || { echo "No Sparkle key \"takku\" in the keychain: see the top of this script." >&2; exit 1; }
+notes_html=$(gh api markdown -f mode=gfm -f context=mameli/Takku -f text="$changes")
+cat > "$appcast" <<APPCAST
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+  <channel>
+    <title>Takku</title>
+    <item>
+      <title>Takku $version</title>
+      <pubDate>$(LC_ALL=C date -u "+%a, %d %b %Y %H:%M:%S +0000")</pubDate>
+      <sparkle:version>$build</sparkle:version>
+      <sparkle:shortVersionString>$version</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>$minimum_macos</sparkle:minimumSystemVersion>
+      <description><![CDATA[$notes_html]]></description>
+      <enclosure url="https://github.com/mameli/Takku/releases/download/$tag/Takku-$version.dmg" $signature type="application/octet-stream"/>
+    </item>
+  </channel>
+</rss>
+APPCAST
+xmllint --noout "$appcast"
+
 [[ ${1:-} == --dry-run ]] && exit 0
 read -r -p "Publish $tag on GitHub? [y/N] " answer
 [[ $answer == y ]] || exit 0
@@ -122,8 +165,8 @@ if [[ $released != $(date -u +%F) ]]; then
     echo "Note: CHANGELOG.md dates $version $released, but today is $(date -u +%F) (UTC): fix it in a later commit." >&2
 fi
 # What's new first, then how to update in plain words: Takku's menu brought here people who
-# never saw GitHub up to 1.16.0 (from 1.16.1 it opens takku.app/update).
-gh release create "$tag" "$dmg" "$latest" --target main --title "Takku $version" --notes-file - <<NOTES
+# never saw GitHub up to 1.16.0 (1.16.1 opens takku.app/update, 1.17.0 and later update themselves).
+gh release create "$tag" "$dmg" "$latest" "$appcast" --target main --title "Takku $version" --notes-file - <<NOTES
 ### What's new
 
 $changes
@@ -133,6 +176,10 @@ All versions: [CHANGELOG.md](https://github.com/mameli/Takku/blob/main/CHANGELOG
 ---
 
 ### How to update
+
+From Takku 1.17.0 on: in Takku's menu choose **Takku … is available…**, then **Install Update**. Takku updates itself and opens again.
+
+From an older Takku, once:
 
 1. Download **[Takku-$version.dmg](https://github.com/mameli/Takku/releases/download/$tag/Takku-$version.dmg)**.
 2. Quit Takku: click its icon at the top of the screen, then **Quit Takku**.
@@ -146,11 +193,15 @@ Step by step: [takku.app/update](https://takku.app/update). With Homebrew: \`bre
 Apple Silicon Mac, macOS 15 or later. New to Takku? \`brew install --cask mameli/takku/takku\`, or download the disk image above, then see [takku.app/setup](https://takku.app/setup). Takku is notarized by Apple: it opens like any other app.
 NOTES
 
-# The cask points to this version's disk image. Pushed through gh, like the Release.
+# The cask points to this version's disk image. Pushed through gh, like the Release. Takku updates
+# itself, so the cask says so (auto_updates): brew upgrade leaves it to Takku.
 sha=$(shasum -a 256 "$dmg" | cut -d ' ' -f 1)
 git -C "$tap" pull --ff-only -q
 sed -i '' -e "s/^  version \".*\"/  version \"$version\"/" -e "s/^  sha256 \".*\"/  sha256 \"$sha\"/" \
     -e 's/Takku-#{version}\.zip"/Takku-#{version}.dmg"/' "$cask"
+grep -q '^  auto_updates true$' "$cask" || sed -i '' 's/^  depends_on arch: :arm64$/  auto_updates true\
+\
+&/' "$cask"
 git -C "$tap" commit -q -am "Takku $version"
 git -C "$tap" -c credential.helper= -c 'credential.helper=!gh auth git-credential' push -q origin main
 echo "Homebrew cask updated to $version."
