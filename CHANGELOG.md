@@ -6,6 +6,7 @@ Takku was called Steno up to 0.2.1.
 
 ## Unreleased
 
+- **A meeting left recording stops by itself**: Takku had no limit, and a meeting forgotten after the call kept recording for days. Now, after half an hour with nobody speaking, Takku stops it and writes the note; and from the second hour of a meeting a notification reminds you every hour that it is still recording, with a button to stop it.
 - **Takku updates itself**: when a new version is out, *Takku … is available…* in the menu (or *Install…* in Settings → About) shows what is new and *Install Update*: Takku downloads it, replaces itself and opens again, never in the middle of a meeting. *Check Now* in Settings → About looks right away. Updating from 1.16.1 or earlier still takes the steps at [takku.app/update](https://takku.app/update), once.
 
 ## 1.16.1 (2026-11-03)

@@ -505,6 +505,90 @@
         }
       }
     },
+    "Is the meeting still going on? If not, stop it.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La riunione è ancora in corso? Se no, fermala."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Läuft die Besprechung noch? Wenn nicht, beende sie."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Sigue la reunión? Si no, detenla."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La réunion est-elle toujours en cours ? Sinon, arrêtez-la."
+          }
+        }
+      }
+    },
+    "Meeting stopped": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Riunione fermata"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Besprechung beendet"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reunión detenida"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réunion arrêtée"
+          }
+        }
+      }
+    },
+    "Nobody has spoken for 30 minutes, so Takku stopped recording and is writing the note.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nessuno parla da 30 minuti: Takku ha fermato la registrazione e sta scrivendo la nota."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seit 30 Minuten hat niemand gesprochen: Takku hat die Aufnahme beendet und schreibt die Notiz."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nadie ha hablado en 30 minutos: Takku ha detenido la grabación y está escribiendo la nota."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personne n’a parlé depuis 30 minutes : Takku a arrêté l’enregistrement et rédige la note."
+          }
+        }
+      }
+    },
     "Show": {
       "localizations": {
         "it": {
@@ -613,6 +697,34 @@
           "stringUnit": {
             "state": "translated",
             "value": "Takku %@ est disponible"
+          }
+        }
+      }
+    },
+    "Takku has been recording for %lld hours": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku registra da %lld ore"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku nimmt seit %lld Stunden auf"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku lleva %lld horas grabando"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku enregistre depuis %lld heures"
           }
         }
       }

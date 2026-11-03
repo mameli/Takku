@@ -112,6 +112,10 @@ actor MeetingTranscription {
     private var cacheProblems: [String] = []
     /// Segments whose current result comes from the cache: a Segment transcribed again leaves it.
     private var fromCacheSegments: Set<String> = []
+    /// While recording: how far each Track is transcribed, and the end of the last Utterance heard,
+    /// in seconds from the start of the Meeting (see `speechProgress`).
+    private var transcribedUntil: [Track: TimeInterval] = [:]
+    private var lastSpeech: TimeInterval?
 
     /// `languages`: the Meeting languages; with only one it is forced, otherwise detected among them.
     init(
@@ -124,6 +128,11 @@ actor MeetingTranscription {
         self.model = model
         self.languages = MeetingLanguages.normalized(languages)
         self.forcedLanguage = MeetingLanguages.forced(languages)
+    }
+
+    /// How far both Tracks are transcribed and when someone last spoke, for `LongRecording.nobodySpeaks`.
+    var speechProgress: (transcribedUntil: TimeInterval, lastSpeech: TimeInterval?) {
+        (Track.allCases.map { transcribedUntil[$0] ?? 0 }.min() ?? 0, lastSpeech)
     }
 
     func setPhaseHandler(_ handler: @escaping @Sendable (Phase) -> Void) {
@@ -350,9 +359,11 @@ actor MeetingTranscription {
         // Whisper only gets the speech ranges: on silence and faint audio (echo residue,
         // distant voices) it makes up sentences such as "Grazie.".
         let ranges = speechRanges(in: samples, sampleRate: sampleRate)
+        let end = segment.start + Double(samples.count) / sampleRate
         guard !ranges.isEmpty else {
             let silent = CachedSegment(model: model.id, language: nil, isLanguageReliable: true, utterances: [], levels: [])
             saveCache(silent, to: cacheURL)
+            heard(segment, until: end, utterances: [])
             return silent
         }
 
@@ -400,7 +411,13 @@ actor MeetingTranscription {
             signal: signal, untickedLanguage: unticked
         )
         saveCache(result, to: cacheURL)
+        heard(segment, until: end, utterances: utterances)
         return result
+    }
+
+    private func heard(_ segment: Segment, until end: TimeInterval, utterances: [Utterance]) {
+        transcribedUntil[segment.track] = max(transcribedUntil[segment.track] ?? 0, end)
+        if let spoken = utterances.map(\.end).max() { lastSpeech = max(lastSpeech ?? 0, spoken) }
     }
 
     /// A cache is only an optimization: failing to write it must never discard recognized text

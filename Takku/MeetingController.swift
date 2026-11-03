@@ -25,6 +25,10 @@ final class MeetingController {
     private var now = Date()
     private var isRequestingPermission = false
     private var ticker: Task<Void, Never>?
+    /// Stops the Meeting in progress once nobody has spoken for half an hour (`LongRecording`).
+    private var silenceWatch: Task<Void, Never>?
+    /// The hours of the last "still recording" reminder, 0 before the first.
+    @ObservationIgnored private var remindedHours = 0
     /// Menus being tracked. While the menu is open the timer does not touch observed state,
     /// otherwise every tick rebuilds its items (open submenus blink, the highlighted item loses
     /// its colour): it changes the title of the timer item in place instead.
@@ -340,6 +344,7 @@ final class MeetingController {
         startedAt = now
         recordingError = nil
         silentTracksNotified = []
+        remindedHours = 0
         currentTakkuID = started.meetingID
         currentDirectory = started.directory
         marks = []
@@ -355,6 +360,7 @@ final class MeetingController {
             transcription: transcription
         )
         startTicker()
+        watchForSilence(transcription, takkuID: started.meetingID)
 
         // On first use this downloads the model: better while the Meeting is in progress.
         Task { [transcriber] in
@@ -374,6 +380,8 @@ final class MeetingController {
         startedAt = nil
         ticker?.cancel()
         ticker = nil
+        silenceWatch?.cancel()
+        silenceWatch = nil
 
         do {
             let stopped = try recorder.stop(at: Date())
@@ -693,7 +701,8 @@ final class MeetingController {
             } else {
                 try? await Task.sleep(for: .seconds(seconds))
             }
-            stop()
+            // It may have stopped by itself: nobody speaking (`LongRecording`).
+            if isInProgress { stop() }
         }
         writeSmokeTestOutcome(lastRecordingDirectory)
     }
@@ -752,6 +761,55 @@ final class MeetingController {
                     self.updateOpenMenuTimer()
                 }
                 self.notifySilentTracks()
+                self.remindIfLong()
+            }
+        }
+    }
+
+    /// From the second hour, once an hour: a Meeting can be left recording after the call.
+    private func remindIfLong() {
+        guard let startedAt,
+              let hours = LongRecording.reminderHours(elapsed: Date().timeIntervalSince(startedAt), reminded: remindedHours)
+        else { return }
+        remindedHours = hours
+        logger.notice("Recording for \(hours, privacy: .public) hours: reminder")
+        Notifications.shared.notify(
+            title: String(localized: "Takku has been recording for \(hours) hours"),
+            body: String(localized: "Is the meeting still going on? If not, stop it."),
+            note: nil, action: .stopMeeting
+        )
+    }
+
+    /// `LongRecording.stopAfterSilence`; in Debug builds `-stopAfterSilenceSeconds 60` tries it in a minute.
+    private static var stopAfterSilence: TimeInterval {
+        #if DEBUG
+        let seconds = UserDefaults.standard.double(forKey: "stopAfterSilenceSeconds")
+        if seconds > 0 { return seconds }
+        #endif
+        return LongRecording.stopAfterSilence
+    }
+
+    /// Every minute, from what is already transcribed: half an hour with nobody speaking on either
+    /// Track stops the Meeting and processes it. Time asleep does not count: the Mac records nothing.
+    private func watchForSilence(_ transcription: MeetingTranscription, takkuID: UUID) {
+        silenceWatch?.cancel()
+        silenceWatch = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(60))
+                let progress = await transcription.speechProgress
+                guard let self, !Task.isCancelled, self.currentTakkuID == takkuID else { return }
+                guard LongRecording.nobodySpeaks(
+                    lastSpeech: progress.lastSpeech, transcribedUntil: progress.transcribedUntil, after: Self.stopAfterSilence
+                ) else { continue }
+                logger.notice("Nobody has spoken for \(Int(Self.stopAfterSilence / 60), privacy: .public) minutes: stopping the Meeting")
+                let note = self.currentNoteURL
+                self.stop()
+                Notifications.shared.notify(
+                    title: String(localized: "Meeting stopped"),
+                    body: String(localized: "Nobody has spoken for 30 minutes, so Takku stopped recording and is writing the note."),
+                    note: note
+                )
+                return
             }
         }
     }

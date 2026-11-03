@@ -253,6 +253,13 @@ A Track that records nothing is noticed during the Meeting, not after it.
 - **Notification**: once per Track per Meeting, only when the Track has had no sound **since the start** for 2 minutes, the case where the Meeting would be lost: "No sound from the system audio" · "Takku has recorded nothing from the call for 2 minutes. Check System Settings → Privacy & Security → Screen & System Audio Recording." (for the microphone: "… → Microphone").
 - Nothing is written in the note; the Recording goes on.
 
+### A Meeting left recording
+
+Takku has no limit on how long a Meeting lasts: a lecture or a day of workshops can take hours. A Meeting forgotten after the call, though, was recorded for days until someone noticed (seen in 1.16: everything said near the Mac, hours of transcription and diarization, a Summary as long as many Meetings). Two things catch it (`LongRecording`):
+
+- **Reminder**: from the second hour, once an hour, a notification "Takku has been recording for N hours" · "Is the meeting still going on? If not, stop it.", with a *Stop meeting* button. Hours by the clock, sleep included: after a night asleep one reminder says all the hours, not one per hour missed.
+- **Stop when nobody speaks**: the Segments are transcribed while recording; every minute Takku looks at how far both Tracks are transcribed and when the last Utterance ended. Half an hour of recording with no Utterance on either Track stops the Meeting, as *Stop* would, and a notification says so ("Meeting stopped" · "Nobody has spoken for 30 minutes, so Takku stopped recording and is writing the note."), opening the note. Only transcribed audio counts: while transcription lags behind (a model still downloading) nothing stops. Time asleep is not recorded, so it does not count either. Debug builds take `-stopAfterSilenceSeconds` to try it quickly.
+
 ### Meeting languages
 
 - Settings → *Transcription* → *Meeting languages*: a list of languages to tick. Detection picks only among those ticked; with a single one ticked, it is forced and there is no detection. At least one stays ticked. Also in the welcome window, on the *Transcription* page, with the same menu.
@@ -355,7 +362,7 @@ A recording made elsewhere (a voice memo on the iPhone, a lecture, a call record
 - Settings → *General* → *Suggest recording when a call starts* (on by default).
 - Every 3 seconds Takku reads which processes are using an audio input (Core Audio process objects, `kAudioProcessPropertyIsRunningInput`; nothing is recorded or listened to). Takku itself is ignored. The app is named after the running app that owns the process (a browser helper becomes the browser).
 - **Start**: when idle and another app has been using the microphone for 15 seconds without a break, one notification per stretch of use: "Looks like a call in Zoom" · "Start recording?", with a *Start meeting* button; clicking the notification starts too. Dictation apps used for a few seconds do not trigger it.
-- **End**: while recording, if at some point another app was using the microphone and now none has been for 30 seconds, one notification: "The call seems over" · "Stop recording?", with a *Stop meeting* button. It comes again only if an app takes the microphone back and releases it again. Takku never stops by itself.
+- **End**: while recording, if at some point another app was using the microphone and now none has been for 30 seconds, one notification: "The call seems over" · "Stop recording?", with a *Stop meeting* button. It comes again only if an app takes the microphone back and releases it again. Takku does not stop for this: only after half an hour with nobody speaking (see [A Meeting left recording](#a-meeting-left-recording)).
 - These notifications are not sent while the corresponding action makes no sense (start while recording, stop while idle); a stale button does nothing.
 
 ### Hook
