@@ -42,6 +42,15 @@ if [[ ! -f $cask || -n $(git -C "$tap" status --porcelain) ]]; then
     echo "The Homebrew tap must be a clean clone of mameli/homebrew-takku in $tap (or set TAKKU_TAP)." >&2
     exit 1
 fi
+# The Release notes are this version's CHANGELOG section, with links that work outside the repo.
+# Its date is the day of publishing (UTC), written in the version commit.
+released=$(sed -n "s/^## $version (\(....-..-..\))\$/\1/p" CHANGELOG.md)
+if [[ -z $released ]]; then
+    echo "CHANGELOG.md has no \"## $version (YYYY-MM-DD)\" section: rename \"## Unreleased\" in the version commit." >&2
+    exit 1
+fi
+changes=$(awk -v head="## $version (" 'index($0, head) == 1 { on = 1; next } /^## / { on = 0 } on' CHANGELOG.md \
+    | perl -0777 -pe 's{\]\((?!https?:|#|mailto:)([^)]+)\)}{](https://github.com/mameli/Takku/blob/main/$1)}g; s/^\s+|\s+$//g')
 
 # A dry-run leaves the notarized disk image and the commit it was built from in build/release/:
 # publishing that same commit reuses them instead of building and notarizing everything again.
@@ -54,10 +63,6 @@ else
         | sed -n 's/^ *organizationalUnitName *= *//p')
     if [[ -z $team ]]; then
         echo "No \"$identity\" certificate in the keychain: create it in Xcode → Settings → Accounts → Manage Certificates." >&2
-        exit 1
-    fi
-    if [[ -e /Volumes/Takku ]]; then
-        echo "Eject /Volumes/Takku first: the disk image is laid out there." >&2
         exit 1
     fi
     if ! xcrun notarytool history --keychain-profile "$notary" >/dev/null 2>&1; then
@@ -113,7 +118,16 @@ if [[ $(git rev-parse HEAD) != $(gh api "repos/{owner}/{repo}/commits/main" --jq
     echo "Push main first: the tag is created on the commit GitHub has." >&2
     exit 1
 fi
+if [[ $released != $(date -u +%F) ]]; then
+    echo "Note: CHANGELOG.md dates $version $released, but today is $(date -u +%F) (UTC): fix it in a later commit." >&2
+fi
 gh release create "$tag" "$dmg" "$latest" --target main --title "Takku $version" --notes-file - <<NOTES
+$changes
+
+All versions: [CHANGELOG.md](https://github.com/mameli/Takku/blob/main/CHANGELOG.md)
+
+---
+
 Apple Silicon Mac, macOS 15 or later.
 
 With Homebrew: \`brew install --cask mameli/takku/takku\` (or \`brew upgrade --cask takku\`). Otherwise download \`Takku-$version.dmg\` (\`Takku.dmg\` is the same file), open it and drag **Takku** into **Applications**.

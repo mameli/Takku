@@ -22,6 +22,11 @@ COMBINE_HIDPI_IMAGES = YES
 ENABLE_HARDENED_RUNTIME[config=Release] = YES
 CODE_SIGN_ENTITLEMENTS = Config/Takku.entitlements
 
+// The Release executable leaves its debug symbols in the dSYM next to it, for crash reports:
+// without them it is about a third smaller.
+DEPLOYMENT_POSTPROCESSING[config=Release] = YES
+STRIP_INSTALLED_PRODUCT[config=Release] = YES
+
 // Without Local.xcconfig the app is signed ad hoc: it builds, but macOS may
 // ask for the permissions again after every build.
 CODE_SIGN_STYLE = Manual
