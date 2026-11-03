@@ -4,6 +4,13 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
+## 1.16.1 (2026-11-03)
+
+- **Meeting languages from your Mac**: on a new install the languages ticked are your Mac's (those Takku transcribes) and English, instead of always Italian and English; the welcome window shows them on the *Transcription* page, to tick the others your meetings are in. A Takku already set up keeps its languages, with your Mac's added.
+- **A meeting in a language not ticked is no longer lost**: with Parakeet, sentences in a language not ticked were all left out, and a meeting in that language came out empty. When a whole part of the meeting is in one such language, Takku now keeps it, and the menu and the notification say which language to tick in *Settings → Transcription*. A meeting already processed empty comes back with *Reprocess Recording…* → *Transcribe again from scratch*.
+- **Settings → About**: the version, *Check for updates* (moved from *General*), the new version to download when there is one, the welcome tour to see again, the website, what's new and *Report a problem…*.
+- **Updating, step by step**: *Takku … is available…* in the menu now opens [takku.app/update](https://takku.app/update), with the steps in plain words, instead of this GitHub page.
+
 ## 1.16.0 (2026-11-02)
 
 - **Your meetings in the terminal**: `takku list`, `takku search` and `takku get` print your meetings, the ones containing some words with the matching lines, or a note with its Transcript, without starting the app; `--json` gives the same fields as the MCP server, for scripts. Homebrew now installs the `takku` command with the app: [README → Your meetings in the terminal](README.md#your-meetings-in-the-terminal).
