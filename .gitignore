@@ -13,3 +13,6 @@ docs/demo-video/
 *.mov
 *.mp3
 *.wav
+
+# Local issues and specs (docs/agents/issue-tracker.md): never committed
+.scratch/
