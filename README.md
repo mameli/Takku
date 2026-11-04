@@ -133,6 +133,9 @@ Templates are Markdown files in `~/.takku/templates/` that define the summary's 
 Built-in and example templates in [`examples/templates/`](examples/templates/):
 - [**Lecture**](examples/templates/Lecture.md) *(created on first launch)*: topic-by-topic study notes with definitions, LaTeX formulas, lecturer highlights, glossary and review questions.
 - [**Full text**](examples/templates/Full%20text.md) *(created on first launch)*: complete lecture rewrite (`full_text: true`) keeping student questions in place and fixing recurring technical terms consistently.
+- [**Video**](examples/templates/Video.md) *(created on first launch)*: notes on a talk, tutorial or podcast, with the main points, topics with their start time and what the video mentions; no sponsors, no next steps.
+
+Lecture and Full text have `folder: Lectures`, Video `folder: Videos`: a file imported with them gets its note in that folder of your notes folder instead of `Meetings/`. Recorded meetings always stay in `Meetings/`.
 - [**Tactical**](examples/templates/Tactical.md) & [**Governance**](examples/templates/Governance.md): minutes for Holacracy circles (checklists, metrics, project updates, tensions, next actions, and governance proposals/objections).
 
 > Long meetings work best with a reasoning model: smaller models or low reasoning effort may shorten discussions or drop points.

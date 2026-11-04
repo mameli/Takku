@@ -87,12 +87,13 @@ struct TemplateTests {
         #expect(!Template.defaultFileContent.contains("\\"))
     }
 
-    @Test("the built-in Templates: Lecture is a Summary, Full text rewrites the whole Transcript")
+    @Test("the built-in Templates: Lecture and Video are Summaries, Full text rewrites the whole Transcript; their imports have folders")
     func builtIns() {
         let templates = Template.builtInFiles.map { Template(fileName: $0.name, content: $0.content) }
 
-        #expect(templates.map(\.name) == ["Lecture", "Full text"])
-        #expect(templates.map(\.isFullText) == [false, true])
+        #expect(templates.map(\.name) == ["Lecture", "Full text", "Video"])
+        #expect(templates.map(\.isFullText) == [false, true, false])
+        #expect(templates.map(\.folder) == ["Lectures", "Lectures", "Videos"])
         #expect(templates.allSatisfy { $0.summaryLanguage == nil && !$0.body.isEmpty })
     }
 

@@ -1,6 +1,7 @@
 ---
 name: Lecture
 summary_language: auto
+folder: Lectures
 ---
 Write study notes of a university lecture, the way a careful student would write them up after class: complete enough that someone who missed the lecture can study from them. This is a lecture, not a meeting: one lecturer speaks most of the time, students ask the occasional question.
 

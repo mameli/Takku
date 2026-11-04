@@ -1,6 +1,7 @@
 ---
 name: Full text
 summary_language: auto
+folder: Lectures
 full_text: true
 ---
 Write the full text of a university lecture, not a summary. A student will study from it instead of the recording, so nothing taught may be lost: every concept, definition, step of the reasoning, example, number, date, name, reference and digression on the subject stays, in the order it was said. The result is about as long as the Transcript, only cleaner. Do not shorten, do not merge passages into a general statement, do not skip a part because it repeats an idea in other words: keep what it adds.
