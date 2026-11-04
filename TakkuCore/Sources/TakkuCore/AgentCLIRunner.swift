@@ -42,20 +42,21 @@ extension AgentCLI {
     /// of models. Cancelling the task, as *Stop processing* does, ends the run.
     public struct Runner: Sendable {
         let cli: AgentCLI
-        private let locate: @Sendable () -> URL?
+        private let locate: @Sendable () async -> URL?
         private let environment: [String: String]
         private let timeout: Duration
         private let log: @Sendable (String) -> Void
 
-        /// `locate` finds the executable before each run (the user may install it in the
-        /// meantime); `environment` is Takku's, which the run gets without the API keys.
+        /// `locate` finds the executable before each run (by default the one found earlier while it
+        /// is still there, see `AgentCLI.executable(refresh:)`); `environment` is Takku's, which the
+        /// run gets without the API keys.
         public init(
-            _ cli: AgentCLI, locate: (@Sendable () -> URL?)? = nil,
+            _ cli: AgentCLI, locate: (@Sendable () async -> URL?)? = nil,
             environment: [String: String] = ProcessInfo.processInfo.environment, timeout: Duration = .seconds(900),
             log: @escaping @Sendable (String) -> Void = { _ in }
         ) {
             self.cli = cli
-            self.locate = locate ?? { cli.locate() }
+            self.locate = locate ?? { await cli.executable() }
             self.environment = environment
             self.timeout = timeout
             self.log = log
@@ -72,17 +73,25 @@ extension AgentCLI {
 
         /// Why the CLI cannot be used now, `nil` when it can as far as can be told without a run.
         public func unavailability() async -> Failure? {
-            guard let executable = locate() else { return .notInstalled(cli) }
+            guard let executable = await locate() else { return .notInstalled(cli) }
             guard let check = cli.signInCheckArguments,
                   let result = try? await runAside(executable, check, timeout: .seconds(30)), result.ending == .exited
             else { return nil }
             return cli.isSignedIn(status: result.status, output: result.output) ? nil : .notSignedIn(cli)
         }
 
+        /// The CLI's version as it prints it (`2.2.5`), `nil` if it is not installed or prints none.
+        public func version() async -> String? {
+            guard let executable = await locate(),
+                  let result = try? await runAside(executable, ["--version"], timeout: .seconds(30)), result.ending == .exited
+            else { return nil }
+            return AgentCLI.version(in: String(decoding: result.output, as: UTF8.self))
+        }
+
         /// The models the agent offers, `nil` when they cannot be read (the model is then typed).
         public func models() async -> [Model]? {
             if let fixed = cli.fixedModels { return fixed }
-            guard let executable = locate(), let place = try? Place(cli, environment: environment) else { return nil }
+            guard let executable = await locate(), let place = try? Place(cli, environment: environment) else { return nil }
             defer { place.remove() }
             // Copilot stops before fetching its catalog without a prompt; it never gets to send it.
             guard let arguments = cli.modelListArguments(folder: place.folder),
@@ -97,7 +106,7 @@ extension AgentCLI {
         private func complete(
             _ request: URLRequest, model: String, reasoning: ProviderProfile.ReasoningEffort?
         ) async throws -> (Data, HTTPURLResponse) {
-            guard let executable = locate() else { throw Failure.notInstalled(cli) }
+            guard let executable = await locate() else { throw Failure.notInstalled(cli) }
             guard !model.isEmpty || cli.hasDefaultModel else { throw Failure.noModel(cli) }
             guard !model.hasPrefix("-") else { throw Failure.invalidModel(cli, model) }
             let (instructions, prompt) = try AppleIntelligence.conversation(fromRequestBody: request.httpBody ?? Data())
@@ -279,6 +288,21 @@ extension AgentCLI {
 
     // MARK: - Finding the executable
 
+    /// Where each CLI was found, kept while Takku runs: asking the user's shell takes a moment.
+    private static let found = OSAllocatedUnfairLock<[AgentCLI: URL]>(initialState: [:])
+
+    /// The CLI's executable: the one found earlier while it is still there, else looked up again
+    /// (always with `refresh`, as the Profile editor does, so a CLI installed elsewhere meanwhile
+    /// is seen). `nil` if it is not installed.
+    public func executable(refresh: Bool = false) async -> URL? {
+        if !refresh, let url = Self.found.withLock({ $0[self] }), FileManager.default.isExecutableFile(atPath: url.path) {
+            return url
+        }
+        let url = await locate()
+        Self.found.withLock { $0[self] = url }
+        return url
+    }
+
     /// Where the CLI usually is, as installed by Homebrew, npm, bun, volta or the agent's own
     /// installer: a Mac app does not get the PATH of the user's shell.
     func candidatePaths(home: URL) -> [String] {
@@ -297,35 +321,62 @@ extension AgentCLI {
         return (folders + versions).map { "\($0)/\(command)" }
     }
 
-    /// The CLI's executable: in the usual places, else where the user's login shell finds it;
-    /// `nil` if neither has it.
-    func locate(home: URL = FileManager.default.homeDirectoryForCurrentUser) -> URL? {
+    /// The CLI's executable: the one the user's shell runs when they type its name in Terminal
+    /// (the one they signed in with and keep updated, also with two installs, say Homebrew's and
+    /// the agent's own installer's), else the first in the usual places; `nil` if neither has it.
+    func locate(
+        home: URL = FileManager.default.homeDirectoryForCurrentUser,
+        shell: URL = URL(filePath: ProcessInfo.processInfo.environment["SHELL"] ?? "/bin/zsh"),
+        timeout: Duration = .seconds(10)
+    ) async -> URL? {
+        if let found = await shellFinds(shell, timeout: timeout) { return found }
+        return candidatePaths(home: home).first(where: FileManager.default.isExecutableFile).map { URL(filePath: $0) }
+    }
+
+    /// Where the user's shell, started as Terminal starts it, finds the command. Interactive too:
+    /// installers (OpenCode's, nvm, bun) add to the PATH in `.zshrc`, which a login shell alone
+    /// does not read.
+    private func shellFinds(_ shell: URL, timeout: Duration) async -> URL? {
         let fileManager = FileManager.default
-        if let path = candidatePaths(home: home).first(where: fileManager.isExecutableFile) {
-            return URL(filePath: path)
-        }
-        let shell = Process()
-        shell.executableURL = URL(filePath: ProcessInfo.processInfo.environment["SHELL"] ?? "/bin/zsh")
-        shell.arguments = ["-lc", "command -v \(command)"]
-        // A file, not a pipe: a login script's child holding a pipe open would keep it from ending.
+        nonisolated(unsafe) let process = Process()
+        process.executableURL = shell
+        // A marked line: an interactive shell's startup can print its own.
+        process.arguments = ["-ilc", "printf '\\nTAKKU_FOUND=%s\\n' \"$(command -v \(command))\""]
+        // A file, not a pipe: a startup script's child holding a pipe open would keep it from ending.
         let outputFile = fileManager.temporaryDirectory.appending(path: "Takku-locate-\(UUID().uuidString)")
         fileManager.createFile(atPath: outputFile.path, contents: nil)
         defer { try? fileManager.removeItem(at: outputFile) }
         guard let output = try? FileHandle(forWritingTo: outputFile) else { return nil }
-        shell.standardOutput = output
-        shell.standardError = FileHandle.nullDevice
-        shell.standardInput = FileHandle.nullDevice
-        let ended = DispatchSemaphore(value: 0)
-        shell.terminationHandler = { _ in ended.signal() }
-        guard (try? shell.run()) != nil else { return nil }
-        // A login script that waits for input would hold the run forever.
-        if ended.wait(timeout: .now() + 10) == .timedOut {
-            shell.terminate()
-            return nil
+        process.standardOutput = output
+        process.standardError = FileHandle.nullDevice
+        process.standardInput = FileHandle.nullDevice
+        // A startup script that waits for input would hold the lookup forever. Killed, with what
+        // it started (Process gives it a group of its own): an interactive shell ignores the
+        // request to end.
+        let watchdog = Task {
+            try await Task.sleep(for: timeout)
+            if process.isRunning { kill(-process.processIdentifier, SIGKILL) }
         }
+        defer { watchdog.cancel() }
+        let started: Bool = await withCheckedContinuation { continuation in
+            process.terminationHandler = { _ in continuation.resume(returning: true) }
+            if (try? process.run()) == nil {
+                process.terminationHandler = nil
+                continuation.resume(returning: false)
+            }
+        }
+        guard started, process.terminationReason == .exit, process.terminationStatus == 0 else { return nil }
         let found = ((try? String(contentsOf: outputFile, encoding: .utf8)) ?? "")
-            .split(separator: "\n").last.map(String.init)?.trimmingCharacters(in: .whitespaces)
-        guard shell.terminationStatus == 0, let found, found.hasPrefix("/"), fileManager.isExecutableFile(atPath: found) else { return nil }
+            .split(separator: "\n").last { $0.hasPrefix("TAKKU_FOUND=") }
+            .map { String($0.dropFirst("TAKKU_FOUND=".count)).trimmingCharacters(in: .whitespaces) }
+        // An alias or a function is not a path: the usual places then.
+        guard let found, found.hasPrefix("/"), fileManager.isExecutableFile(atPath: found) else { return nil }
         return URL(filePath: found)
+    }
+
+    /// The version in what `--version` printed: `codex-cli 0.163.0`, `opencode v2.2.5`,
+    /// `2.1.282 (Claude Code)`, `GitHub Copilot CLI 1.0.105.`
+    static func version(in text: String) -> String? {
+        text.firstMatch(of: /\d+\.\d+(?:\.\d+)?(?:-[0-9A-Za-z.]+)?/).map { String($0.output) }
     }
 }

@@ -61,6 +61,8 @@ struct ProfileEditor: View {
     @State private var agentModels: [AgentCLI.Model]?
     /// Agent CLIs only: the model is typed (*Other…*) rather than chosen in the menu.
     @State private var typesModel = false
+    /// Agent CLIs only: the executable Takku runs and its version, to tell two installs apart.
+    @State private var cliInstall: (path: String, version: String?)?
 
     var body: some View {
         Section {
@@ -208,6 +210,17 @@ struct ProfileEditor: View {
         }
         if let cliProblem {
             Text(cliProblem).foregroundStyle(.orange).textSelection(.enabled)
+        } else if let cliInstall {
+            Group {
+                if let version = cliInstall.version {
+                    Text("Runs \(cliInstall.path), version \(version).")
+                } else {
+                    Text("Runs \(cliInstall.path).")
+                }
+            }
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .textSelection(.enabled)
         }
     }
 
@@ -415,10 +428,14 @@ struct ProfileEditor: View {
     /// none are read yet or the problem changed (a list is a run of the CLI: Copilot's takes seconds).
     private func checkAgentCLI() async {
         guard let cli = profile.agentCLI else { return }
+        // Looked up again: the user may have installed it elsewhere meanwhile.
+        let executable = await cli.executable(refresh: true)
         let runner = AgentCLI.Runner(cli)
         let problem = await runner.unavailability()
         let changed = problem?.localizedDescription != cliProblem
         cliProblem = problem?.localizedDescription
+        let version = executable == nil ? nil : await runner.version()
+        cliInstall = executable.map { (path: ($0.path as NSString).abbreviatingWithTildeInPath, version: version) }
         if problem != .notInstalled(cli) && (agentModels == nil || changed) { agentModels = await runner.models() }
     }
 
