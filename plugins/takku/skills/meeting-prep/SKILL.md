@@ -5,7 +5,7 @@ description: Use when the user wants to prepare for an upcoming meeting, a call 
 
 # Preparing a meeting
 
-Build a short brief from the user's past meetings, through the `takku` MCP tools (read only).
+Build a short brief from the user's past meetings, through the `takku` MCP tools (read only). Without them, use the `takku` command: `takku list --query NAME --json`, `takku search WORDS --json` and `takku get ID --json --no-transcript`, with the same fields.
 
 1. Find the past meetings that matter: `list_meetings` with the person's name, the team or the recurring title as `query` (participants and speakers are matched), and `search_meetings` with the project or topic. Look back about two months unless the user says otherwise.
 2. Read the latest three to five with `get_meeting` (summary first, `include_transcript: false`; the transcript only when a point is unclear).

@@ -1,0 +1,15 @@
+{
+  "name": "takku",
+  "description": "Takku's plugin: your meetings recorded with Takku, and recordings imported into it, in Claude Code.",
+  "owner": {
+    "name": "Takku",
+    "url": "https://takku.app"
+  },
+  "plugins": [
+    {
+      "name": "takku",
+      "source": "./plugins/takku",
+      "description": "Search and read the meetings recorded with Takku, prepare the next one, import audio and videos, and write Templates."
+    }
+  ]
+}

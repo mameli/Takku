@@ -1,0 +1,13 @@
+{
+  "name": "takku",
+  "version": "1.1.0",
+  "description": "Your meetings recorded with Takku: search what was said, read a note with its transcript, prepare the next meeting, import audio and videos (YouTube too) and write Templates. MCP server and skills; needs Takku in /Applications.",
+  "author": {
+    "name": "Takku",
+    "url": "https://takku.app"
+  },
+  "homepage": "https://takku.app",
+  "repository": "https://github.com/mameli/Takku",
+  "license": "MIT",
+  "keywords": ["meetings", "notes", "transcripts", "markdown", "youtube"]
+}

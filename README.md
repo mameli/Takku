@@ -21,7 +21,7 @@ Built as an alternative to Granola for people and companies that keep meeting au
 - **Markdown Templates**: customise sections and instructions in `~/.takku/templates/`, or set `full_text: true` to rewrite an entire lecture instead of summarising it.
 - **Screenshots in the note** (optional): `⌃⌥⌘S` captures the active window and embeds it under the matching summary point. Never sent to the model.
 - **Custom Vocabulary**: fixes names, acronyms and jargon in the transcript and spells them right in the summary.
-- **Hooks, MCP and CLI**: run a script after each meeting (Notion, Confluence, git), query your meetings from Claude, Codex, Cursor and other MCP assistants, or search them with `takku` in the terminal.
+- **Hooks, MCP and CLI**: run a script after each meeting (Notion, Confluence, git), query your meetings from Claude, Codex, Cursor and other assistants (MCP server and skills), or search them with `takku` in the terminal.
 
 ## Requirements
 
@@ -181,19 +181,27 @@ To run multiple hooks, keep each in `~/.takku/hooks/` and call them from `after-
 
 Ask any MCP-compatible assistant (Claude Code, Claude Desktop, Codex, Cursor…) questions across your meetings—e.g. *"what did we decide about the release with Mario last week?"* Takku 1.14.0+ includes a built-in read-only MCP server (`Takku` does not need to be running).
 
-- **Claude Code** (run once):
+- **Claude Code** (run once): the Takku plugin adds the MCP server and the skills below.
   ```sh
-  claude mcp add --scope user takku -- /Applications/Takku.app/Contents/MacOS/Takku mcp
+  claude plugin marketplace add mameli/Takku
+  claude plugin install takku@takku
   ```
-- **Codex** (run once): the Takku plugin adds the MCP server and two skills, one that looks up what was said and one that prepares a brief for your next meeting with someone.
+  Or only the MCP server: `claude mcp add --scope user takku -- /Applications/Takku.app/Contents/MacOS/Takku mcp`.
+- **Codex** (run once): the same plugin, MCP server and skills.
   ```sh
   codex plugin marketplace add mameli/Takku
   codex plugin add takku@takku
+  ```
+- **Any other agent** (Cursor, OpenCode, Copilot…): the skills alone, with [skills](https://github.com/vercel-labs/skills). They use the `takku` command when the MCP server is not set up.
+  ```sh
+  npx skills@latest add mameli/Takku
   ```
 - **Claude Desktop** (*Settings → Developer → Edit Config*):
   ```json
   { "mcpServers": { "takku": { "command": "/Applications/Takku.app/Contents/MacOS/Takku", "args": ["mcp"] } } }
   ```
+
+The skills: **meeting-context** finds what was said or decided and cites the meetings; **meeting-prep** prepares a brief for your next meeting with someone; **takku-import** summarises an audio or video file, or a YouTube video with yt-dlp, through `takku import` (it asks the app, so only when you ask it to); **takku-template** writes and tunes your Templates, using the Summary log.
 
 The assistant can list meetings (by date, title, folder or participant), search them (case- and accent-insensitive) and read notes and transcripts from `<notes-folder>/Meetings/` (pass `--notes-folder PATH` after `mcp` to use another folder). It can also see your Templates and Summary Profiles (names and models, never addresses or keys) and whether a meeting is still being processed. It never accesses audio, modifies files or imports anything: an assistant reading a web page could otherwise be tricked into transcribing any file on your Mac. Remember that any meeting the assistant reads is sent to its AI provider.
 
