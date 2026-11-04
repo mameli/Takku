@@ -734,7 +734,7 @@ struct AgentCLITests {
         #expect(claude.calls.isEmpty)
     }
 
-    @Test("Copilot lists auto, then the chat models the user's plan has, read from the catalog in its log, without asking any model")
+    @Test("Copilot lists the chat models the user's plan has, read from the catalog in its log, without asking any model; its auto is Default")
     func copilotModels() async throws {
         let catalog = #"""
             [{"id":"gpt-6.1-sol","capabilities":{"type":"chat"},"policy":{"state":"disabled"},"billing":{"restricted_to":["pro_plus"]}},{"id":"gpt-6-luna","capabilities":{"type":"chat"},"policy":{"state":"enabled"}},{"id":"mai-code-1.1-flash","capabilities":{"type":"chat"},"policy":{"state":"enabled"}},{"id":"text-embedding-3-small","capabilities":{"type":"embeddings"},"policy":{"state":"enabled"}},{"id":"gpt-4o","capabilities":{"type":"chat"}},{"id":"claude-haiku-4.5","capabilities":{"type":"chat"},"policy":{"state":"enabled"}}]
@@ -757,7 +757,7 @@ struct AgentCLITests {
 
         let models = await fake.runner().models()
 
-        #expect(models?.map(\.name) == ["auto", "gpt-6-luna", "mai-code-1.1-flash", "claude-haiku-4.5"])
+        #expect(models?.map(\.name) == ["gpt-6-luna", "mai-code-1.1-flash", "claude-haiku-4.5"])
         let run = try #require(fake.calls.first)
         #expect(run.arguments.contains("--available-tools=takku_none"))
         #expect(run.value(after: "--log-level") == "all")

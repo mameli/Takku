@@ -46,7 +46,7 @@ public enum AgentCLI: String, CaseIterable, Sendable {
         case .copilot: "copilot login"
         case .claude: "claude auth login"
         case .opencode: "opencode auth login"
-        case .pi: "pi, then /login"
+        case .pi: "pi"
         }
     }
 
@@ -138,20 +138,19 @@ public enum AgentCLI: String, CaseIterable, Sendable {
                 return Model("\(columns[0])/\(columns[1])")
             }
         case .copilot:
-            // The chat models the user's plan or organisation turned on, after auto.
+            // The chat models the user's plan or organisation turned on; auto is the menu's Default.
             let catalog = String(decoding: data, as: UTF8.self).split(separator: "\n").last { $0.contains("fetched model catalog") }
             guard let catalog, let brace = catalog.firstIndex(of: "{"),
                   let entry = (try? JSONSerialization.jsonObject(with: Data(catalog[brace...].utf8))) as? [String: Any],
                   let listed = entry["models"] as? String,
                   let models = (try? JSONSerialization.jsonObject(with: Data(listed.utf8))) as? [[String: Any]]
             else { return [] }
-            let names = models.compactMap { model -> String? in
+            return models.compactMap { model -> Model? in
                 guard (model["policy"] as? [String: Any])?["state"] as? String == "enabled",
                       (model["capabilities"] as? [String: Any])?["type"] as? String == "chat"
                 else { return nil }
-                return model["id"] as? String
+                return (model["id"] as? String).map { Model($0) }
             }
-            return names.isEmpty ? [] : [Model("auto")] + names.map { Model($0) }
         case .claude:
             return []
         }

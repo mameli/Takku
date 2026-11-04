@@ -15,6 +15,11 @@ extension AgentCLI {
 
         public var errorDescription: String? {
             switch self {
+            // Pi signs in from inside, with /login, to each provider.
+            case .notInstalled(.pi):
+                String(localized: "Pi is not installed: install it with \(AgentCLI.pi.installCommand) in Terminal, then run pi and sign in with /login.")
+            case .notSignedIn(.pi):
+                String(localized: "Pi is not signed in to this model's provider: run pi in Terminal and sign in with /login, then try again.")
             case .notInstalled(let cli):
                 String(localized: "\(cli.name) is not installed: install it with \(cli.installCommand) in Terminal, then sign in with \(cli.signInCommand).")
             case .notSignedIn(let cli):

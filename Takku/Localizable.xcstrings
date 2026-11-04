@@ -12707,6 +12707,64 @@
           }
         }
       }
+    },
+    "Pi is not installed: install it with %@ in Terminal, then run pi and sign in with /login.": {
+      "extractionState": "manual",
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pi non è installato: installalo con %@ nel Terminale, poi avvia pi e accedi con /login."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pi ist nicht installiert: Installiere es mit %@ im Terminal, starte dann pi und melde dich mit /login an."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pi no está instalado: instálalo con %@ en Terminal, luego abre pi e inicia sesión con /login."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pi n’est pas installé : installez-le avec %@ dans Terminal, puis lancez pi et connectez-vous avec /login."
+          }
+        }
+      }
+    },
+    "Pi is not signed in to this model's provider: run pi in Terminal and sign in with /login, then try again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pi non ha l'accesso al fornitore di questo modello: avvia pi nel Terminale e accedi con /login, poi riprova."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pi ist beim Anbieter dieses Modells nicht angemeldet: Starte pi im Terminal, melde dich mit /login an und versuche es dann erneut."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pi no tiene la sesión iniciada en el proveedor de este modelo: abre pi en Terminal e inicia sesión con /login, luego vuelve a intentarlo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pi n’est pas connecté au fournisseur de ce modèle : lancez pi dans Terminal et connectez-vous avec /login, puis réessayez."
+          }
+        }
+      }
     }
   },
   "version": "1.0"
