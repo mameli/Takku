@@ -4,7 +4,7 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
-## Unreleased
+## 1.18.0 (2026-11-04)
 
 - **Import from the terminal**: `takku import FILE…` makes audio or video files meetings, as *Import audio…* does, with the Template, Summary Profile, title and folder you give it (`--template`, `--profile`, `--title`, `--folder`). It opens Takku if needed, waits for each note and prints its path, or the note and its summary with `--json`. With yt-dlp, a YouTube video becomes a summary in one command: [README → Your meetings in the terminal](README.md#your-meetings-in-the-terminal).
 - **Imports in a folder of their own**: a lecture or a video no longer has to end up in `Meetings/`. `takku import --folder Lectures/Law` puts the note anywhere in your notes folder, with its transcript in a `Transcripts` folder next to it; a Template can do the same with `folder: YouTube` in its frontmatter, also for *Import audio…* from the menu. Meetings you record stay in `Meetings/`. On a new install, Lecture and Full text come with `folder: Lectures`, and a new **Video** Template (talks, tutorials, podcasts: main points, topics with their start time, what the video mentions, no sponsors) with `folder: Videos`; Templates you already have are left as they are.
