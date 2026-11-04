@@ -52,8 +52,12 @@ public struct MeetingNote: Equatable, Sendable {
     /// and `tags` they are written only here and belong to the user afterwards.
     public static func initial(
         takkuID: UUID, startedAt: Date, participants: [String] = [], timeZone: TimeZone = .current,
-        isImport: Bool = false
+        isImport: Bool = false, personalNotes: String? = nil
     ) -> MeetingNote {
+        // `takku import --notes`: what the user tells the Summary about the file, as if typed in the
+        // note. A Managed section marker in it would split the note.
+        let notes = (personalNotes ?? "").components(separatedBy: "\n").filter { Marker($0) == nil }
+            .joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
         let participantsEntry = participantsLines(participants).map { "\n" + $0 }.joined()
         let status = isImport
             ? "⏳ Imported recording queued for Processing."
@@ -69,7 +73,7 @@ public struct MeetingNote: Equatable, Sendable {
             \(managedEnd)
 
             \(personalNotesHeading)
-
+            \(notes.isEmpty ? "" : notes + "\n")
 
             """)
     }

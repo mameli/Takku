@@ -156,12 +156,14 @@ final class MeetingProcessor {
     /// `noteFolder` and `noteTitle` come from `takku import --folder` and `--title`.
     func meetingImported(
         takkuID: UUID, startedAt: Date, templateName: String, summaryProfile: ProviderProfile?, noteURL: URL?,
-        warnings: [String], noteFolder: String? = nil, noteTitle: String? = nil
+        warnings: [String], noteFolder: String? = nil, noteTitle: String? = nil, notes: String? = nil,
+        languages: [String]? = nil
     ) {
         let record = ProcessingRecord(
             takkuID: takkuID, startedAt: startedAt, status: .queued,
             templateName: templateName, summaryProfile: summaryProfile, noteURL: noteURL,
-            importedAt: Date(), importWarnings: warnings, noteFolder: noteFolder, noteTitle: noteTitle
+            importedAt: Date(), importWarnings: warnings, noteFolder: noteFolder, noteTitle: noteTitle,
+            notes: notes, languages: languages
         )
         save(record)
         enqueueProcessing(record)
@@ -480,10 +482,11 @@ final class MeetingProcessor {
         let started = ContinuousClock.now
         logger.notice("Processing \(record.takkuID, privacy: .public) started")
         let directory = Self.directory(for: record.takkuID)
+        // An import given its languages (`takku import --language`) keeps them, also when reprocessed.
         let transcription = liveTranscriptions.removeValue(forKey: record.takkuID)
             ?? MeetingTranscription(
                 transcriber: transcriber, diarizer: diarizer, speechDetector: speechDetector, model: .selected,
-                languages: AppSettings.meetingLanguages
+                languages: record.languages ?? AppSettings.meetingLanguages
             )
 
         let recording: Recording
@@ -703,7 +706,8 @@ final class MeetingProcessor {
     ) async throws -> (URL, String?) {
         let noteURL = try vault.findMeetingNote(takkuID: record.takkuID, expected: record.noteURL)
             ?? vault.createMeetingNote(
-                takkuID: record.takkuID, startedAt: record.startedAt, folder: record.noteFolder, title: record.noteTitle
+                takkuID: record.takkuID, startedAt: record.startedAt, folder: record.noteFolder, title: record.noteTitle,
+                personalNotes: record.notes
             )
         guard let finished else {
             try vault.update(noteURL) {

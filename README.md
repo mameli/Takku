@@ -219,13 +219,14 @@ takku regenerate 11111111-2222-3333-4444-555555555555 --template Notes
 takku status                                   # what is being recorded or processed
 ```
 
-`import` takes any file *Import audio…* takes, with `--template`, `--profile NAME` (or `transcript`, for no summary), `--title` and `--folder` (a folder of your notes folder, such as `Lectures/Law`; the transcript goes in a `Transcripts` folder next to the note); without them it uses what is chosen in the menu, and the note goes in `Meetings/`. A Template can say where its imports go with `folder: YouTube` in its frontmatter, also for *Import audio…*. It waits for each note and prints its path (`--json` prints the note, summary and transcript; `--no-wait` prints the meeting ids and returns). For example, to summarise a YouTube video with [yt-dlp](https://github.com/yt-dlp/yt-dlp):
+`import` takes any file *Import audio…* takes, with `--template`, `--profile NAME` (or `transcript`, for no summary), `--title` and `--folder` (a folder of your notes folder, such as `Lectures/Law`; the transcript goes in a `Transcripts` folder next to the note); without them it uses what is chosen in the menu, and the note goes in `Meetings/`. A Template can say where its imports go with `folder: YouTube` in its frontmatter, also for *Import audio…*. `--notes TEXT` goes in the note's personal notes, which the summary reads (who speaks, which course, a video's description), and `--language de` (or `it,en`) sets the languages of that file instead of the meeting languages in Settings. It waits for each note and prints its path (`--json` prints the note, summary and transcript; `--no-wait` prints the meeting ids and returns). For example, to summarise a YouTube video with [yt-dlp](https://github.com/yt-dlp/yt-dlp):
 
 ```sh
 yts() {
   local file
-  file=$(yt-dlp -f 'ba[ext=m4a]/ba' -x --audio-format m4a -o "$HOME/Movies/YouTube/%(title)s.%(ext)s" --print after_move:filepath "$1") || return
-  takku import "$file" --template Video --title "$(basename "$file" .m4a)" --folder YouTube
+  file=$(yt-dlp --no-playlist -f 'ba[ext=m4a]/ba' -x --audio-format m4a -o "$HOME/Movies/YouTube/%(title)s.%(ext)s" --print after_move:filepath "$1") || return
+  takku import "$file" --template Video --title "$(basename "$file" .m4a)" --folder YouTube \
+    --notes "$(yt-dlp --no-playlist --print 'Video by %(channel)s. %(description)s' "$1")"
 }
 ```
 

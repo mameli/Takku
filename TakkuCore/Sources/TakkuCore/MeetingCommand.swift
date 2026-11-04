@@ -24,10 +24,12 @@ public struct MeetingCommand: Sendable {
           profiles            the Summary Profiles, the active one marked
           status [ID]         meetings being recorded or processed, or one meeting
           import FILE... [--template NAME] [--profile NAME|transcript] [--title TEXT]
-                 [--folder FOLDER] [--no-wait]
+                 [--folder FOLDER] [--notes TEXT] [--language CODE[,CODE]] [--no-wait]
                               audio or video files made meetings by Takku, which opens
                               if needed; waits for each note and prints its path.
-                              --folder is inside the notes folder, e.g. YouTube
+                              --folder is inside the notes folder, e.g. YouTube;
+                              --notes goes in the note's Personal notes, read by the
+                              Summary; --language replaces the meeting languages, e.g. de
           regenerate ID [--template NAME] [--profile NAME|transcript] [--no-wait]
                               a new Summary from the meeting's current transcript;
                               by default with the meeting's own Template and Profile
@@ -238,6 +240,8 @@ public struct MeetingCommand: Sendable {
         var profile: String?
         var title: String?
         var folder: String?
+        var notes: String?
+        var languages: [String]?
         var wait = true
         var words: [String] = []
 
@@ -246,7 +250,7 @@ public struct MeetingCommand: Sendable {
             case "list": ["--notes-folder", "--from", "--to", "--query", "--limit"]
             case "search": ["--notes-folder", "--limit"]
             case "get", "mcp": ["--notes-folder"]
-            case "import": ["--template", "--profile", "--title", "--folder"]
+            case "import": ["--template", "--profile", "--title", "--folder", "--notes", "--language"]
             case "regenerate": ["--template", "--profile"]
             default: []
             }
@@ -285,6 +289,17 @@ public struct MeetingCommand: Sendable {
                             throw Failure(message: "--title has nothing a note name can keep.")
                         }
                         title = name
+                    case "--notes":
+                        let text = value.trimmingCharacters(in: .whitespacesAndNewlines)
+                        guard !text.isEmpty else { throw Failure(message: "--notes is empty.") }
+                        notes = text
+                    case "--language":
+                        let codes = value.lowercased().split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+                        let unknown = codes.filter { !MeetingLanguages.offered.contains($0) }
+                        guard !codes.isEmpty, unknown.isEmpty else {
+                            throw Failure(message: "--language takes language codes Takku transcribes, separated by commas: \(MeetingLanguages.offered.joined(separator: ", ")).")
+                        }
+                        languages = MeetingLanguages.normalized(codes)
                     case "--folder":
                         switch VaultNaming.noteFolder(value) {
                         case .success(let checked): folder = checked

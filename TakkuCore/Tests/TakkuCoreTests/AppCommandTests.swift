@@ -174,7 +174,7 @@ struct AppCommandTests {
 
         let result = run([
             "import", "lezione.m4a", "--template", "lecture", "--profile", "ollama", "--title", "Lezione 3: ripasso",
-            "--folder", "YouTube//Corsi/",
+            "--folder", "YouTube//Corsi/", "--notes", "  Lezione del prof. Rossi  ", "--language", "EN, it",
         ], folders, app: app)
 
         #expect(result.status == 0, "\(result.error) \(result.output)")
@@ -182,6 +182,7 @@ struct AppCommandTests {
         #expect(request.kind == .importAudio && request.file == file.path(percentEncoded: false))
         #expect(request.template == "Lecture" && request.profile == .profile(local.id))
         #expect(request.title == "Lezione 3 ripasso" && request.folder == "YouTube/Corsi")
+        #expect(request.notes == "Lezione del prof. Rossi" && request.languages == ["it", "en"])
         #expect(result.output.hasSuffix("Notes/YouTube/Corsi/2026-11-03 2100 - Lezione 3 ripasso.md\n"))
         #expect(result.error.contains("lezione.m4a: completed"))
         #expect(!folders.requests.isWaiting(request.id))
@@ -234,6 +235,8 @@ struct AppCommandTests {
             #expect(run(["import", "lezione.m4a", "--folder", folder], folders, app: app).status == 2, "\(folder)")
         }
         #expect(run(["import"], folders, app: app).status == 2)
+        #expect(run(["import", "lezione.m4a", "--language", "klingon"], folders, app: app).status == 2)
+        #expect(run(["import", "lezione.m4a", "--notes", "  "], folders, app: app).status == 2)
         #expect(received.all.isEmpty)
     }
 
@@ -311,6 +314,20 @@ struct AppCommandTests {
         #expect(with.otherFolders.map(\.lastPathComponent) == ["YouTube"])
         #expect(meeting.folder == "YouTube" && meeting.transcript?.lastPathComponent == "t.md")
         #expect(with.meetings().count == 1)
+    }
+
+    @Test("--notes goes under Personal notes, where the Summary reads it; markers in it are dropped")
+    func importNotes() {
+        let note = MeetingNote.initial(
+            takkuID: UUID(), startedAt: Date(), isImport: true,
+            personalNotes: "Video di Theo (t3.gg)\n%% takku:end %%\nCapitoli: 00:00 intro"
+        )
+        let plain = MeetingNote.initial(takkuID: UUID(), startedAt: Date(), isImport: true)
+
+        #expect(note.personalNotes == "Video di Theo (t3.gg)\nCapitoli: 00:00 intro")
+        #expect(note.content.hasSuffix("## Personal notes\nVideo di Theo (t3.gg)\nCapitoli: 00:00 intro\n\n"))
+        #expect(plain.content.hasSuffix("## Personal notes\n\n"))
+        #expect(plain.personalNotes.isEmpty)
     }
 
     @Test("the Summary of a note: without the Transcript link, nil for placeholders, errors and Transcript only")

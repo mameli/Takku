@@ -72,7 +72,7 @@ struct Vault {
     /// remembered so the note is found there; `title` (`--title`) names it instead of the event.
     func createMeetingNote(
         takkuID: UUID, startedAt: Date, event: CalendarEvent? = nil, isImport: Bool = false,
-        folder: String? = nil, title: String? = nil
+        folder: String? = nil, title: String? = nil, personalNotes: String? = nil
     ) throws -> URL {
         guard FileManager.default.fileExists(atPath: root.path(percentEncoded: false)) else {
             throw VaultError.unreachable(root.path(percentEncoded: false))
@@ -86,7 +86,10 @@ struct Vault {
             taken: Self.noteNames(in: noteFolder).union(Self.noteNames(in: meetingsFolder))
         )
         let url = noteFolder.appending(path: name + ".md")
-        let note = MeetingNote.initial(takkuID: takkuID, startedAt: startedAt, participants: event?.participants ?? [], isImport: isImport)
+        let note = MeetingNote.initial(
+            takkuID: takkuID, startedAt: startedAt, participants: event?.participants ?? [], isImport: isImport,
+            personalNotes: personalNotes
+        )
         try note.content.write(to: url, atomically: true, encoding: .utf8)
         return url
     }

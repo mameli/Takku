@@ -5,7 +5,9 @@ import Foundation
 /// same Takku, so the format is theirs alone; `version` lets an app left running after an update
 /// refuse a request it does not know.
 public struct AppRequest: Codable, Equatable, Sendable {
-    public static let currentVersion = 1
+    /// Raised whenever a field is added: an older app would decode the request without it and do
+    /// something else than asked (2: `notes` and `languages`).
+    public static let currentVersion = 2
 
     public enum Kind: String, Codable, Sendable {
         case importAudio = "import"
@@ -32,14 +34,21 @@ public struct AppRequest: Codable, Equatable, Sendable {
     public var profile: ProfileChoice?
     /// The note's title at creation, already valid as a file name.
     public var title: String?
+    /// Text for the note's Personal notes (`--notes`): context the Summary reads, such as who speaks.
+    public var notes: String?
+    /// The languages the file is in (`--language`), instead of the Meeting languages of Settings.
+    public var languages: [String]?
     /// The note's folder inside the notes folder, already checked (`VaultNaming.noteFolder`); `nil`
     /// leaves it to the Template (`folder:`), else `Meetings/`.
     public var folder: String?
 
     public init(
         kind: Kind, meetingID: UUID, file: String? = nil, template: String? = nil, profile: ProfileChoice? = nil,
-        title: String? = nil, folder: String? = nil, id: UUID = UUID(), version: Int = currentVersion
+        title: String? = nil, folder: String? = nil, notes: String? = nil, languages: [String]? = nil,
+        id: UUID = UUID(), version: Int = currentVersion
     ) {
+        self.notes = notes
+        self.languages = languages
         self.version = version
         self.id = id
         self.kind = kind

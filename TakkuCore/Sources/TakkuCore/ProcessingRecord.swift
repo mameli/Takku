@@ -62,6 +62,11 @@ public struct ProcessingRecord: Codable, Equatable, Sendable {
     public var noteFolder: String?
     /// The title given at the import (`--title`), for a note created only at the end of Processing.
     public var noteTitle: String?
+    /// The Personal notes given at the import (`--notes`), for a note created only at the end of Processing.
+    public var notes: String?
+    /// The languages of an import (`--language`), used instead of the Meeting languages of Settings,
+    /// also when it is reprocessed. `nil`: those of Settings at the time.
+    public var languages: [String]?
 
     /// How Reprocess Recording rebuilds the Transcript from the audio.
     public enum Reprocessing: String, Codable, Sendable {
@@ -82,8 +87,10 @@ public struct ProcessingRecord: Codable, Equatable, Sendable {
         takkuID: UUID, startedAt: Date, status: Status,
         templateName: String, summaryProfile: ProviderProfile?, noteURL: URL?,
         reprocessing: Reprocessing? = nil, importedAt: Date? = nil, importWarnings: [String]? = nil,
-        noteFolder: String? = nil, noteTitle: String? = nil
+        noteFolder: String? = nil, noteTitle: String? = nil, notes: String? = nil, languages: [String]? = nil
     ) {
+        self.notes = notes
+        self.languages = languages
         self.noteFolder = noteFolder
         self.noteTitle = noteTitle
         self.takkuID = takkuID

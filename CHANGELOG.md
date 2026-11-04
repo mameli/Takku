@@ -4,6 +4,10 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
+## Unreleased
+
+- **Context and language for an import**: `takku import --notes "Video by Theo"` puts a line in the note's personal notes, which the summary reads, so it knows who speaks or which course a lecture belongs to (with yt-dlp, the video's channel and description: [README → Your meetings in the terminal](README.md#your-meetings-in-the-terminal)). `--language de` transcribes a file in a language you have not ticked in Settings, without changing them for your meetings.
+
 ## 1.18.0 (2026-11-04)
 
 - **Import from the terminal**: `takku import FILE…` makes audio or video files meetings, as *Import audio…* does, with the Template, Summary Profile, title and folder you give it (`--template`, `--profile`, `--title`, `--folder`). It opens Takku if needed, waits for each note and prints its path, or the note and its summary with `--json`. With yt-dlp, a YouTube video becomes a summary in one command: [README → Your meetings in the terminal](README.md#your-meetings-in-the-terminal).

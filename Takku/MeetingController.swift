@@ -551,10 +551,11 @@ final class MeetingController {
         importingFileTotal = 0
     }
 
-    /// One file made a Meeting and queued; `meetingID`, `title` and `folder` come from `takku import`.
+    /// One file made a Meeting and queued; `meetingID`, `title`, `folder`, `notes` and `languages`
+    /// come from `takku import`.
     private func importFile(
         _ url: URL, meetingID: UUID = UUID(), templateName: String, profile: ProviderProfile?,
-        title: String? = nil, folder: String? = nil
+        title: String? = nil, folder: String? = nil, notes: String? = nil, languages: [String]? = nil
     ) async throws {
         importingFileName = url.lastPathComponent
         // Without --folder, where the Template puts its notes (`folder:`), else Meetings/.
@@ -567,14 +568,16 @@ final class MeetingController {
         lastRecordingDirectory = imported.directory
         processor.meetingImported(
             takkuID: recording.meetingID, startedAt: recording.startedAt, templateName: templateName,
-            summaryProfile: profile, noteURL: createImportedNote(imported, title: title, folder: folder),
-            warnings: imported.warnings, noteFolder: folder, noteTitle: title
+            summaryProfile: profile, noteURL: createImportedNote(imported, title: title, folder: folder, notes: notes),
+            warnings: imported.warnings, noteFolder: folder, noteTitle: title, notes: notes, languages: languages
         )
     }
 
     /// The Meeting note of an imported file, not opened: the notification at the end of Processing
     /// opens it. If it cannot be created here, Processing creates it at the end.
-    private func createImportedNote(_ imported: AudioFileImport.Imported, title: String?, folder: String?) -> URL? {
+    private func createImportedNote(
+        _ imported: AudioFileImport.Imported, title: String?, folder: String?, notes: String?
+    ) -> URL? {
         guard let vault = Vault.configured else { return nil }
         let startedAt = imported.recording.startedAt
         // Only a date from the file's metadata says when it was recorded: the date of a copied or
@@ -583,7 +586,7 @@ final class MeetingController {
         do {
             return try vault.createMeetingNote(
                 takkuID: imported.recording.meetingID, startedAt: startedAt, event: event, isImport: true,
-                folder: folder, title: title
+                folder: folder, title: title, personalNotes: notes
             )
         } catch {
             logger.error("Meeting note of the imported file not created: \(error, privacy: .public)")
@@ -690,7 +693,8 @@ final class MeetingController {
             do {
                 try await importFile(
                     URL(filePath: path), meetingID: request.meetingID, templateName: request.template ?? templateName,
-                    profile: profile, title: request.title, folder: request.folder
+                    profile: profile, title: request.title, folder: request.folder, notes: request.notes,
+                    languages: request.languages
                 )
                 logger.notice("Imported from the terminal as Meeting \(request.meetingID, privacy: .public)")
                 return nil

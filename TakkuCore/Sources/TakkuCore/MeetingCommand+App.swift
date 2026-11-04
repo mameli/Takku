@@ -63,7 +63,8 @@ extension MeetingCommand {
                 Sent(
                     request: AppRequest(
                         kind: .importAudio, meetingID: UUID(), file: file.path(percentEncoded: false), template: template,
-                        profile: profile, title: options.title, folder: options.folder
+                        profile: profile, title: options.title, folder: options.folder, notes: options.notes,
+                        languages: options.languages
                     ),
                     label: file.lastPathComponent
                 )
