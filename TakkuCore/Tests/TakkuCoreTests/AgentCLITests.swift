@@ -621,24 +621,29 @@ struct AgentCLITests {
         #expect(claude.calls.isEmpty)
     }
 
-    @Test("Copilot lists auto, then the models its settings help names")
+    @Test("Copilot lists auto, then the chat models the user's plan has, read from the catalog in its log, without asking any model")
     func copilotModels() async throws {
-        let fake = try FakeCLI(.copilot, [.init(pattern: "help config", script: FakeCLI.prints("""
-            Configuration Settings:
-
-              `logLevel`: log level for CLI; defaults to "default". Set to "all" for debug logging.
-
-              `model`: AI model to use for Copilot CLI; can be changed with /model command or --model flag option.
-                - "claude-sonnet-5.5"
-                - "gpt-6-luna"
-                - "mai-code-1.1-flash"
-
-              `mouse`: whether to enable mouse support in alt screen mode; defaults to `true`.
-            """))])
+        let catalog = #"""
+            [{"id":"gpt-6.1-sol","capabilities":{"type":"chat"},"policy":{"state":"disabled"},"billing":{"restricted_to":["pro_plus"]}},{"id":"gpt-6-luna","capabilities":{"type":"chat"},"policy":{"state":"enabled"}},{"id":"mai-code-1.1-flash","capabilities":{"type":"chat"},"policy":{"state":"enabled"}},{"id":"text-embedding-3-small","capabilities":{"type":"embeddings"},"policy":{"state":"enabled"}},{"id":"gpt-4o","capabilities":{"type":"chat"}},{"id":"claude-haiku-4.5","capabilities":{"type":"chat"},"policy":{"state":"enabled"}}]
+            """#
+        let line = try String(decoding: JSONSerialization.data(withJSONObject: ["count": 6, "models": catalog]), as: UTF8.self)
+        let fake = try FakeCLI(.copilot, [.init(pattern: "*--model takku-lists-models*", script: """
+            mkdir -p "$COPILOT_HOME/logs"
+            cat > "$COPILOT_HOME/logs/process-1793807321451-58724.log" <<'TAKKU_EOF'
+            2026-11-04T15:48:41.698Z [DEBUG] No model backend (auth, legacy provider, or BYOK registry) available, skipping custom agents load
+            2026-11-04T15:48:42.850Z [DEBUG] [rust:capi_models] fetched model catalog from CAPI \(line)
+            2026-11-04T15:48:42.855Z [ERROR] Model "takku-lists-models" from --model flag is not available.
+            TAKKU_EOF
+            echo 'Error: Model "takku-lists-models" from --model flag is not available.' >&2
+            exit 1
+            """)])
 
         let models = await fake.runner().models()
 
-        #expect(models?.map(\.name) == ["auto", "claude-sonnet-5.5", "gpt-6-luna", "mai-code-1.1-flash"])
+        #expect(models?.map(\.name) == ["auto", "gpt-6-luna", "mai-code-1.1-flash", "claude-haiku-4.5"])
+        let run = try #require(fake.calls.first)
+        #expect(run.arguments.contains("--available-tools=takku_none"))
+        #expect(run.value(after: "--log-level") == "all")
         #expect(AgentCLI.copilot.reasoningLevels(for: "", in: models) == [])
         #expect(AgentCLI.copilot.reasoningLevels(for: "gpt-6-luna", in: models) == ProviderProfile.ReasoningEffort.allCases)
     }

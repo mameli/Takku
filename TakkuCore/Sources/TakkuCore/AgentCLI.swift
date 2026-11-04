@@ -89,15 +89,27 @@ public enum AgentCLI: String, CaseIterable, Sendable {
         }
     }
 
-    /// The arguments that list the models, for the agents whose list depends on the user.
-    var modelListArguments: [String]? {
+    /// The arguments that list the models, for the agents whose list depends on the user. Copilot
+    /// has no such command: a run with a model no one has stops before any request, and its debug
+    /// log holds the catalog it fetched for the user's plan.
+    func modelListArguments(folder: URL) -> [String]? {
         switch self {
         case .codex: ["debug", "models"]
-        case .copilot: ["help", "config"]
+        case .copilot: arguments(model: Self.noModel, reasoning: nil, folder: folder) + ["--log-level", "all"]
         case .opencode: ["models"]
         case .pi: ["--list-models", "--offline"]
         case .claude: nil
         }
+    }
+
+    private static let noModel = "takku-lists-models"
+
+    /// What lists the models, from what the listing run left: its output, or Copilot's log.
+    func modelListing(output: Data, status: Int32, scratch: URL) -> Data? {
+        guard self == .copilot else { return status == 0 ? output : nil }
+        let logs = scratch.appending(path: "home/logs")
+        let files = (try? FileManager.default.contentsOfDirectory(at: logs, includingPropertiesForKeys: nil)) ?? []
+        return files.filter { $0.pathExtension == "log" }.compactMap { try? Data(contentsOf: $0) }.reduce(Data(), +)
     }
 
     /// The models in what `modelListArguments` printed. Codex: the ones it lists in its own
@@ -125,12 +137,19 @@ public enum AgentCLI: String, CaseIterable, Sendable {
                 return Model("\(columns[0])/\(columns[1])")
             }
         case .copilot:
-            // The CLI's own list, under `model` in its settings help: not every plan has them all.
-            let lines = String(decoding: data, as: UTF8.self).split(separator: "\n", omittingEmptySubsequences: false)
-            guard let start = lines.firstIndex(where: { $0.trimmingCharacters(in: .whitespaces).hasPrefix("`model`:") }) else { return [] }
-            let names = lines[lines.index(after: start)...]
-                .prefix { $0.trimmingCharacters(in: .whitespaces).hasPrefix("- \"") }
-                .map { $0.trimmingCharacters(in: .whitespaces).dropFirst(3).dropLast().description }
+            // The chat models the user's plan or organisation turned on, after auto.
+            let catalog = String(decoding: data, as: UTF8.self).split(separator: "\n").last { $0.contains("fetched model catalog") }
+            guard let catalog, let brace = catalog.firstIndex(of: "{"),
+                  let entry = (try? JSONSerialization.jsonObject(with: Data(catalog[brace...].utf8))) as? [String: Any],
+                  let listed = entry["models"] as? String,
+                  let models = (try? JSONSerialization.jsonObject(with: Data(listed.utf8))) as? [[String: Any]]
+            else { return [] }
+            let names = models.compactMap { model -> String? in
+                guard (model["policy"] as? [String: Any])?["state"] as? String == "enabled",
+                      (model["capabilities"] as? [String: Any])?["type"] as? String == "chat"
+                else { return nil }
+                return model["id"] as? String
+            }
             return names.isEmpty ? [] : [Model("auto")] + names.map { Model($0) }
         case .claude:
             return []

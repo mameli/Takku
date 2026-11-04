@@ -73,11 +73,14 @@ extension AgentCLI {
         /// The models the agent offers, `nil` when they cannot be read (the model is then typed).
         public func models() async -> [Model]? {
             if let fixed = cli.fixedModels { return fixed }
-            guard let arguments = cli.modelListArguments, let executable = locate(),
-                  let result = try? await runAside(executable, arguments, timeout: .seconds(60)),
-                  result.ending == .exited, result.status == 0
+            guard let executable = locate(), let place = try? Place(cli) else { return nil }
+            defer { place.remove() }
+            guard let arguments = cli.modelListArguments(folder: place.folder),
+                  let result = try? await run(executable, arguments, in: place, input: Data(), timeout: .seconds(60)),
+                  result.ending == .exited,
+                  let listing = cli.modelListing(output: result.output, status: result.status, scratch: place.scratch)
             else { return nil }
-            let models = cli.models(fromListing: result.output)
+            let models = cli.models(fromListing: listing)
             return models.isEmpty ? nil : models
         }
 
