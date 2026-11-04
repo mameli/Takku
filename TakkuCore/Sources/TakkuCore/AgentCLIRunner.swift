@@ -8,6 +8,8 @@ extension AgentCLI {
         case notInstalled(AgentCLI), notSignedIn(AgentCLI), timedOut(AgentCLI), emptyReply(AgentCLI)
         /// The agent has no model of its own (OpenCode, Pi) and the Profile names none.
         case noModel(AgentCLI)
+        /// The model would reach the CLI as one of its options.
+        case invalidModel(AgentCLI, String)
         /// The agent's own message, as it wrote it.
         case failed(AgentCLI, String)
 
@@ -23,6 +25,8 @@ extension AgentCLI {
                 String(localized: "\(cli.name) finished without writing anything.")
             case .noModel(let cli):
                 String(localized: "\(cli.name) needs a model: choose one in its Profile in Settings → Summary.")
+            case .invalidModel(let cli, let model):
+                String(localized: "\"\(model)\" is not a model name for \(cli.name): choose one in its Profile in Settings → Summary.")
             case .failed(let cli, let reason):
                 String(localized: "\(cli.name): \(reason)")
             }
@@ -90,14 +94,13 @@ extension AgentCLI {
         ) async throws -> (Data, HTTPURLResponse) {
             guard let executable = locate() else { throw Failure.notInstalled(cli) }
             guard !model.isEmpty || cli.hasDefaultModel else { throw Failure.noModel(cli) }
+            guard !model.hasPrefix("-") else { throw Failure.invalidModel(cli, model) }
             let (instructions, prompt) = try AppleIntelligence.conversation(fromRequestBody: request.httpBody ?? Data())
             let input = cli.input(instructions: instructions, prompt: prompt)
+            Place.removeLeftovers()
             let place = try Place(cli, environment: environment)
             defer { place.remove() }
-            // Another run still going has its session in the shared folder too: only a run alone clears
-            // them, and no other starts while it does (`takku import` runs in this app too).
-            if cli == .opencode { await Self.openCodeRuns.begin { await deleteLeftoverSessions(executable) } }
-            defer { if cli == .opencode { Task { await Self.openCodeRuns.end() } } }
+            if cli == .opencode { await deleteLeftoverSessions(executable) }
 
             let started = ContinuousClock.now
             log("LLM request through \(cli.name), model \(model.isEmpty ? "default" : model), \(input.utf8.count) bytes")
@@ -136,12 +139,13 @@ extension AgentCLI {
         }
 
         /// Before a run, the sessions earlier runs left in OpenCode (Takku quit or the Mac slept
-        /// during one).
+        /// during one): only those older than a run can last, so none still going is touched.
         private func deleteLeftoverSessions(_ executable: URL) async {
             guard let result = try? await runAside(executable, ["session", "list", "--standalone", "--format", "json"], timeout: .seconds(60)),
                   result.ending == .exited, result.status == 0
             else { return }
-            for session in cli.leftoverSessions(inListing: result.output, folder: Place.openCodeFolder) {
+            let finished = Date.now.addingTimeInterval(-(timeout / .seconds(1)) - 300)
+            for session in cli.leftoverSessions(inListing: result.output, folder: Place.openCodeFolder, createdBefore: finished) {
                 await deleteSession(session, executable)
             }
         }
@@ -149,8 +153,6 @@ extension AgentCLI {
         private func deleteSession(_ session: String, _ executable: URL) async {
             _ = try? await runAside(executable, ["session", "delete", "--standalone", session], timeout: .seconds(60))
         }
-
-        private static let openCodeRuns = OpenCodeRuns()
 
         /// A short run that is not a request (sign-in, models, sessions), in a place of its own.
         private func runAside(_ executable: URL, _ arguments: [String], timeout: Duration) async throws -> Result {
@@ -231,28 +233,6 @@ extension AgentCLI {
         }
     }
 
-    /// The OpenCode runs going on, and the clean-up of earlier runs' sessions, which only a run
-    /// with no other going on does, and during which no other starts.
-    private actor OpenCodeRuns {
-        private var running = 0
-        private var cleaning: Task<Void, Never>?
-
-        func begin(cleanup: @escaping @Sendable () async -> Void) async {
-            while let cleaning { await cleaning.value }
-            if running == 0 {
-                let task = Task { await cleanup() }
-                cleaning = task
-                await task.value
-                cleaning = nil
-            }
-            running += 1
-        }
-
-        func end() {
-            running -= 1
-        }
-    }
-
     /// Where a run happens: an empty folder to run in, and next to it a scratch folder for its
     /// input and output and whatever else the CLI needs; the scratch folder goes after the run.
     private struct Place {
@@ -275,6 +255,20 @@ extension AgentCLI {
 
         func remove() {
             try? FileManager.default.removeItem(at: scratch)
+        }
+
+        /// The scratch folders of runs cut short (Takku quit, the Mac slept), which hold a request:
+        /// older than any run can last.
+        static func removeLeftovers() {
+            let fileManager = FileManager.default
+            let prefixes = AgentCLI.allCases.map { "Takku-\($0.rawValue)-" }
+            let folders = (try? fileManager.contentsOfDirectory(
+                at: fileManager.temporaryDirectory, includingPropertiesForKeys: [.contentModificationDateKey]
+            )) ?? []
+            for folder in folders where folder != openCodeFolder && prefixes.contains(where: folder.lastPathComponent.hasPrefix) {
+                let modified = (try? folder.resourceValues(forKeys: [.contentModificationDateKey]))?.contentModificationDate
+                if let modified, modified < Date.now.addingTimeInterval(-3600) { try? fileManager.removeItem(at: folder) }
+            }
         }
     }
 

@@ -411,13 +411,15 @@ struct ProfileEditor: View {
         }
     }
 
-    /// The agent's problem and models, read again when the user comes back from Terminal.
+    /// The agent's problem, read again when the user comes back from Terminal, and its models when
+    /// none are read yet or the problem changed (a list is a run of the CLI: Copilot's takes seconds).
     private func checkAgentCLI() async {
         guard let cli = profile.agentCLI else { return }
         let runner = AgentCLI.Runner(cli)
         let problem = await runner.unavailability()
+        let changed = problem?.localizedDescription != cliProblem
         cliProblem = problem?.localizedDescription
-        if problem != .notInstalled(cli) { agentModels = await runner.models() }
+        if problem != .notInstalled(cli) && (agentModels == nil || changed) { agentModels = await runner.models() }
     }
 
     private func test() async {

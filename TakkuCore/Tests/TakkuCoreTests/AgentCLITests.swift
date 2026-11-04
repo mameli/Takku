@@ -179,6 +179,26 @@ struct AgentCLITests {
         #expect(await runner.unavailability() == .notInstalled(.claude))
     }
 
+    @Test("the folder of a run cut short (Takku quit, the Mac slept), which holds the request, goes at the next run; a recent one stays")
+    func leftoverRunFolders() async throws {
+        let temporary = FileManager.default.temporaryDirectory
+        let old = temporary.appending(path: "Takku-claude-\(UUID().uuidString)")
+        let recent = temporary.appending(path: "Takku-pi-\(UUID().uuidString)")
+        for folder in [old, recent] {
+            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            try "Il rilascio slitta al 20.".write(to: folder.appending(path: "in"), atomically: true, encoding: .utf8)
+        }
+        try FileManager.default.setAttributes([.modificationDate: Date.now.addingTimeInterval(-7200)], ofItemAtPath: old.path)
+        defer { try? FileManager.default.removeItem(at: recent) }
+        let fake = try FakeCLI(.codex, [.init(pattern: "exec*", script: FakeCLI.prints(Self.codexReply))])
+
+        _ = try await fake.runner().client(for: AgentCLI.codex.profile()).complete(Self.meeting)
+
+        #expect(!FileManager.default.fileExists(atPath: old.path))
+        #expect(FileManager.default.fileExists(atPath: recent.path))
+        #expect(FileManager.default.fileExists(atPath: fake.executable.path))
+    }
+
     @Test("API keys and the agents' own variables never reach the CLI, so the plan pays and not the key", arguments: AgentCLI.allCases)
     func noAPIKeys(cli: AgentCLI) async throws {
         let fake = try FakeCLI(cli, [.init(pattern: "*", script: "exit 1")])
@@ -277,6 +297,7 @@ struct AgentCLITests {
     func copilotAccount() async throws {
         let home = FileManager.default.temporaryDirectory.appending(path: "Takku-home-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: home.appending(path: ".copilot"), withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: home) }
         try """
             // User settings belong in settings.json.
             // This file is managed automatically.
@@ -358,6 +379,31 @@ struct AgentCLITests {
         #expect(!run.arguments.contains("--settings"))
     }
 
+    @Test("Claude Code's input counts the tokens it read from its cache too")
+    func claudeUsage() async throws {
+        let reply = Self.claudeReply.replacingOccurrences(of: #""cache_read_input_tokens":0"#, with: #""cache_read_input_tokens":15000"#)
+        let fake = try FakeCLI(.claude, [.init(pattern: "-p*", script: FakeCLI.prints(reply))])
+        let log = SummaryLog.Recorder()
+
+        _ = try await fake.runner().client(for: AgentCLI.claude.profile()).recording(into: log, as: .single).complete(Self.meeting)
+
+        let response = try #require(await log.calls.first?.response)
+        let body = try #require(try JSONSerialization.jsonObject(with: response) as? [String: Any])
+        #expect((body["agent"] as? [String: Any])?["usage"] as? String == "15433 tokens in, 4 out")
+    }
+
+    @Test("a model that looks like an option never reaches the CLI", arguments: AgentCLI.allCases)
+    func modelLikeAnOption(cli: AgentCLI) async throws {
+        let fake = try FakeCLI(cli, [.init(pattern: "*", script: "exit 1")])
+        var profile = cli.profile()
+        profile.model = " --yolo"
+
+        await #expect(throws: AgentCLI.Failure.invalidModel(cli, "--yolo")) {
+            try await fake.runner().client(for: profile).complete(Self.meeting)
+        }
+        #expect(fake.calls.isEmpty)
+    }
+
     @Test("a failed Claude Code run gives its message, though it says \"success\"")
     func claudeFailure() async throws {
         let fake = try FakeCLI(.claude, [.init(pattern: "-p*", script: """
@@ -388,10 +434,11 @@ struct AgentCLITests {
         {"type":"error","timestamp":1793804414182,"sessionID":"ses_run","error":{"type":"provider.free-limit","message":"Free usage limit reached. Connect a provider or subscribe to OpenCode Go to keep going, or switch models.","status":429,"response":{"body":"{\"type\":\"error\"}"},"retryAfterMs":32386000}}
         """#
 
-    /// What `session list` prints: a session an earlier run left, and two of the user's (one
-    /// titled like Takku's, elsewhere).
+    /// What `session list` prints: a session an earlier run left, one of a run that may still be
+    /// going (created a minute ago), and two of the user's (one titled like Takku's, elsewhere).
     static let openCodeSessions = """
-        printf '[{"id":"ses_left","title":"Takku","directory":"%s"},{"id":"ses_user","title":"Takku","directory":"/Users/x/code"},{"id":"ses_mine","title":"Refactor","directory":"%s"}]' "$PWD" "$PWD"
+        now=$(($(date +%s) * 1000)); recent=$((now - 60000))
+        printf '[{"id":"ses_left","title":"Takku","directory":"%s","created":1793804413569},{"id":"ses_live","title":"Takku","directory":"%s","created":%s},{"id":"ses_user","title":"Takku","directory":"/Users/x/code","created":1793804413569},{"id":"ses_mine","title":"Refactor","directory":"%s","created":1793804413569}]' "$PWD" "$PWD" "$recent" "$PWD"
         """
 
     static func openCode(run: String) throws -> FakeCLI {

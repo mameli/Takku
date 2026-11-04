@@ -4,7 +4,7 @@ import TakkuCore
 /// A stand-in for an agent's CLI: a shell script that records what each run got (arguments,
 /// environment, standard input, folder) and answers with the first rule whose pattern matches its
 /// arguments, as recorded from real runs.
-struct FakeCLI {
+final class FakeCLI {
     struct Rule {
         /// A shell `case` pattern on the arguments joined by spaces, e.g. `"*debug models*"`.
         var pattern: String
@@ -62,6 +62,10 @@ struct FakeCLI {
             """
         try script.write(to: executable, atomically: true, encoding: .utf8)
         try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: executable.path)
+    }
+
+    deinit {
+        try? FileManager.default.removeItem(at: folder)
     }
 
     var calls: [Call] {

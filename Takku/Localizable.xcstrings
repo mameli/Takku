@@ -12678,6 +12678,35 @@
           }
         }
       }
+    },
+    "\"%@\" is not a model name for %@: choose one in its Profile in Settings → Summary.": {
+      "extractionState": "manual",
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "\"%1$@\" non è un nome di modello per %2$@: scegline uno nel suo Profilo in Impostazioni → Riepilogo."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%1$@“ ist kein Modellname für %2$@: Wähle eines in seinem Profil unter Einstellungen → Zusammenfassung."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«%1$@» no es un nombre de modelo para %2$@: elige uno en su Perfil en Ajustes → Resumen."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "« %1$@ » n’est pas un nom de modèle pour %2$@ : choisissez-en un dans son Profil dans Réglages → Résumé."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

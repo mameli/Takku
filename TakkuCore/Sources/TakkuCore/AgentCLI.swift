@@ -458,7 +458,9 @@ public enum AgentCLI: String, CaseIterable, Sendable {
             outcome.reply = text
         }
         let usage = event["usage"] as? [String: Any]
-        outcome.inputTokens += usage?["input_tokens"] as? Int ?? 0
+        for key in ["input_tokens", "cache_read_input_tokens", "cache_creation_input_tokens"] {
+            outcome.inputTokens += usage?[key] as? Int ?? 0
+        }
         outcome.outputTokens += usage?["output_tokens"] as? Int ?? 0
         outcome.toolCalls += (event["permission_denials"] as? [Any])?.count ?? 0
         outcome.model = (event["modelUsage"] as? [String: Any])?.keys.sorted().joined(separator: ", ")
@@ -518,15 +520,16 @@ public enum AgentCLI: String, CaseIterable, Sendable {
         }
     }
 
-    /// The sessions of Takku's runs in an OpenCode session list: those with its title, in `folder`.
-    /// Never another of the user's.
-    func leftoverSessions(inListing data: Data, folder: URL) -> [String] {
+    /// The sessions of Takku's runs in an OpenCode session list: those with its title, in `folder`,
+    /// created before `date`. Never another of the user's.
+    func leftoverSessions(inListing data: Data, folder: URL, createdBefore date: Date) -> [String] {
         let sessions = (try? JSONSerialization.jsonObject(with: data)) as? [[String: Any]] ?? []
         let folder = folder.resolvingSymlinksInPath().path
         return sessions.compactMap { session in
             guard session["title"] as? String == Self.openCodeTitle,
                   let directory = session["directory"] as? String,
-                  URL(filePath: directory).resolvingSymlinksInPath().path == folder
+                  URL(filePath: directory).resolvingSymlinksInPath().path == folder,
+                  let created = session["created"] as? Double, created / 1000 < date.timeIntervalSince1970
             else { return nil }
             return session["id"] as? String
         }
