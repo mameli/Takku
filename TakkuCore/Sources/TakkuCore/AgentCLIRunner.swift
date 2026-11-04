@@ -94,13 +94,10 @@ extension AgentCLI {
             let input = cli.input(instructions: instructions, prompt: prompt)
             let place = try Place(cli, environment: environment)
             defer { place.remove() }
-            // Another run still going has its session in the shared folder too: only a run alone clears them.
-            let isAlone = Self.openCodeRuns.withLock { runs in
-                runs += cli == .opencode ? 1 : 0
-                return runs == 1
-            }
-            defer { if cli == .opencode { Self.openCodeRuns.withLock { $0 -= 1 } } }
-            if cli == .opencode && isAlone { await deleteLeftoverSessions(executable) }
+            // Another run still going has its session in the shared folder too: only a run alone clears
+            // them, and no other starts while it does (`takku import` runs in this app too).
+            if cli == .opencode { await Self.openCodeRuns.begin { await deleteLeftoverSessions(executable) } }
+            defer { if cli == .opencode { Task { await Self.openCodeRuns.end() } } }
 
             let started = ContinuousClock.now
             log("LLM request through \(cli.name), model \(model.isEmpty ? "default" : model), \(input.utf8.count) bytes")
@@ -153,8 +150,7 @@ extension AgentCLI {
             _ = try? await runAside(executable, ["session", "delete", "--standalone", session], timeout: .seconds(60))
         }
 
-        /// OpenCode runs going on in this app.
-        private static let openCodeRuns = OSAllocatedUnfairLock(initialState: 0)
+        private static let openCodeRuns = OpenCodeRuns()
 
         /// A short run that is not a request (sign-in, models, sessions), in a place of its own.
         private func runAside(_ executable: URL, _ arguments: [String], timeout: Duration) async throws -> Result {
@@ -226,14 +222,34 @@ extension AgentCLI {
             return printed(status, timedOut.withLock { $0 } ? .timedOut : .exited)
         }
 
-        /// Asks the process to end, and kills it if it has not a few seconds later.
+        /// Asks the process and what it started to end (Process runs it in a group of its own), and
+        /// kills the group if it has not a few seconds later.
         private static func stop(_ process: Process) {
             process.terminate()
-            let pid = process.processIdentifier
-            nonisolated(unsafe) let process = process
-            DispatchQueue.global().asyncAfter(deadline: .now() + 5) {
-                if process.isRunning { kill(pid, SIGKILL) }
+            let group = process.processIdentifier
+            DispatchQueue.global().asyncAfter(deadline: .now() + 5) { kill(-group, SIGKILL) }
+        }
+    }
+
+    /// The OpenCode runs going on, and the clean-up of earlier runs' sessions, which only a run
+    /// with no other going on does, and during which no other starts.
+    private actor OpenCodeRuns {
+        private var running = 0
+        private var cleaning: Task<Void, Never>?
+
+        func begin(cleanup: @escaping @Sendable () async -> Void) async {
+            while let cleaning { await cleaning.value }
+            if running == 0 {
+                let task = Task { await cleanup() }
+                cleaning = task
+                await task.value
+                cleaning = nil
             }
+            running += 1
+        }
+
+        func end() {
+            running -= 1
         }
     }
 
@@ -292,17 +308,23 @@ extension AgentCLI {
         let shell = Process()
         shell.executableURL = URL(filePath: ProcessInfo.processInfo.environment["SHELL"] ?? "/bin/zsh")
         shell.arguments = ["-lc", "command -v \(command)"]
-        let output = Pipe()
+        // A file, not a pipe: a login script's child holding a pipe open would keep it from ending.
+        let outputFile = fileManager.temporaryDirectory.appending(path: "Takku-locate-\(UUID().uuidString)")
+        fileManager.createFile(atPath: outputFile.path, contents: nil)
+        defer { try? fileManager.removeItem(at: outputFile) }
+        guard let output = try? FileHandle(forWritingTo: outputFile) else { return nil }
         shell.standardOutput = output
         shell.standardError = FileHandle.nullDevice
         shell.standardInput = FileHandle.nullDevice
+        let ended = DispatchSemaphore(value: 0)
+        shell.terminationHandler = { _ in ended.signal() }
         guard (try? shell.run()) != nil else { return nil }
         // A login script that waits for input would hold the run forever.
-        nonisolated(unsafe) let running = shell
-        DispatchQueue.global().asyncAfter(deadline: .now() + 10) { if running.isRunning { running.terminate() } }
-        let printed = output.fileHandleForReading.readDataToEndOfFile()
-        shell.waitUntilExit()
-        let found = String(decoding: printed, as: UTF8.self)
+        if ended.wait(timeout: .now() + 10) == .timedOut {
+            shell.terminate()
+            return nil
+        }
+        let found = ((try? String(contentsOf: outputFile, encoding: .utf8)) ?? "")
             .split(separator: "\n").last.map(String.init)?.trimmingCharacters(in: .whitespaces)
         guard shell.terminationStatus == 0, let found, found.hasPrefix("/"), fileManager.isExecutableFile(atPath: found) else { return nil }
         return URL(filePath: found)

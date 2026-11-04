@@ -334,9 +334,10 @@ public enum AgentCLI: String, CaseIterable, Sendable {
     /// (Claude Code always does under `-p`), and an agent's own variables would bring back the
     /// session it runs in or settings of the user's.
     static func isRemoved(_ variable: String) -> Bool {
-        let names: Set = ["OPENAI_API_KEY", "CODEX_API_KEY", "GITHUB_TOKEN", "GH_TOKEN", "COPILOT_GITHUB_TOKEN", "OPENROUTER_API_KEY"]
-        return names.contains(variable) || variable.hasSuffix("_API_KEY")
-            || ["ANTHROPIC_", "CLAUDE", "OPENCODE_", "AWS_", "AZURE_OPENAI_"].contains { variable.hasPrefix($0) }
+        // Where the user moved an agent's sign-in: without it the CLI would be signed out.
+        if ["CODEX_HOME", "PI_CODING_AGENT_DIR"].contains(variable) { return false }
+        return variable.hasSuffix("_API_KEY") || variable.hasSuffix("_TOKEN")
+            || ["ANTHROPIC_", "CLAUDE", "OPENCODE_", "CODEX_", "COPILOT_", "PI_", "AWS_", "AZURE_OPENAI_"].contains { variable.hasPrefix($0) }
     }
 
     // MARK: - What a run ended with

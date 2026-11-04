@@ -145,6 +145,30 @@ struct AgentCLITests {
         #expect(kill(pid, 0) != 0)
     }
 
+    @Test("stopping the request also ends what the CLI started, as an npm launcher starts Node")
+    func cancellationOfChildren() async throws {
+        let fake = try FakeCLI(.codex, [.init(pattern: "exec*", script: """
+            sleep 30 &
+            echo $! > "$call/child"
+            wait
+            """)])
+        let client = fake.runner().client(for: AgentCLI.codex.profile())
+        let childFile = fake.folder.appending(path: "calls/0/child")
+
+        let request = Task { try await client.complete(Self.meeting) }
+        var child: Int32?
+        for _ in 0..<100 where child == nil {
+            try await Task.sleep(for: .milliseconds(50))
+            child = (try? String(contentsOf: childFile, encoding: .utf8)).flatMap { Int32($0.trimmingCharacters(in: .whitespacesAndNewlines)) }
+        }
+        request.cancel()
+
+        await #expect(throws: CancellationError.self) { try await request.value }
+        let pid = try #require(child)
+        for _ in 0..<20 where kill(pid, 0) == 0 { try await Task.sleep(for: .milliseconds(50)) }
+        #expect(kill(pid, 0) != 0)
+    }
+
     @Test("not installed: the CLI is not found")
     func notInstalled() async throws {
         let runner = AgentCLI.Runner(.claude, locate: { nil })
@@ -164,6 +188,8 @@ struct AgentCLITests {
             "CLAUDE_CODE_ENTRYPOINT": "cli", "OPENAI_API_KEY": "sk-openai", "CODEX_API_KEY": "sk-codex",
             "GITHUB_TOKEN": "ghp", "GH_TOKEN": "gho", "COPILOT_GITHUB_TOKEN": "ghc", "OPENROUTER_API_KEY": "sk-or",
             "GROQ_API_KEY": "gsk", "AWS_ACCESS_KEY_ID": "AKIA", "AWS_BEARER_TOKEN_BEDROCK": "bedrock",
+            "GH_ENTERPRISE_TOKEN": "ghe", "CODEX_SANDBOX": "seatbelt", "COPILOT_MODEL": "gpt-6.1-sol",
+            "PI_SHARE_VIEWER_URL": "https://example.com",
             "OPENCODE_CONFIG": "/Users/x/.config/opencode/opencode.json",
         ]
         var profile = cli.profile()
@@ -177,6 +203,19 @@ struct AgentCLITests {
         }
         #expect(run.environment["LANG"] == "it_IT.UTF-8")
         #expect(run.environment["PATH"]?.hasPrefix(fake.executable.deletingLastPathComponent().path + ":/opt/homebrew/bin") == true)
+    }
+
+    @Test("where the user keeps an agent's sign-in, when they moved it, still reaches the CLI")
+    func signInFolders() async throws {
+        let codex = try FakeCLI(.codex, [.init(pattern: "*", script: "exit 1")])
+        let pi = try FakeCLI(.pi, [.init(pattern: "*", script: "exit 1")])
+        let environment = ["PATH": "/usr/bin:/bin", "HOME": NSHomeDirectory(), "CODEX_HOME": "/Users/x/.codex-work", "PI_CODING_AGENT_DIR": "/Users/x/.pi-work"]
+
+        _ = try? await codex.runner(environment: environment).client(for: AgentCLI.codex.profile()).complete(Self.meeting)
+        _ = try? await pi.runner(environment: environment).client(for: Self.piProfile).complete(Self.meeting)
+
+        #expect(codex.calls.first?.environment["CODEX_HOME"] == "/Users/x/.codex-work")
+        #expect(pi.calls.first?.environment["PI_CODING_AGENT_DIR"] == "/Users/x/.pi-work")
     }
 
     // MARK: - GitHub Copilot
