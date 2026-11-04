@@ -30,7 +30,7 @@ Import only what the user asked for. The transcript goes to the Summary Profile 
 - **Language** (`--language de`, or `it,en`): only when the recording is in a language the user has not ticked in Takku, or the detection got it wrong.
 - **Title** (`--title`): the note's name; for a video, its title.
 
-`--notes` and `--language` need Takku 1.19 or later: if `takku` answers `unknown option`, run the import again without them.
+`--notes` and `--language` need Takku 1.18.1 or later: if `takku` answers `unknown option`, run the import again without them.
 
 ## 3. Import and wait
 
