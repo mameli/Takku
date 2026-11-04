@@ -110,7 +110,7 @@ extension AgentCLI {
                 await Task.detached { await deleteSession(session, executable) }.value
             }
             let seconds = ((ContinuousClock.now - started) / .seconds(1)).formatted(.number.precision(.fractionLength(1)))
-            log("LLM reply through \(cli.name) in \(seconds) s: \(result.ending), exit \(result.status), \(outcome.usage), \(outcome.toolCalls) tool calls")
+            log("LLM reply through \(cli.name) in \(seconds) s: \(result.ending), exit \(result.status), model \(outcome.model ?? "not reported"), \(outcome.usage), \(outcome.toolCalls) tool calls")
 
             switch result.ending {
             case .cancelled: throw CancellationError()

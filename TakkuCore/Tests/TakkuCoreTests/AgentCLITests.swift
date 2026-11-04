@@ -458,6 +458,20 @@ struct AgentCLITests {
         let agent = try #require(body["agent"] as? [String: Any])
         #expect(agent["usage"] as? String == "116 tokens in, 16 out")
         #expect(agent["tool_calls"] as? Int == 1)
+        #expect(agent["model"] as? String == "github-copilot/claude-haiku-4.5")
+    }
+
+    @Test("the model Copilot's auto picked reaches the Summary log")
+    func copilotAutoModel() async throws {
+        let fake = try FakeCLI(.copilot, [.init(pattern: "*", script: FakeCLI.prints(Self.copilotReply))])
+        let log = SummaryLog.Recorder()
+
+        _ = try await fake.runner().client(for: AgentCLI.copilot.profile()).recording(into: log, as: .single).complete(Self.meeting)
+
+        let response = try #require(await log.calls.first?.response)
+        let body = try #require(try JSONSerialization.jsonObject(with: response) as? [String: Any])
+        #expect((body["agent"] as? [String: Any])?["model"] as? String == "gpt-6-luna")
+        #expect((body["agent"] as? [String: Any])?["usage"] as? String == "1 premium requests")
     }
 
     @Test("a Pi reasoning level goes to its thinking")

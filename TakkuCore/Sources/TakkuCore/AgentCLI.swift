@@ -308,6 +308,8 @@ public enum AgentCLI: String, CaseIterable, Sendable {
         public var usage = ""
         /// Commands, file reads and other tools the agent tried despite having none.
         public var toolCalls = 0
+        /// The model that answered, as the agent reports it (Copilot's auto picks one); `nil` if it does not.
+        public var model: String?
         /// OpenCode's session, to delete.
         public var session: String?
     }
@@ -345,6 +347,7 @@ public enum AgentCLI: String, CaseIterable, Sendable {
         tokens.input += usage?["input"] as? Int ?? 0
         tokens.output += usage?["output"] as? Int ?? 0
         outcome.usage = "\(tokens.input) tokens in, \(tokens.output) out"
+        if let provider = message["provider"] as? String, let model = message["model"] as? String { outcome.model = "\(provider)/\(model)" }
         if message["stopReason"] as? String == "error" {
             outcome.failure = message["errorMessage"] as? String ?? "error"
             return
@@ -380,6 +383,8 @@ public enum AgentCLI: String, CaseIterable, Sendable {
     private static func readCopilot(_ type: String, _ event: [String: Any], into outcome: inout Outcome) {
         let data = event["data"] as? [String: Any]
         switch type {
+        case "session.auto_mode_resolved":
+            outcome.model = data?["chosenModel"] as? String
         case "assistant.message":
             outcome.toolCalls += (data?["toolRequests"] as? [Any])?.count ?? 0
             // A message that only asks for a tool has no text.
@@ -407,6 +412,7 @@ public enum AgentCLI: String, CaseIterable, Sendable {
         let usage = event["usage"] as? [String: Any]
         outcome.usage = "\(usage?["input_tokens"] as? Int ?? 0) tokens in, \(usage?["output_tokens"] as? Int ?? 0) out"
         outcome.toolCalls += (event["permission_denials"] as? [Any])?.count ?? 0
+        outcome.model = (event["modelUsage"] as? [String: Any])?.keys.sorted().joined(separator: ", ")
     }
 
     private static func readOpenCode(_ type: String, _ event: [String: Any], into outcome: inout Outcome, tokens: inout (input: Int, output: Int)) {
@@ -480,11 +486,13 @@ public enum AgentCLI: String, CaseIterable, Sendable {
     /// A Chat Completions reply holding the agent's last message, with what the run used for the
     /// Summary log.
     func responseBody(_ text: String, outcome: Outcome) -> Data {
+        var agent: [String: Any] = ["name": name, "usage": outcome.usage, "tool_calls": outcome.toolCalls]
+        agent["model"] = outcome.model
         let body: [String: Any] = [
             "object": "chat.completion",
             "model": name,
             "choices": [["index": 0, "message": ["role": "assistant", "content": text], "finish_reason": "stop"]],
-            "agent": ["name": name, "usage": outcome.usage, "tool_calls": outcome.toolCalls],
+            "agent": agent,
         ]
         return (try? JSONSerialization.data(withJSONObject: body)) ?? Data()
     }
