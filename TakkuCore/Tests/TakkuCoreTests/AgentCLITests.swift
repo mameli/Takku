@@ -234,6 +234,33 @@ struct AgentCLITests {
         #expect(!auto.arguments.contains("--reasoning-effort"))
     }
 
+    @Test("Copilot runs as the account the user signed in with: only who is signed in reaches its empty home, none of the rest of their settings")
+    func copilotAccount() async throws {
+        let home = FileManager.default.temporaryDirectory.appending(path: "Takku-home-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: home.appending(path: ".copilot"), withIntermediateDirectories: true)
+        try """
+            // User settings belong in settings.json.
+            // This file is managed automatically.
+            {
+              "lastLoggedInUser": {"host": "https://acme.ghe.com/consulting", "login": "mario-rossi"},
+              "loggedInUsers": [{"host": "https://acme.ghe.com/consulting", "login": "mario-rossi", "kind": "proxima"}],
+              "recentModelIds": ["claude-opus-5.5"],
+              "trustedFolders": ["/Users/mario/code"]
+            }
+            """.write(to: home.appending(path: ".copilot/config.json"), atomically: true, encoding: .utf8)
+        let fake = try FakeCLI(.copilot, [.init(pattern: "*", script: """
+            cp "$COPILOT_HOME/config.json" "$call/copilot-config"
+            \(FakeCLI.prints(Self.copilotReply))
+            """)])
+
+        _ = try await fake.runner(environment: ["PATH": "/usr/bin:/bin", "HOME": home.path]).client(for: AgentCLI.copilot.profile()).complete(Self.meeting)
+
+        let copied = try Data(contentsOf: fake.folder.appending(path: "calls/0/copilot-config"))
+        let config = try #require(try JSONSerialization.jsonObject(with: copied) as? [String: Any])
+        #expect(Set(config.keys) == ["lastLoggedInUser", "loggedInUsers"])
+        #expect((config["lastLoggedInUser"] as? [String: String])?["login"] == "mario-rossi")
+    }
+
     @Test("a failed Copilot run gives the session's error")
     func copilotFailure() async throws {
         let fake = try FakeCLI(.copilot, [.init(pattern: "*", script: FakeCLI.prints("""
@@ -628,6 +655,10 @@ struct AgentCLITests {
             """#
         let line = try String(decoding: JSONSerialization.data(withJSONObject: ["count": 6, "models": catalog]), as: UTF8.self)
         let fake = try FakeCLI(.copilot, [.init(pattern: "*--model takku-lists-models*", script: """
+            if [ ! -s "$call/input" ]; then
+              echo 'No prompt provided. Run in an interactive terminal or provide a prompt with -p or via standard in.' >&2
+              exit 1
+            fi
             mkdir -p "$COPILOT_HOME/logs"
             cat > "$COPILOT_HOME/logs/process-1793807321451-58724.log" <<'TAKKU_EOF'
             2026-11-04T15:48:41.698Z [DEBUG] No model backend (auth, legacy provider, or BYOK registry) available, skipping custom agents load

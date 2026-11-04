@@ -314,6 +314,21 @@ public enum AgentCLI: String, CaseIterable, Sendable {
         }
     }
 
+    /// Copilot's empty home needs to know who is signed in (its token stays in the Keychain):
+    /// without it Copilot runs on the free tier. Only that is copied from the user's settings.
+    func prepare(scratch: URL, environment: [String: String]) {
+        guard self == .copilot else { return }
+        let home = environment["COPILOT_HOME"].map { URL(filePath: $0) }
+            ?? URL(filePath: environment["HOME"] ?? NSHomeDirectory()).appending(path: ".copilot")
+        guard let text = try? String(contentsOf: home.appending(path: "config.json"), encoding: .utf8) else { return }
+        // The file opens with // comments.
+        let json = text.split(separator: "\n").filter { !$0.trimmingCharacters(in: .whitespaces).hasPrefix("//") }.joined(separator: "\n")
+        guard let config = (try? JSONSerialization.jsonObject(with: Data(json.utf8))) as? [String: Any] else { return }
+        let account = config.filter { ["loggedInUsers", "lastLoggedInUser"].contains($0.key) }
+        guard !account.isEmpty, let data = try? JSONSerialization.data(withJSONObject: account) else { return }
+        try? data.write(to: scratch.appending(path: "home/config.json"))
+    }
+
     /// The variables no run gets: with an API key the CLI bills per token instead of using the plan
     /// (Claude Code always does under `-p`), and an agent's own variables would bring back the
     /// session it runs in or settings of the user's.

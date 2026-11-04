@@ -73,10 +73,11 @@ extension AgentCLI {
         /// The models the agent offers, `nil` when they cannot be read (the model is then typed).
         public func models() async -> [Model]? {
             if let fixed = cli.fixedModels { return fixed }
-            guard let executable = locate(), let place = try? Place(cli) else { return nil }
+            guard let executable = locate(), let place = try? Place(cli, environment: environment) else { return nil }
             defer { place.remove() }
+            // Copilot stops before fetching its catalog without a prompt; it never gets to send it.
             guard let arguments = cli.modelListArguments(folder: place.folder),
-                  let result = try? await run(executable, arguments, in: place, input: Data(), timeout: .seconds(60)),
+                  let result = try? await run(executable, arguments, in: place, input: Data("OK".utf8), timeout: .seconds(60)),
                   result.ending == .exited,
                   let listing = cli.modelListing(output: result.output, status: result.status, scratch: place.scratch)
             else { return nil }
@@ -91,7 +92,7 @@ extension AgentCLI {
             guard !model.isEmpty || cli.hasDefaultModel else { throw Failure.noModel(cli) }
             let (instructions, prompt) = try AppleIntelligence.conversation(fromRequestBody: request.httpBody ?? Data())
             let input = cli.input(instructions: instructions, prompt: prompt)
-            let place = try Place(cli)
+            let place = try Place(cli, environment: environment)
             defer { place.remove() }
             // Another run still going has its session in the shared folder too: only a run alone clears them.
             let isAlone = Self.openCodeRuns.withLock { runs in
@@ -157,7 +158,7 @@ extension AgentCLI {
 
         /// A short run that is not a request (sign-in, models, sessions), in a place of its own.
         private func runAside(_ executable: URL, _ arguments: [String], timeout: Duration) async throws -> Result {
-            let place = try Place(cli)
+            let place = try Place(cli, environment: environment)
             defer { place.remove() }
             return try await run(executable, arguments, in: place, input: Data(), timeout: timeout)
         }
@@ -246,13 +247,14 @@ extension AgentCLI {
         let scratch: URL
         let folder: URL
 
-        init(_ cli: AgentCLI) throws {
+        init(_ cli: AgentCLI, environment: [String: String]) throws {
             scratch = FileManager.default.temporaryDirectory.appending(path: "Takku-\(cli.rawValue)-\(UUID().uuidString)")
             folder = cli == .opencode ? Self.openCodeFolder : scratch.appending(path: "work")
             for subfolder in ["home", "config", "state", "cache"] {
                 try FileManager.default.createDirectory(at: scratch.appending(path: subfolder), withIntermediateDirectories: true)
             }
             try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            cli.prepare(scratch: scratch, environment: environment)
         }
 
         func remove() {
