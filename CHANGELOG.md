@@ -4,6 +4,11 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
+## 1.19.0 (2026-11-04)
+
+- **Summaries with the coding agent you already pay for**: + in *Settings → Summary* adds **Codex**, **GitHub Copilot**, **Claude Code**, **OpenCode** or **Pi** as a Summary Profile. Takku runs the CLI you installed and signed in to, so the summary uses your plan and there is no key to paste. Each run has no tools and none of your coding setup, and keeps no session: a sentence said in a meeting cannot make the agent run a command or read a file. The profile says when the CLI is missing or signed out and what to run in Terminal, and its menu lists the models your agent offers. Claude Code at your own risk: [README → First setup](README.md#first-setup).
+- **Where the text goes is your choice**: the line under the Summary Profiles no longer speaks only of OpenAI-compatible servers.
+
 ## 1.18.1 (2026-11-04)
 
 - **Context and language for an import**: `takku import --notes "Video by Theo"` puts a line in the note's personal notes, which the summary reads, so it knows who speaks or which course a lecture belongs to (with yt-dlp, the video's channel and description: [README → Your meetings in the terminal](README.md#your-meetings-in-the-terminal)). `--language de` transcribes a file in a language you have not ticked in Settings, without changing them for your meetings.
