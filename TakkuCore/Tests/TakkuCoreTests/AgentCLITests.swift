@@ -613,15 +613,34 @@ struct AgentCLITests {
         #expect(await fake.runner().models() == nil)
     }
 
-    @Test("Claude Code offers its aliases and Copilot auto, without running")
+    @Test("Claude Code offers its aliases without running")
     func fixedModels() async throws {
         let claude = try FakeCLI(.claude, [])
-        let copilot = try FakeCLI(.copilot, [])
 
         #expect(await claude.runner().models()?.map(\.name) == ["fable", "opus", "sonnet", "haiku"])
-        #expect(await copilot.runner().models()?.map(\.name) == ["auto"])
-        #expect(AgentCLI.copilot.reasoningLevels(for: "", in: nil) == [])
-        #expect(claude.calls.isEmpty && copilot.calls.isEmpty)
+        #expect(claude.calls.isEmpty)
+    }
+
+    @Test("Copilot lists auto, then the models its settings help names")
+    func copilotModels() async throws {
+        let fake = try FakeCLI(.copilot, [.init(pattern: "help config", script: FakeCLI.prints("""
+            Configuration Settings:
+
+              `logLevel`: log level for CLI; defaults to "default". Set to "all" for debug logging.
+
+              `model`: AI model to use for Copilot CLI; can be changed with /model command or --model flag option.
+                - "claude-sonnet-5.5"
+                - "gpt-6-luna"
+                - "mai-code-1.1-flash"
+
+              `mouse`: whether to enable mouse support in alt screen mode; defaults to `true`.
+            """))])
+
+        let models = await fake.runner().models()
+
+        #expect(models?.map(\.name) == ["auto", "claude-sonnet-5.5", "gpt-6-luna", "mai-code-1.1-flash"])
+        #expect(AgentCLI.copilot.reasoningLevels(for: "", in: models) == [])
+        #expect(AgentCLI.copilot.reasoningLevels(for: "gpt-6-luna", in: models) == ProviderProfile.ReasoningEffort.allCases)
     }
 
     @Test("new Profiles are light on the plan: Codex Low, Claude Code and Pi Off, Copilot and OpenCode the agent's own", arguments: AgentCLI.allCases)

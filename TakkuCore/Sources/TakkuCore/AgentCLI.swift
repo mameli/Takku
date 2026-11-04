@@ -81,13 +81,11 @@ public enum AgentCLI: String, CaseIterable, Sendable {
     /// the user's settings, have no default of their own.
     public var hasDefaultModel: Bool { self != .opencode && self != .pi }
 
-    /// The models that need no run to list: Claude Code's aliases always mean the latest of each,
-    /// and Copilot's plans differ, so only its own choice is sure.
+    /// The models that need no run to list: Claude Code's aliases always mean the latest of each.
     var fixedModels: [Model]? {
         switch self {
         case .claude: ["fable", "opus", "sonnet", "haiku"].map { Model($0) }
-        case .copilot: [Model("auto")]
-        case .codex, .opencode, .pi: nil
+        case .codex, .copilot, .opencode, .pi: nil
         }
     }
 
@@ -95,9 +93,10 @@ public enum AgentCLI: String, CaseIterable, Sendable {
     var modelListArguments: [String]? {
         switch self {
         case .codex: ["debug", "models"]
+        case .copilot: ["help", "config"]
         case .opencode: ["models"]
         case .pi: ["--list-models", "--offline"]
-        case .copilot, .claude: nil
+        case .claude: nil
         }
     }
 
@@ -125,7 +124,15 @@ public enum AgentCLI: String, CaseIterable, Sendable {
                 guard columns.count >= 2, columns[0] != "provider" else { return nil }
                 return Model("\(columns[0])/\(columns[1])")
             }
-        case .copilot, .claude:
+        case .copilot:
+            // The CLI's own list, under `model` in its settings help: not every plan has them all.
+            let lines = String(decoding: data, as: UTF8.self).split(separator: "\n", omittingEmptySubsequences: false)
+            guard let start = lines.firstIndex(where: { $0.trimmingCharacters(in: .whitespaces).hasPrefix("`model`:") }) else { return [] }
+            let names = lines[lines.index(after: start)...]
+                .prefix { $0.trimmingCharacters(in: .whitespaces).hasPrefix("- \"") }
+                .map { $0.trimmingCharacters(in: .whitespaces).dropFirst(3).dropLast().description }
+            return names.isEmpty ? [] : [Model("auto")] + names.map { Model($0) }
+        case .claude:
             return []
         }
     }
