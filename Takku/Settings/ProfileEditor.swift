@@ -30,6 +30,8 @@ struct ProfileRow: View {
         switch profile.agentCLI {
         case .codex: return String(localized: "Your ChatGPT plan, through Codex")
         case .copilot: return String(localized: "Your GitHub Copilot plan")
+        case .claude: return String(localized: "Your Claude plan, through Claude Code")
+        case .opencode: return String(localized: "Your plan, through OpenCode")
         case nil: break
         }
         return profile.model.isEmpty ? String(localized: "To be configured") : profile.model
@@ -54,6 +56,10 @@ struct ProfileEditor: View {
     @State private var isReadingCredit = false
     /// Agent CLIs only: why the CLI cannot be used now (not installed, not signed in), `nil` when it can.
     @State private var cliProblem: String?
+    /// Agent CLIs only: the models the agent offers, `nil` when they could not be read.
+    @State private var agentModels: [AgentCLI.Model]?
+    /// Agent CLIs only: the model is typed (*Other…*) rather than chosen in the menu.
+    @State private var typesModel = false
 
     var body: some View {
         Section {
@@ -93,7 +99,7 @@ struct ProfileEditor: View {
 
             HStack {
                 Button("Test connection") { Task { await test() } }
-                    .disabled(isTesting || profile.baseURL.isEmpty || (profile.model.isEmpty && profile.agentCLI == nil) || extraParametersProblem != nil)
+                    .disabled(isTesting || profile.baseURL.isEmpty || (profile.model.isEmpty && profile.agentCLI?.hasDefaultModel != true) || extraParametersProblem != nil)
                 if isTesting { ProgressView().controlSize(.small) }
                 Spacer()
                 if isActive {
@@ -143,7 +149,7 @@ struct ProfileEditor: View {
     }
 
     /// An agent CLI needs no key: it is the user's own, signed in with their plan. Only the model
-    /// and how much it reasons can change; an empty model is the CLI's default.
+    /// and how much it reasons can change; an empty model is the agent's own default.
     @ViewBuilder private func agentCLIRows(_ cli: AgentCLI) -> some View {
         Group {
             switch cli {
@@ -151,22 +157,72 @@ struct ProfileEditor: View {
                 Text("Summaries written by the Codex CLI installed on this Mac, with the ChatGPT plan you signed in to it with: no key and no credit here. The Transcript and your notes go to OpenAI under your plan's terms. Each request is a run of codex exec that keeps nothing and uses none of your Codex settings.")
             case .copilot:
                 Text("Summaries written by the GitHub Copilot CLI installed on this Mac, with the Copilot plan you signed in to it with: no key and no credit here. Each request costs premium requests of your plan, and the Transcript and your notes go to GitHub and its model providers under your plan's terms. Each run keeps nothing and uses none of your Copilot settings.")
+            case .claude:
+                Text("Summaries written by the Claude Code CLI installed on this Mac, with the Claude plan you signed in to it with: no key and no credit here. The Transcript and your notes go to Anthropic under your plan's terms. Each run keeps nothing and uses none of your Claude Code settings.")
+            case .opencode:
+                Text("Summaries written by the OpenCode CLI installed on this Mac, with OpenCode Go or another plan you signed in to through it: no key and no credit here. The Transcript and your notes go to the model's provider under your plan's terms. Each run uses none of your OpenCode settings, and Takku deletes its session afterwards.")
             }
         }
         .font(.caption)
         .foregroundStyle(.secondary)
         .fixedSize(horizontal: false, vertical: true)
-        LabeledContent("Model") {
-            PasteableTextField(placeholder: String(localized: "\(cli.name)'s default"), text: $profile.model)
+        Picker("Model", selection: modelChoice(cli)) {
+            if cli.hasDefaultModel {
+                Text("\(cli.name)'s default model").tag(ModelChoice.agentDefault)
+            } else if profile.model.isEmpty && !typesModel {
+                Text("Choose a model").tag(ModelChoice.unset)
+            }
+            ForEach(agentModels ?? [], id: \.name) { model in
+                Text(verbatim: model.name).tag(ModelChoice.named(model.name))
+            }
+            Text("Other…").tag(ModelChoice.other)
         }
-        Picker("Reasoning", selection: $profile.reasoning) {
-            Text("Model default").tag(ProviderProfile.ReasoningEffort?.none)
-            ForEach(ProviderProfile.ReasoningEffort.allCases, id: \.self) { effort in
-                Text(effort.displayName).tag(ProviderProfile.ReasoningEffort?.some(effort))
+        if modelChoice(cli).wrappedValue == .other {
+            LabeledContent("Model name") {
+                PasteableTextField(placeholder: String(localized: "As \(cli.name) names it"), text: $profile.model)
+            }
+        } else if cli.hasDefaultModel && profile.model.isEmpty {
+            Text("\(cli.name)'s own default, not the model chosen in your \(cli.name) settings: Takku does not read them.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        if let levels = cli.reasoningLevels(for: profile.model, in: agentModels) {
+            Picker("Reasoning", selection: $profile.reasoning) {
+                Text("Model default").tag(ProviderProfile.ReasoningEffort?.none)
+                ForEach(levels, id: \.self) { effort in
+                    Text(effort.displayName).tag(ProviderProfile.ReasoningEffort?.some(effort))
+                }
+            }
+            .disabled(levels.isEmpty)
+            .onChange(of: levels, initial: true) {
+                // A level the new model refuses would make every Summary fail.
+                if let reasoning = profile.reasoning, !levels.contains(reasoning) { profile.reasoning = nil }
             }
         }
         if let cliProblem {
             Text(cliProblem).foregroundStyle(.orange).textSelection(.enabled)
+        }
+    }
+
+    private enum ModelChoice: Hashable {
+        case agentDefault, named(String), other, unset
+    }
+
+    /// The model menu's choice: the agent's default for no model, *Other…* for a model the menu
+    /// does not list, which is then typed.
+    private func modelChoice(_ cli: AgentCLI) -> Binding<ModelChoice> {
+        Binding {
+            let model = profile.model.trimmingCharacters(in: .whitespaces)
+            if typesModel { return .other }
+            if model.isEmpty { return cli.hasDefaultModel ? .agentDefault : .unset }
+            return agentModels?.contains { $0.name == model } == true ? .named(model) : .other
+        } set: { choice in
+            typesModel = choice == .other
+            switch choice {
+            case .agentDefault, .unset: profile.model = ""
+            case .named(let model): profile.model = model
+            case .other: break
+            }
         }
     }
 
@@ -310,9 +366,13 @@ struct ProfileEditor: View {
         }
     }
 
+    /// The agent's problem and models, read again when the user comes back from Terminal.
     private func checkAgentCLI() async {
         guard let cli = profile.agentCLI else { return }
-        cliProblem = await AgentCLIModel.unavailability(cli)?.localizedDescription
+        let runner = AgentCLI.Runner(cli)
+        let problem = await runner.unavailability()
+        cliProblem = problem?.localizedDescription
+        if problem != .notInstalled(cli) { agentModels = await runner.models() }
     }
 
     private func test() async {

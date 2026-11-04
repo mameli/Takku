@@ -1541,34 +1541,6 @@
         }
       }
     },
-    "Any server with an OpenAI-compatible API. For work meetings use only local Providers or Providers based and hosting data in the EU.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Qualsiasi server con API compatibile OpenAI. Per le riunioni di lavoro usa solo Provider locali o con sede e dati in UE."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Jeder Server mit OpenAI-kompatibler API. Verwende für berufliche Besprechungen nur lokale Anbieter oder Anbieter mit Sitz und Datenhaltung in der EU."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cualquier servidor con una API compatible con OpenAI. Para reuniones de trabajo, usa solo proveedores locales o con sede y alojamiento de datos en la UE."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tout serveur doté d’une API compatible OpenAI. Pour les réunions professionnelles, utilisez uniquement des fournisseurs locaux ou hébergeant les données dans l’UE."
-          }
-        }
-      }
-    },
     "Audio on this Mac": {
       "localizations": {
         "it": {
@@ -12025,6 +11997,628 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ollama ou LM Studio…"
+          }
+        }
+      }
+    },
+    "Your ChatGPT plan, through Codex": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il tuo piano ChatGPT, tramite Codex"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dein ChatGPT-Abo, über Codex"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu plan de ChatGPT, a través de Codex"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre forfait ChatGPT, via Codex"
+          }
+        }
+      }
+    },
+    "Your GitHub Copilot plan": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il tuo piano GitHub Copilot"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dein GitHub-Copilot-Abo"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu plan de GitHub Copilot"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre forfait GitHub Copilot"
+          }
+        }
+      }
+    },
+    "Your Claude plan, through Claude Code": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il tuo piano Claude, tramite Claude Code"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dein Claude-Abo, über Claude Code"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu plan de Claude, a través de Claude Code"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre forfait Claude, via Claude Code"
+          }
+        }
+      }
+    },
+    "Your plan, through OpenCode": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il tuo piano, tramite OpenCode"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dein Abo, über OpenCode"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu plan, a través de OpenCode"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre forfait, via OpenCode"
+          }
+        }
+      }
+    },
+    "Summaries written by the Codex CLI installed on this Mac, with the ChatGPT plan you signed in to it with: no key and no credit here. The Transcript and your notes go to OpenAI under your plan's terms. Each request is a run of codex exec that keeps nothing and uses none of your Codex settings.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Riepiloghi scritti dalla CLI di Codex installata su questo Mac, con il piano ChatGPT con cui hai fatto l'accesso: niente chiave e niente credito qui. La Trascrizione e le tue note vanno a OpenAI alle condizioni del tuo piano. Ogni richiesta è un'esecuzione di codex exec che non conserva nulla e non usa nessuna delle tue impostazioni di Codex."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zusammenfassungen von der auf diesem Mac installierten Codex-CLI, mit dem ChatGPT-Abo, mit dem du dich dort angemeldet hast: kein Schlüssel und kein Guthaben hier. Das Transkript und deine Notizen gehen zu den Bedingungen deines Abos an OpenAI. Jede Anfrage ist ein Lauf von codex exec, der nichts behält und keine deiner Codex-Einstellungen verwendet."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resúmenes escritos por la CLI de Codex instalada en este Mac, con el plan de ChatGPT con el que iniciaste sesión: sin clave ni saldo aquí. La transcripción y tus notas van a OpenAI según los términos de tu plan. Cada solicitud es una ejecución de codex exec que no guarda nada y no usa ninguno de tus ajustes de Codex."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Résumés écrits par la CLI Codex installée sur ce Mac, avec le forfait ChatGPT avec lequel vous vous y êtes connecté : ni clé ni crédit ici. La transcription et vos notes vont à OpenAI selon les conditions de votre forfait. Chaque requête est une exécution de codex exec qui ne garde rien et n’utilise aucun de vos réglages Codex."
+          }
+        }
+      }
+    },
+    "Summaries written by the GitHub Copilot CLI installed on this Mac, with the Copilot plan you signed in to it with: no key and no credit here. Each request costs premium requests of your plan, and the Transcript and your notes go to GitHub and its model providers under your plan's terms. Each run keeps nothing and uses none of your Copilot settings.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Riepiloghi scritti dalla CLI di GitHub Copilot installata su questo Mac, con il piano Copilot con cui hai fatto l'accesso: niente chiave e niente credito qui. Ogni richiesta consuma richieste premium del tuo piano, e la Trascrizione e le tue note vanno a GitHub e ai suoi fornitori di modelli alle condizioni del tuo piano. Ogni esecuzione non conserva nulla e non usa nessuna delle tue impostazioni di Copilot."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zusammenfassungen von der auf diesem Mac installierten GitHub-Copilot-CLI, mit dem Copilot-Abo, mit dem du dich dort angemeldet hast: kein Schlüssel und kein Guthaben hier. Jede Anfrage kostet Premium-Anfragen deines Abos, und das Transkript und deine Notizen gehen zu den Bedingungen deines Abos an GitHub und seine Modellanbieter. Jeder Lauf behält nichts und verwendet keine deiner Copilot-Einstellungen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resúmenes escritos por la CLI de GitHub Copilot instalada en este Mac, con el plan de Copilot con el que iniciaste sesión: sin clave ni saldo aquí. Cada solicitud consume solicitudes premium de tu plan, y la Transcripción y tus notas van a GitHub y a sus proveedores de modelos según los términos de tu plan. Cada ejecución no guarda nada y no usa ninguno de tus ajustes de Copilot."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Résumés écrits par la CLI GitHub Copilot installée sur ce Mac, avec le forfait Copilot avec lequel vous vous y êtes connecté : ni clé ni crédit ici. Chaque requête consomme des requêtes premium de votre forfait, et la Transcription et vos notes vont à GitHub et à ses fournisseurs de modèles selon les conditions de votre forfait. Chaque exécution ne garde rien et n’utilise aucun de vos réglages Copilot."
+          }
+        }
+      }
+    },
+    "Summaries written by the Claude Code CLI installed on this Mac, with the Claude plan you signed in to it with: no key and no credit here. The Transcript and your notes go to Anthropic under your plan's terms. Each run keeps nothing and uses none of your Claude Code settings.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Riepiloghi scritti dalla CLI di Claude Code installata su questo Mac, con il piano Claude con cui hai fatto l'accesso: niente chiave e niente credito qui. La Trascrizione e le tue note vanno ad Anthropic alle condizioni del tuo piano. Ogni esecuzione non conserva nulla e non usa nessuna delle tue impostazioni di Claude Code."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zusammenfassungen von der auf diesem Mac installierten Claude-Code-CLI, mit dem Claude-Abo, mit dem du dich dort angemeldet hast: kein Schlüssel und kein Guthaben hier. Das Transkript und deine Notizen gehen zu den Bedingungen deines Abos an Anthropic. Jeder Lauf behält nichts und verwendet keine deiner Claude-Code-Einstellungen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resúmenes escritos por la CLI de Claude Code instalada en este Mac, con el plan de Claude con el que iniciaste sesión: sin clave ni saldo aquí. La transcripción y tus notas van a Anthropic según los términos de tu plan. Cada ejecución no guarda nada y no usa ninguno de tus ajustes de Claude Code."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Résumés écrits par la CLI Claude Code installée sur ce Mac, avec le forfait Claude avec lequel vous vous y êtes connecté : ni clé ni crédit ici. La transcription et vos notes vont à Anthropic selon les conditions de votre forfait. Chaque exécution ne garde rien et n’utilise aucun de vos réglages Claude Code."
+          }
+        }
+      }
+    },
+    "Summaries written by the OpenCode CLI installed on this Mac, with OpenCode Go or another plan you signed in to through it: no key and no credit here. The Transcript and your notes go to the model's provider under your plan's terms. Each run uses none of your OpenCode settings, and Takku deletes its session afterwards.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Riepiloghi scritti dalla CLI di OpenCode installata su questo Mac, con OpenCode Go o un altro piano a cui hai fatto l'accesso tramite OpenCode: niente chiave e niente credito qui. La Trascrizione e le tue note vanno al fornitore del modello alle condizioni del tuo piano. Ogni esecuzione non usa nessuna delle tue impostazioni di OpenCode, e Takku ne elimina poi la sessione."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zusammenfassungen von der auf diesem Mac installierten OpenCode-CLI, mit OpenCode Go oder einem anderen Abo, bei dem du dich darüber angemeldet hast: kein Schlüssel und kein Guthaben hier. Das Transkript und deine Notizen gehen zu den Bedingungen deines Abos an den Anbieter des Modells. Jeder Lauf verwendet keine deiner OpenCode-Einstellungen, und Takku löscht danach seine Sitzung."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resúmenes escritos por la CLI de OpenCode instalada en este Mac, con OpenCode Go u otro plan con el que iniciaste sesión a través de ella: sin clave ni saldo aquí. La transcripción y tus notas van al proveedor del modelo según los términos de tu plan. Cada ejecución no usa ninguno de tus ajustes de OpenCode, y Takku borra su sesión después."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Résumés écrits par la CLI OpenCode installée sur ce Mac, avec OpenCode Go ou un autre forfait auquel vous vous êtes connecté via OpenCode : ni clé ni crédit ici. La transcription et vos notes vont au fournisseur du modèle selon les conditions de votre forfait. Chaque exécution n’utilise aucun de vos réglages OpenCode, et Takku supprime ensuite sa session."
+          }
+        }
+      }
+    },
+    "%@'s default model": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modello predefinito di %@"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Standardmodell von %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modelo predeterminado de %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modèle par défaut de %@"
+          }
+        }
+      }
+    },
+    "Choose a model": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scegli un modello"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modell auswählen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige un modelo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisissez un modèle"
+          }
+        }
+      }
+    },
+    "Other…": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Altro…"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Andere …"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otro…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autre…"
+          }
+        }
+      }
+    },
+    "Model name": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome del modello"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modellname"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nombre del modelo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nom du modèle"
+          }
+        }
+      }
+    },
+    "As %@ names it": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Come lo chiama %@"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wie %@ es nennt"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Como lo llama %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tel que %@ le nomme"
+          }
+        }
+      }
+    },
+    "%@'s own default, not the model chosen in your %@ settings: Takku does not read them.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il predefinito di %1$@, non il modello scelto nelle tue impostazioni di %2$@: Takku non le legge."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der eigene Standard von %1$@, nicht das in deinen %2$@-Einstellungen gewählte Modell: Takku liest sie nicht."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El predeterminado de %1$@, no el modelo elegido en tus ajustes de %2$@: Takku no los lee."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le modèle par défaut de %1$@, pas celui choisi dans vos réglages %2$@ : Takku ne les lit pas."
+          }
+        }
+      }
+    },
+    "Changes are saved as you type.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le modifiche si salvano mentre scrivi."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Änderungen werden beim Tippen gespeichert."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los cambios se guardan mientras escribes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les modifications sont enregistrées pendant la saisie."
+          }
+        }
+      }
+    },
+    "Where the text goes is your choice: for work meetings, use local Providers or Providers that keep data in the EU.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dove va il testo lo scegli tu: per le riunioni di lavoro usa Provider locali o Provider che tengono i dati nell'UE."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wohin der Text geht, entscheidest du: Für Arbeitsbesprechungen nutze lokale Anbieter oder Anbieter, die Daten in der EU speichern."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adónde va el texto lo eliges tú: para reuniones de trabajo, usa proveedores locales o proveedores que guarden los datos en la UE."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "C’est vous qui choisissez où va le texte : pour les réunions de travail, utilisez des fournisseurs locaux ou des fournisseurs qui gardent les données dans l’UE."
+          }
+        }
+      }
+    },
+    "%@ is not installed: install it with %@ in Terminal, then sign in with %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ non è installato: installalo con %2$@ nel Terminale, poi accedi con %3$@."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ ist nicht installiert: Installiere es mit %2$@ im Terminal und melde dich dann mit %3$@ an."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ no está instalado: instálalo con %2$@ en Terminal y luego inicia sesión con %3$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ n’est pas installé : installez-le avec %2$@ dans Terminal, puis connectez-vous avec %3$@."
+          }
+        }
+      }
+    },
+    "%@ is not signed in: run %@ in Terminal, then try again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ non ha l'accesso: esegui %2$@ nel Terminale, poi riprova."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ ist nicht angemeldet: Führe %2$@ im Terminal aus und versuche es dann erneut."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ no tiene la sesión iniciada: ejecuta %2$@ en Terminal y vuelve a intentarlo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ n’est pas connecté : exécutez %2$@ dans Terminal, puis réessayez."
+          }
+        }
+      }
+    },
+    "%@ did not answer within 15 minutes.": {
+      "extractionState": "manual",
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ non ha risposto entro 15 minuti."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ hat nicht innerhalb von 15 Minuten geantwortet."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ no respondió en 15 minutos."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ n’a pas répondu en 15 minutes."
+          }
+        }
+      }
+    },
+    "%@ finished without writing anything.": {
+      "extractionState": "manual",
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ha finito senza scrivere nulla."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ist fertig, ohne etwas zu schreiben."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ terminó sin escribir nada."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ a terminé sans rien écrire."
+          }
+        }
+      }
+    },
+    "%@: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@: %2$@"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@: %2$@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@: %2$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ : %2$@"
+          }
+        }
+      }
+    },
+    "%@ needs a model: choose one in its Profile in Settings → Summary.": {
+      "extractionState": "manual",
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ha bisogno di un modello: sceglilo nel suo Profilo in Impostazioni → Riepilogo."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ braucht ein Modell: Wähle eines in seinem Profil unter Einstellungen → Zusammenfassung."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ necesita un modelo: elige uno en su Perfil en Ajustes → Resumen."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ a besoin d’un modèle : choisissez-en un dans son Profil dans Réglages → Résumé."
           }
         }
       }

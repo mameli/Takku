@@ -27,7 +27,8 @@ extension ChatClient {
             return
         }
         if let cli = profile.agentCLI {
-            self = AgentCLIModel.client(cli, profile: profile)
+            // What it logs holds no text of the Meeting: model, sizes, timing, usage, the agent's error.
+            self = AgentCLI.Runner(cli, log: { logger.notice("\($0, privacy: .public)") }).client(for: profile)
             return
         }
         let url = try profile.validatedBaseURL()

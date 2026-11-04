@@ -246,7 +246,7 @@ private struct SummaryTab: View {
             } header: {
                 Text("Summary Profiles")
             } footer: {
-                Text("Any server with an OpenAI-compatible API. For work meetings use only local Providers or Providers based and hosting data in the EU.")
+                Text("Where the text goes is your choice: for work meetings, use local Providers or Providers that keep data in the EU.")
                     .foregroundStyle(.secondary)
             }
 
@@ -272,7 +272,7 @@ private struct SummaryTab: View {
 
     /// + and − under the list, as in the Mac's own lists. The + offers Takku Credit to those who
     /// had Profiles before it existed, or deleted it, Apple Intelligence on a Mac that has it, and
-    /// the agent CLIs (Codex, GitHub Copilot): ready-made ones come only once. The CLIs are offered
+    /// the coding agents' CLIs not added yet: ready-made ones come only once. The CLIs are offered
     /// even when not installed: their editor says what is missing.
     private var addAndDelete: some View {
         HStack(spacing: 12) {
