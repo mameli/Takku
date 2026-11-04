@@ -27,7 +27,11 @@ struct ProfileRow: View {
     private var caption: String {
         if profile.isTakkuCredit { return String(localized: "Prepaid credit") }
         if profile.isAppleIntelligence { return String(localized: "On this Mac") }
-        if profile.isCodex { return String(localized: "Your ChatGPT plan, through Codex") }
+        switch profile.agentCLI {
+        case .codex: return String(localized: "Your ChatGPT plan, through Codex")
+        case .copilot: return String(localized: "Your GitHub Copilot plan")
+        case nil: break
+        }
         return profile.model.isEmpty ? String(localized: "To be configured") : profile.model
     }
 }
@@ -48,8 +52,8 @@ struct ProfileEditor: View {
     @State private var credit: TakkuCredit.Balance?
     @State private var creditProblem: String?
     @State private var isReadingCredit = false
-    /// Codex only: why it cannot be used now (not installed, not signed in), `nil` when it can.
-    @State private var codexProblem: String?
+    /// Agent CLIs only: why the CLI cannot be used now (not installed, not signed in), `nil` when it can.
+    @State private var cliProblem: String?
 
     var body: some View {
         Section {
@@ -57,15 +61,15 @@ struct ProfileEditor: View {
                 creditRows
             } else if profile.isAppleIntelligence {
                 appleIntelligenceRows
-            } else if profile.isCodex {
-                codexRows
+            } else if let cli = profile.agentCLI {
+                agentCLIRows(cli)
             } else {
                 providerRows
             }
 
             // The only place where the key is entered. It is saved only on Return or with the
             // button, never while typing: a stray keystroke must not replace a working key.
-            if !profile.isAppleIntelligence && !profile.isCodex { LabeledContent("API key") {
+            if !profile.isAppleIntelligence && profile.agentCLI == nil { LabeledContent("API key") {
                 HStack {
                     PasteableTextField(
                         placeholder: storedKeySuffix.map { String(localized: "Saved in the Keychain (…\($0)) · paste here to replace it") }
@@ -89,7 +93,7 @@ struct ProfileEditor: View {
 
             HStack {
                 Button("Test connection") { Task { await test() } }
-                    .disabled(isTesting || profile.baseURL.isEmpty || (profile.model.isEmpty && !profile.isCodex) || extraParametersProblem != nil)
+                    .disabled(isTesting || profile.baseURL.isEmpty || (profile.model.isEmpty && profile.agentCLI == nil) || extraParametersProblem != nil)
                 if isTesting { ProgressView().controlSize(.small) }
                 Spacer()
                 if isActive {
@@ -104,20 +108,26 @@ struct ProfileEditor: View {
         } header: {
             Text("Profile: \(profile.displayName)")
         } footer: {
-            Text("Changes are saved as you type. The key goes to the Keychain when you press Return or Save key.")
-                .foregroundStyle(.secondary)
+            Group {
+                if profile.isAppleIntelligence || profile.agentCLI != nil {
+                    Text("Changes are saved as you type.")
+                } else {
+                    Text("Changes are saved as you type. The key goes to the Keychain when you press Return or Save key.")
+                }
+            }
+            .foregroundStyle(.secondary)
         }
         .onAppear {
             refreshStoredKey()
             extraParameters = profile.extraParameters ?? ""
             Task { await readCredit() }
-            Task { await checkCodex() }
+            Task { await checkAgentCLI() }
         }
         // Back from the browser after paying: the new balance without pressing anything.
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             Task { await readCredit() }
-            // Back from Terminal after codex login.
-            Task { await checkCodex() }
+            // Back from Terminal after the CLI's login.
+            Task { await checkAgentCLI() }
         }
     }
 
@@ -132,15 +142,22 @@ struct ProfileEditor: View {
         }
     }
 
-    /// Codex needs no key: it is the user's own CLI, signed in with their ChatGPT plan. Only the
-    /// model and how much it reasons can change; an empty model is Codex's default.
-    @ViewBuilder private var codexRows: some View {
-        Text("Summaries written by the Codex CLI installed on this Mac, with the ChatGPT plan you signed in to it with: no key and no credit here. The Transcript and your notes go to OpenAI under your plan's terms. Each request is a run of codex exec that keeps nothing and uses none of your Codex settings.")
-            .font(.caption)
-            .foregroundStyle(.secondary)
-            .fixedSize(horizontal: false, vertical: true)
+    /// An agent CLI needs no key: it is the user's own, signed in with their plan. Only the model
+    /// and how much it reasons can change; an empty model is the CLI's default.
+    @ViewBuilder private func agentCLIRows(_ cli: AgentCLI) -> some View {
+        Group {
+            switch cli {
+            case .codex:
+                Text("Summaries written by the Codex CLI installed on this Mac, with the ChatGPT plan you signed in to it with: no key and no credit here. The Transcript and your notes go to OpenAI under your plan's terms. Each request is a run of codex exec that keeps nothing and uses none of your Codex settings.")
+            case .copilot:
+                Text("Summaries written by the GitHub Copilot CLI installed on this Mac, with the Copilot plan you signed in to it with: no key and no credit here. Each request costs premium requests of your plan, and the Transcript and your notes go to GitHub and its model providers under your plan's terms. Each run keeps nothing and uses none of your Copilot settings.")
+            }
+        }
+        .font(.caption)
+        .foregroundStyle(.secondary)
+        .fixedSize(horizontal: false, vertical: true)
         LabeledContent("Model") {
-            PasteableTextField(placeholder: String(localized: "Codex's default"), text: $profile.model)
+            PasteableTextField(placeholder: String(localized: "\(cli.name)'s default"), text: $profile.model)
         }
         Picker("Reasoning", selection: $profile.reasoning) {
             Text("Model default").tag(ProviderProfile.ReasoningEffort?.none)
@@ -148,8 +165,8 @@ struct ProfileEditor: View {
                 Text(effort.displayName).tag(ProviderProfile.ReasoningEffort?.some(effort))
             }
         }
-        if let codexProblem {
-            Text(codexProblem).foregroundStyle(.orange).textSelection(.enabled)
+        if let cliProblem {
+            Text(cliProblem).foregroundStyle(.orange).textSelection(.enabled)
         }
     }
 
@@ -293,9 +310,9 @@ struct ProfileEditor: View {
         }
     }
 
-    private func checkCodex() async {
-        guard profile.isCodex else { return }
-        codexProblem = await CodexModel.unavailability()?.localizedDescription
+    private func checkAgentCLI() async {
+        guard let cli = profile.agentCLI else { return }
+        cliProblem = await AgentCLIModel.unavailability(cli)?.localizedDescription
     }
 
     private func test() async {

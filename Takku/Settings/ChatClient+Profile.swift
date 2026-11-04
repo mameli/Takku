@@ -26,8 +26,8 @@ extension ChatClient {
             self = AppleIntelligenceModel.client()!
             return
         }
-        if profile.isCodex {
-            self = CodexModel.client(profile: profile)
+        if let cli = profile.agentCLI {
+            self = AgentCLIModel.client(cli, profile: profile)
             return
         }
         let url = try profile.validatedBaseURL()

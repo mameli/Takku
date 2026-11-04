@@ -272,21 +272,23 @@ private struct SummaryTab: View {
 
     /// + and − under the list, as in the Mac's own lists. The + offers Takku Credit to those who
     /// had Profiles before it existed, or deleted it, Apple Intelligence on a Mac that has it, and
-    /// Codex: ready-made ones come only once. Codex is offered even when not installed: its
-    /// editor says what is missing.
+    /// the agent CLIs (Codex, GitHub Copilot): ready-made ones come only once. The CLIs are offered
+    /// even when not installed: their editor says what is missing.
     private var addAndDelete: some View {
         HStack(spacing: 12) {
             let offersCredit = !profiles.contains(where: \.isTakkuCredit)
             let offersAppleIntelligence = AppleIntelligenceModel.isAvailable && !profiles.contains(where: \.isAppleIntelligence)
-            let offersCodex = !profiles.contains(where: \.isCodex)
-            if !offersCredit && !offersAppleIntelligence && !offersCodex {
+            let offeredCLIs = AgentCLI.allCases.filter { cli in !profiles.contains { $0.agentCLI == cli } }
+            if !offersCredit && !offersAppleIntelligence && offeredCLIs.isEmpty {
                 IconButton(title: "Add Profile", systemImage: "plus", action: addProfile)
             } else {
                 Menu {
                     Button("New Profile", action: addProfile)
                     if offersCredit { Button("Takku Credit", action: addTakkuCredit) }
                     if offersAppleIntelligence { Button(action: addAppleIntelligence) { Text(verbatim: AppleIntelligence.name) } }
-                    if offersCodex { Button(action: addCodex) { Text(verbatim: Codex.name) } }
+                    ForEach(offeredCLIs, id: \.self) { cli in
+                        Button { addAgentCLI(cli) } label: { Text(verbatim: cli.name) }
+                    }
                 } label: {
                     RowIcon(systemImage: "plus").accessibilityLabel(Text("Add Profile"))
                 }
@@ -337,8 +339,8 @@ private struct SummaryTab: View {
         selectedProfileID = profile.id
     }
 
-    private func addCodex() {
-        let profile = Codex.profile()
+    private func addAgentCLI(_ cli: AgentCLI) {
+        let profile = cli.profile()
         profiles.append(profile)
         selectedProfileID = profile.id
     }
