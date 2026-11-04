@@ -163,7 +163,8 @@ struct AgentCLITests {
             "ANTHROPIC_API_KEY": "sk-ant", "ANTHROPIC_BASE_URL": "https://example.com", "CLAUDECODE": "1",
             "CLAUDE_CODE_ENTRYPOINT": "cli", "OPENAI_API_KEY": "sk-openai", "CODEX_API_KEY": "sk-codex",
             "GITHUB_TOKEN": "ghp", "GH_TOKEN": "gho", "COPILOT_GITHUB_TOKEN": "ghc", "OPENROUTER_API_KEY": "sk-or",
-            "GROQ_API_KEY": "gsk", "OPENCODE_CONFIG": "/Users/x/.config/opencode/opencode.json",
+            "GROQ_API_KEY": "gsk", "AWS_ACCESS_KEY_ID": "AKIA", "AWS_BEARER_TOKEN_BEDROCK": "bedrock",
+            "OPENCODE_CONFIG": "/Users/x/.config/opencode/opencode.json",
         ]
         var profile = cli.profile()
         profile.model = "provider/model"
@@ -409,6 +410,129 @@ struct AgentCLITests {
         #expect(fake.calls(startingWith: ["session", "delete"]).map(\.arguments.last) == ["ses_left", "ses_run"])
     }
 
+    // MARK: - Pi
+
+    static let piReply = """
+        {"type":"session","version":3,"id":"01a1a727-63ee-7174-8bf2-886fa1511d09","timestamp":"2026-11-04T15:22:18.992Z","cwd":"/private/var/folders/T/tmp"}
+        {"type":"agent_start"}
+        {"type":"turn_start"}
+        {"type":"message_end","message":{"role":"system","content":"","sections":{"preamble":"You write text for Takku"},"timestamp":1793805747735}}
+        {"type":"message_end","message":{"role":"user","content":[{"type":"text","text":"Il rilascio slitta al 20."}],"timestamp":1793805747735}}
+        {"type":"message_end","message":{"role":"assistant","content":[{"type":"toolCall","id":"call_1","name":"read","arguments":{"path":"secret.txt"}}],"provider":"github-copilot","model":"claude-haiku-4.5","usage":{"input":40,"output":12,"totalTokens":52},"stopReason":"toolUse","timestamp":1793805747800}}
+        {"type":"message_end","message":{"role":"assistant","content":[{"type":"text","text":"Il rilascio "},{"type":"text","text":"è venerdì."}],"api":"anthropic-messages","provider":"github-copilot","model":"claude-haiku-4.5","usage":{"input":76,"output":4,"cacheRead":0,"cacheWrite":0,"totalTokens":80,"cost":{"total":9.6e-05}},"stopReason":"stop","timestamp":1793805747812}}
+        {"type":"turn_end","message":{"role":"assistant","content":[{"type":"text","text":"Il rilascio è venerdì."}],"stopReason":"stop"},"toolResults":[]}
+        {"type":"agent_end","messages":[]}
+        {"type":"agent_settled"}
+        """
+
+    static var piProfile: ProviderProfile {
+        var profile = AgentCLI.pi.profile()
+        profile.model = "github-copilot/claude-haiku-4.5"
+        return profile
+    }
+
+    @Test("a Pi run has no tools, extensions, skills, instructions or session, Takku's system prompt, and thinking off by default")
+    func pi() async throws {
+        let fake = try FakeCLI(.pi, [.init(pattern: "-p*", script: FakeCLI.prints(Self.piReply))])
+        let log = SummaryLog.Recorder()
+
+        let reply = try await fake.runner().client(for: Self.piProfile).recording(into: log, as: .single).complete(Self.meeting)
+
+        #expect(reply == "Il rilascio è venerdì.")
+        let run = try #require(fake.calls.first)
+        for flag in [
+            "--no-session", "--no-tools", "--no-extensions", "--no-skills", "--no-prompt-templates", "--no-themes",
+            "--no-context-files", "--no-approve", "--offline",
+        ] {
+            #expect(run.arguments.contains(flag))
+        }
+        #expect(run.value(after: "--mode") == "json")
+        #expect(run.value(after: "--model") == "github-copilot/claude-haiku-4.5")
+        #expect(run.value(after: "--thinking") == "off")
+        #expect(run.value(after: "--system-prompt")?.contains("no tools") == true)
+        #expect(run.environment["PI_TELEMETRY"] == "0")
+        #expect(run.files.isEmpty)
+        #expect(!run.input.contains("Do not run commands"))
+        let response = try #require(await log.calls.first?.response)
+        let body = try #require(try JSONSerialization.jsonObject(with: response) as? [String: Any])
+        let agent = try #require(body["agent"] as? [String: Any])
+        #expect(agent["usage"] as? String == "116 tokens in, 16 out")
+        #expect(agent["tool_calls"] as? Int == 1)
+    }
+
+    @Test("a Pi reasoning level goes to its thinking")
+    func piReasoning() async throws {
+        let fake = try FakeCLI(.pi, [.init(pattern: "-p*", script: FakeCLI.prints(Self.piReply))])
+        var profile = Self.piProfile
+        profile.reasoning = .medium
+
+        _ = try await fake.runner().client(for: profile).complete(Self.meeting)
+
+        #expect(fake.calls.first?.value(after: "--thinking") == "medium")
+    }
+
+    @Test("a failed Pi run, which exits with 0, gives the provider's message after Pi's own retries")
+    func piFailure() async throws {
+        let fake = try FakeCLI(.pi, [.init(pattern: "-p*", script: FakeCLI.prints(#"""
+            {"type":"session","version":3,"id":"01a1a726"}
+            {"type":"message_end","message":{"role":"assistant","content":[],"provider":"opencode-go","model":"deepseek-v4.1-flash","usage":{"input":0,"output":0},"stopReason":"error","errorMessage":"401: {\"type\":\"server_error\",\"message\":\"Upstream request failed: Invalid credential\"}"}}
+            {"type":"auto_retry_start","attempt":1,"maxAttempts":3,"delayMs":2000,"errorMessage":"401"}
+            {"type":"message_end","message":{"role":"assistant","content":[],"provider":"opencode-go","model":"deepseek-v4.1-flash","usage":{"input":0,"output":0},"stopReason":"error","errorMessage":"401: {\"type\":\"server_error\",\"message\":\"Upstream request failed: Invalid credential\"}"}}
+            {"type":"auto_retry_end","success":false,"attempt":3}
+            {"type":"agent_settled"}
+            """#))])
+
+        await #expect(throws: AgentCLI.Failure.failed(.pi, #"401: {"type":"server_error","message":"Upstream request failed: Invalid credential"}"#)) {
+            try await fake.runner().client(for: Self.piProfile).complete(Self.meeting)
+        }
+    }
+
+    @Test("Pi with no sign-in for the model's provider says it is not signed in")
+    func piSignedOut() async throws {
+        let fake = try FakeCLI(.pi, [.init(pattern: "-p*", script: """
+            echo 'No API key found for anthropic.' >&2
+            echo '' >&2
+            echo 'Use /login to log into a provider via OAuth or API key. See:' >&2
+            echo '  /opt/homebrew/lib/node_modules/@earendil-works/pi-coding-agent/docs/models.md' >&2
+            exit 1
+            """)])
+
+        await #expect(throws: AgentCLI.Failure.notSignedIn(.pi)) {
+            try await fake.runner().client(for: Self.piProfile).complete(Self.meeting)
+        }
+    }
+
+    @Test("Pi with an unknown model gives its own message")
+    func piUnknownModel() async throws {
+        let fake = try FakeCLI(.pi, [.init(pattern: "-p*", script: """
+            echo 'Error: Model "nonexistent/xyz" not found. Use --list-models to see available models.' >&2
+            exit 1
+            """)])
+
+        await #expect(throws: AgentCLI.Failure.failed(.pi, #"Error: Model "nonexistent/xyz" not found. Use --list-models to see available models."#)) {
+            try await fake.runner().client(for: Self.piProfile).complete(Self.meeting)
+        }
+    }
+
+    @Test("Pi lists the models of the providers it can use, and needs one: it has no default of its own")
+    func piModels() async throws {
+        let fake = try FakeCLI(.pi, [.init(pattern: "--list-models*", script: FakeCLI.prints("""
+            provider        model                         context  max-out  thinking  images
+            github-copilot  claude-haiku-4.5              200K     64K      yes       yes
+            ollama          gemma4:latest                 128K     16.4K    yes       no
+            opencode-go     deepseek-v4.1-flash           1M       384K     yes       yes
+            """))])
+
+        let models = await fake.runner().models()
+
+        #expect(models?.map(\.name) == ["github-copilot/claude-haiku-4.5", "ollama/gemma4:latest", "opencode-go/deepseek-v4.1-flash"])
+        #expect(!AgentCLI.pi.hasDefaultModel)
+        #expect(AgentCLI.pi.reasoningLevels(for: "ollama/gemma4:latest", in: models) == ProviderProfile.ReasoningEffort.allCases)
+        await #expect(throws: AgentCLI.Failure.noModel(.pi)) {
+            try await fake.runner().client(for: AgentCLI.pi.profile()).complete(Self.meeting)
+        }
+    }
+
     // MARK: - Sign-in
 
     @Test("a signed-out CLI says so before any run; Copilot cannot tell")
@@ -486,7 +610,7 @@ struct AgentCLITests {
         #expect(claude.calls.isEmpty && copilot.calls.isEmpty)
     }
 
-    @Test("new Profiles are light on the plan: Codex Low, Claude Code Off, Copilot and OpenCode the agent's own", arguments: AgentCLI.allCases)
+    @Test("new Profiles are light on the plan: Codex Low, Claude Code and Pi Off, Copilot and OpenCode the agent's own", arguments: AgentCLI.allCases)
     func newProfile(cli: AgentCLI) {
         let profile = cli.profile()
 
@@ -494,7 +618,7 @@ struct AgentCLITests {
         #expect(!profile.runsOnThisMac)
         #expect(profile.model.isEmpty)
         #expect(profile.maxContextTokens == 128_000)
-        #expect(profile.reasoning == [AgentCLI.codex: .low, .claude: .off][cli])
+        #expect(profile.reasoning == [AgentCLI.codex: .low, .claude: .off, .pi: .off][cli])
     }
 
     /// The process the fake CLI's run is, once it started.

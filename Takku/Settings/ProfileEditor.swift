@@ -32,6 +32,7 @@ struct ProfileRow: View {
         case .copilot: return String(localized: "Your GitHub Copilot plan")
         case .claude: return String(localized: "Your Claude plan, through Claude Code")
         case .opencode: return String(localized: "Your plan, through OpenCode")
+        case .pi: return String(localized: "Your plan, through Pi")
         case nil: break
         }
         return profile.model.isEmpty ? String(localized: "To be configured") : profile.model
@@ -161,6 +162,8 @@ struct ProfileEditor: View {
                 Text("Summaries written by the Claude Code CLI installed on this Mac, with the Claude plan you signed in to it with: no key and no credit here. The Transcript and your notes go to Anthropic under your plan's terms. Each run keeps nothing and uses none of your Claude Code settings.")
             case .opencode:
                 Text("Summaries written by the OpenCode CLI installed on this Mac, with OpenCode Go or another plan you signed in to through it: no key and no credit here. The Transcript and your notes go to the model's provider under your plan's terms. Each run uses none of your OpenCode settings, and Takku deletes its session afterwards.")
+            case .pi:
+                Text("Summaries written by the Pi CLI installed on this Mac, with a plan you signed in to through it: no key and no credit here. The Transcript and your notes go to the model's provider under your plan's terms. Each run keeps nothing and uses none of your extensions, skills or instructions.")
             }
         }
         .font(.caption)

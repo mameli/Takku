@@ -12622,6 +12622,62 @@
           }
         }
       }
+    },
+    "Your plan, through Pi": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il tuo piano, tramite Pi"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dein Abo, über Pi"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu plan, a través de Pi"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre forfait, via Pi"
+          }
+        }
+      }
+    },
+    "Summaries written by the Pi CLI installed on this Mac, with a plan you signed in to through it: no key and no credit here. The Transcript and your notes go to the model's provider under your plan's terms. Each run keeps nothing and uses none of your extensions, skills or instructions.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Riepiloghi scritti dalla CLI di Pi installata su questo Mac, con un piano a cui hai fatto l'accesso tramite Pi: niente chiave e niente credito qui. La Trascrizione e le tue note vanno al fornitore del modello alle condizioni del tuo piano. Ogni esecuzione non conserva nulla e non usa nessuna delle tue estensioni, skill o istruzioni."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zusammenfassungen von der auf diesem Mac installierten Pi-CLI, mit einem Abo, bei dem du dich darüber angemeldet hast: kein Schlüssel und kein Guthaben hier. Das Transkript und deine Notizen gehen zu den Bedingungen deines Abos an den Anbieter des Modells. Jeder Lauf behält nichts und verwendet keine deiner Erweiterungen, Skills oder Anweisungen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resúmenes escritos por la CLI de Pi instalada en este Mac, con un plan con el que iniciaste sesión a través de ella: sin clave ni saldo aquí. La transcripción y tus notas van al proveedor del modelo según los términos de tu plan. Cada ejecución no guarda nada y no usa ninguna de tus extensiones, skills o instrucciones."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Résumés écrits par la CLI Pi installée sur ce Mac, avec un forfait auquel vous vous êtes connecté via Pi : ni clé ni crédit ici. La transcription et vos notes vont au fournisseur du modèle selon les conditions de votre forfait. Chaque exécution ne garde rien et n’utilise aucune de vos extensions, skills ou instructions."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

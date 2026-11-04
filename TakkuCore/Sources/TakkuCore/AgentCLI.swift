@@ -11,7 +11,7 @@ import Foundation
 /// deleted after it), no settings, instructions, MCP servers, hooks, memories, plugins or skills,
 /// no API key from the environment, in an empty folder.
 public enum AgentCLI: String, CaseIterable, Sendable {
-    case codex, copilot, claude, opencode
+    case codex, copilot, claude, opencode, pi
 
     public var name: String {
         switch self {
@@ -19,6 +19,7 @@ public enum AgentCLI: String, CaseIterable, Sendable {
         case .copilot: "GitHub Copilot"
         case .claude: "Claude Code"
         case .opencode: "OpenCode"
+        case .pi: "Pi"
         }
     }
 
@@ -34,6 +35,7 @@ public enum AgentCLI: String, CaseIterable, Sendable {
         case .copilot: "brew install --cask copilot-cli"
         case .claude: "curl -fsSL https://claude.ai/install.sh | bash"
         case .opencode: "curl -fsSL https://opencode.ai/install | bash"
+        case .pi: "npm install -g @earendil-works/pi-coding-agent"
         }
     }
 
@@ -44,6 +46,7 @@ public enum AgentCLI: String, CaseIterable, Sendable {
         case .copilot: "copilot login"
         case .claude: "claude auth login"
         case .opencode: "opencode auth login"
+        case .pi: "pi, then /login"
         }
     }
 
@@ -55,7 +58,7 @@ public enum AgentCLI: String, CaseIterable, Sendable {
     public func profile() -> ProviderProfile {
         let reasoning: ProviderProfile.ReasoningEffort? = switch self {
         case .codex: .low
-        case .claude: .off
+        case .claude, .pi: .off
         case .copilot, .opencode: nil
         }
         return ProviderProfile(name: name, baseURL: baseURL, model: "", maxContextTokens: Self.contextTokens, reasoning: reasoning)
@@ -74,9 +77,9 @@ public enum AgentCLI: String, CaseIterable, Sendable {
         }
     }
 
-    /// Whether the agent picks a model when the Profile names none. OpenCode, apart from the
-    /// user's settings, has no default of its own.
-    public var hasDefaultModel: Bool { self != .opencode }
+    /// Whether the agent picks a model when the Profile names none. OpenCode and Pi, apart from
+    /// the user's settings, have no default of their own.
+    public var hasDefaultModel: Bool { self != .opencode && self != .pi }
 
     /// The models that need no run to list: Claude Code's aliases always mean the latest of each,
     /// and Copilot's plans differ, so only its own choice is sure.
@@ -84,7 +87,7 @@ public enum AgentCLI: String, CaseIterable, Sendable {
         switch self {
         case .claude: ["fable", "opus", "sonnet", "haiku"].map { Model($0) }
         case .copilot: [Model("auto")]
-        case .codex, .opencode: nil
+        case .codex, .opencode, .pi: nil
         }
     }
 
@@ -93,6 +96,7 @@ public enum AgentCLI: String, CaseIterable, Sendable {
         switch self {
         case .codex: ["debug", "models"]
         case .opencode: ["models"]
+        case .pi: ["--list-models", "--offline"]
         case .copilot, .claude: nil
         }
     }
@@ -114,6 +118,13 @@ public enum AgentCLI: String, CaseIterable, Sendable {
                 .map { $0.trimmingCharacters(in: .whitespaces) }
                 .filter { $0.contains("/") && !$0.contains(" ") }
                 .map { Model($0) }
+        case .pi:
+            // A table: provider, model, then the model's limits.
+            return String(decoding: data, as: UTF8.self).split(separator: "\n").compactMap { row in
+                let columns = row.split(whereSeparator: \.isWhitespace)
+                guard columns.count >= 2, columns[0] != "provider" else { return nil }
+                return Model("\(columns[0])/\(columns[1])")
+            }
         case .copilot, .claude:
             return []
         }
@@ -129,7 +140,7 @@ public enum AgentCLI: String, CaseIterable, Sendable {
             return nil
         case .copilot:
             return Self.isCopilotAuto(model) ? [] : all
-        case .claude:
+        case .claude, .pi:
             return all
         case .codex:
             let model = model.trimmingCharacters(in: .whitespaces)
@@ -158,7 +169,7 @@ public enum AgentCLI: String, CaseIterable, Sendable {
         """
 
     /// Whether `systemPrompt` replaces the agent's own.
-    private var replacesSystemPrompt: Bool { self == .claude || self == .opencode }
+    private var replacesSystemPrompt: Bool { self == .claude || self == .opencode || self == .pi }
 
     /// What goes to the CLI's standard input: Takku's instructions and the request, after being
     /// told to answer with the text alone where the agent's system prompt stays.
@@ -228,6 +239,16 @@ public enum AgentCLI: String, CaseIterable, Sendable {
             var arguments = ["run", "--standalone", "--format", "json", "--agent", "takku", "--title", Self.openCodeTitle]
             if !model.isEmpty { arguments += ["-m", model] }
             return arguments
+        case .pi:
+            // Its settings file stays (it holds the default model and level, both always given here).
+            var arguments = [
+                "-p", "--mode", "json", "--no-session", "--no-tools", "--no-extensions", "--no-skills",
+                "--no-prompt-templates", "--no-themes", "--no-context-files", "--no-approve", "--offline",
+                "--system-prompt", Self.systemPrompt,
+            ]
+            if !model.isEmpty { arguments += ["--model", model] }
+            if let reasoning { arguments += ["--thinking", reasoning == .off ? "off" : reasoning.rawValue] }
+            return arguments
         }
     }
 
@@ -243,6 +264,8 @@ public enum AgentCLI: String, CaseIterable, Sendable {
             return [:]
         case .copilot:
             return ["COPILOT_HOME": scratch.appending(path: "home").path]
+        case .pi:
+            return ["PI_TELEMETRY": "0"]
         case .opencode:
             // Deny-all alone still offers the skill tool: its plugins go too.
             let config: [String: Any] = [
@@ -271,7 +294,7 @@ public enum AgentCLI: String, CaseIterable, Sendable {
     static func isRemoved(_ variable: String) -> Bool {
         let names: Set = ["OPENAI_API_KEY", "CODEX_API_KEY", "GITHUB_TOKEN", "GH_TOKEN", "COPILOT_GITHUB_TOKEN", "OPENROUTER_API_KEY"]
         return names.contains(variable) || variable.hasSuffix("_API_KEY")
-            || ["ANTHROPIC_", "CLAUDE", "OPENCODE_"].contains { variable.hasPrefix($0) }
+            || ["ANTHROPIC_", "CLAUDE", "OPENCODE_", "AWS_", "AZURE_OPENAI_"].contains { variable.hasPrefix($0) }
     }
 
     // MARK: - What a run ended with
@@ -301,9 +324,36 @@ public enum AgentCLI: String, CaseIterable, Sendable {
             case .copilot: Self.readCopilot(type, event, into: &outcome)
             case .claude: Self.readClaude(type, event, into: &outcome)
             case .opencode: Self.readOpenCode(type, event, into: &outcome, tokens: &tokens)
+            case .pi: Self.readPi(type, event, into: &outcome, tokens: &tokens)
             }
         }
         return outcome
+    }
+
+    /// What it prints before an event, or instead of any: the first line says why.
+    func reason(inPrinted text: String) -> String? {
+        let lines = text.split(separator: "\n").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+        return (self == .pi ? lines.first : lines.last)
+    }
+
+    /// Exits with 0 also when the provider failed, after its own retries: the last message says so.
+    private static func readPi(_ type: String, _ event: [String: Any], into outcome: inout Outcome, tokens: inout (input: Int, output: Int)) {
+        guard type == "message_end", let message = event["message"] as? [String: Any], message["role"] as? String == "assistant" else { return }
+        let content = message["content"] as? [[String: Any]] ?? []
+        outcome.toolCalls += content.filter { $0["type"] as? String == "toolCall" }.count
+        let usage = message["usage"] as? [String: Any]
+        tokens.input += usage?["input"] as? Int ?? 0
+        tokens.output += usage?["output"] as? Int ?? 0
+        outcome.usage = "\(tokens.input) tokens in, \(tokens.output) out"
+        if message["stopReason"] as? String == "error" {
+            outcome.failure = message["errorMessage"] as? String ?? "error"
+            return
+        }
+        let text = content.filter { $0["type"] as? String == "text" }.compactMap { $0["text"] as? String }.joined()
+        if !text.isEmpty {
+            outcome.reply = text
+            outcome.failure = nil
+        }
     }
 
     private static func readCodex(_ type: String, _ event: [String: Any], into outcome: inout Outcome) {
@@ -390,14 +440,14 @@ public enum AgentCLI: String, CaseIterable, Sendable {
 
     // MARK: - Sign-in and sessions
 
-    /// The arguments that tell whether the CLI is signed in; Copilot has none (a signed-out run's
-    /// error says so).
+    /// The arguments that tell whether the CLI is signed in; Copilot and Pi have none (a signed-out
+    /// run's error says so; Pi signs in per provider).
     var signInCheckArguments: [String]? {
         switch self {
         case .codex: ["login", "status"]
         case .claude: ["auth", "status"]
         case .opencode: ["auth", "list", "--format", "json"]
-        case .copilot: nil
+        case .copilot, .pi: nil
         }
     }
 
@@ -409,7 +459,7 @@ public enum AgentCLI: String, CaseIterable, Sendable {
         switch self {
         case .claude: return (object as? [String: Any])?["loggedIn"] as? Bool != false
         case .opencode: return (object as? [Any])?.isEmpty == false
-        case .codex, .copilot: return true
+        case .codex, .copilot, .pi: return true
         }
     }
 

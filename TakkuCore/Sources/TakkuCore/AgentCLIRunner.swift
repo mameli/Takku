@@ -117,13 +117,13 @@ extension AgentCLI {
             case .timedOut: throw Failure.timedOut(cli)
             case .exited: break
             }
-            // Only the last line of what the CLI printed: the rest can hold the request's text.
-            let printed = String(decoding: result.errors, as: UTF8.self).split(separator: "\n").last.map(String.init)
+            // One line of what the CLI printed: the rest can hold the request's text.
+            let printed = cli.reason(inPrinted: String(decoding: result.errors, as: UTF8.self))
             if outcome.reply == nil || result.status != 0 {
                 let reason = outcome.failure ?? printed ?? "exit \(result.status)"
                 // Not what it printed: that can hold the request's text.
                 log("\(cli.name) failed: \(outcome.failure ?? "exit \(result.status)")")
-                let signIn = ["login", "log in", "sign in", "signed in", "authenticat"].contains { reason.localizedCaseInsensitiveContains($0) }
+                let signIn = ["login", "log in", "sign in", "signed in", "authenticat", "no api key"].contains { reason.localizedCaseInsensitiveContains($0) }
                 if signIn { throw Failure.notSignedIn(cli) }
                 if outcome.failure != nil || result.status != 0 { throw Failure.failed(cli, reason) }
             }
