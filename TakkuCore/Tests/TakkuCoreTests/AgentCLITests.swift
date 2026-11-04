@@ -640,11 +640,11 @@ struct AgentCLITests {
         #expect(await fake.runner().models() == nil)
     }
 
-    @Test("Claude Code offers its aliases without running")
+    @Test("Claude Code offers the latest full model names without running")
     func fixedModels() async throws {
         let claude = try FakeCLI(.claude, [])
 
-        #expect(await claude.runner().models()?.map(\.name) == ["fable", "opus", "sonnet", "haiku"])
+        #expect(await claude.runner().models()?.map(\.name) == ["claude-fable-5-1", "claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"])
         #expect(claude.calls.isEmpty)
     }
 

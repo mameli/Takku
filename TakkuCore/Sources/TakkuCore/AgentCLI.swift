@@ -81,10 +81,11 @@ public enum AgentCLI: String, CaseIterable, Sendable {
     /// the user's settings, have no default of their own.
     public var hasDefaultModel: Bool { self != .opencode && self != .pi }
 
-    /// The models that need no run to list: Claude Code's aliases always mean the latest of each.
+    /// The models that need no run to list. Claude Code has no list, and its aliases lag behind
+    /// (2.1.282 maps haiku to Haiku 4.5): the latest full names, to update when models come out.
     var fixedModels: [Model]? {
         switch self {
-        case .claude: ["fable", "opus", "sonnet", "haiku"].map { Model($0) }
+        case .claude: ["claude-fable-5-1", "claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"].map { Model($0) }
         case .codex, .copilot, .opencode, .pi: nil
         }
     }
