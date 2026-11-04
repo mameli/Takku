@@ -4,7 +4,7 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
-## Unreleased
+## 1.18.1 (2026-11-04)
 
 - **Context and language for an import**: `takku import --notes "Video by Theo"` puts a line in the note's personal notes, which the summary reads, so it knows who speaks or which course a lecture belongs to (with yt-dlp, the video's channel and description: [README → Your meetings in the terminal](README.md#your-meetings-in-the-terminal)). `--language de` transcribes a file in a language you have not ticked in Settings, without changing them for your meetings.
 - **Skills for your AI assistant**: besides finding what was said and preparing a meeting, the Takku skills now import a recording or a YouTube video for you and help you write Templates, and they use the `takku` command when the MCP server is not set up. Claude Code gets them as a plugin (`claude plugin marketplace add mameli/Takku`, then `claude plugin install takku@takku`), any other agent with `npx skills@latest add mameli/Takku`: [README → Your meetings in an AI assistant](README.md#your-meetings-in-an-ai-assistant-mcp).
