@@ -23,13 +23,13 @@ public enum AgentCLI: String, CaseIterable, Sendable {
         }
     }
 
-    public var command: String { rawValue }
+    var command: String { rawValue }
 
     /// Not an address: it marks the Profile, and the transport never sends it anywhere.
     public var baseURL: String { "\(rawValue)://this-mac" }
 
     /// What installs the CLI, for a user who does not have it.
-    public var installCommand: String {
+    var installCommand: String {
         switch self {
         case .codex: "brew install codex"
         case .copilot: "brew install --cask copilot-cli"
@@ -40,7 +40,7 @@ public enum AgentCLI: String, CaseIterable, Sendable {
     }
 
     /// What signs the user in, in Terminal.
-    public var signInCommand: String {
+    var signInCommand: String {
         switch self {
         case .codex: "codex login"
         case .copilot: "copilot login"
@@ -51,7 +51,7 @@ public enum AgentCLI: String, CaseIterable, Sendable {
     }
 
     /// What the agents' models take comfortably, after their own instructions.
-    public static let contextTokens = 128_000
+    static let contextTokens = 128_000
 
     /// A new Profile: light on the plan and quick (Codex refuses no reasoning at all, Copilot's
     /// own model refuses any level, OpenCode has none).
@@ -342,24 +342,30 @@ public enum AgentCLI: String, CaseIterable, Sendable {
 
     // MARK: - What a run ended with
 
-    public struct Outcome: Equatable, Sendable {
+    struct Outcome {
         /// The last message the agent wrote, `nil` if none.
-        public var reply: String?
+        var reply: String?
         /// Why the run failed, in the provider's words; `nil` if it did not.
-        public var failure: String?
-        /// What the run used, for the log: tokens, or premium requests for Copilot.
-        public var usage = ""
+        var failure: String?
+        var inputTokens = 0, outputTokens = 0
+        /// What a Copilot run used instead of tokens.
+        var premiumRequests: Double?
         /// Commands, file reads and other tools the agent tried despite having none.
-        public var toolCalls = 0
+        var toolCalls = 0
         /// The model that answered, as the agent reports it (Copilot's auto picks one); `nil` if it does not.
-        public var model: String?
+        var model: String?
         /// OpenCode's session, to delete.
-        public var session: String?
+        var session: String?
+
+        /// What the run used, for the log; empty if the agent did not say.
+        var usage: String {
+            if let premiumRequests { return "\(premiumRequests.formatted()) premium requests" }
+            return inputTokens + outputTokens > 0 ? "\(inputTokens) tokens in, \(outputTokens) out" : ""
+        }
     }
 
     func outcome(ofEvents data: Data) -> Outcome {
         var outcome = Outcome()
-        var tokens = (input: 0, output: 0)
         for line in data.split(separator: UInt8(ascii: "\n")) {
             guard let event = (try? JSONSerialization.jsonObject(with: Data(line))) as? [String: Any],
                   let type = event["type"] as? String
@@ -368,8 +374,8 @@ public enum AgentCLI: String, CaseIterable, Sendable {
             case .codex: Self.readCodex(type, event, into: &outcome)
             case .copilot: Self.readCopilot(type, event, into: &outcome)
             case .claude: Self.readClaude(type, event, into: &outcome)
-            case .opencode: Self.readOpenCode(type, event, into: &outcome, tokens: &tokens)
-            case .pi: Self.readPi(type, event, into: &outcome, tokens: &tokens)
+            case .opencode: Self.readOpenCode(type, event, into: &outcome)
+            case .pi: Self.readPi(type, event, into: &outcome)
             }
         }
         return outcome
@@ -382,14 +388,13 @@ public enum AgentCLI: String, CaseIterable, Sendable {
     }
 
     /// Exits with 0 also when the provider failed, after its own retries: the last message says so.
-    private static func readPi(_ type: String, _ event: [String: Any], into outcome: inout Outcome, tokens: inout (input: Int, output: Int)) {
+    private static func readPi(_ type: String, _ event: [String: Any], into outcome: inout Outcome) {
         guard type == "message_end", let message = event["message"] as? [String: Any], message["role"] as? String == "assistant" else { return }
         let content = message["content"] as? [[String: Any]] ?? []
         outcome.toolCalls += content.filter { $0["type"] as? String == "toolCall" }.count
         let usage = message["usage"] as? [String: Any]
-        tokens.input += usage?["input"] as? Int ?? 0
-        tokens.output += usage?["output"] as? Int ?? 0
-        outcome.usage = "\(tokens.input) tokens in, \(tokens.output) out"
+        outcome.inputTokens += usage?["input"] as? Int ?? 0
+        outcome.outputTokens += usage?["output"] as? Int ?? 0
         if let provider = message["provider"] as? String, let model = message["model"] as? String { outcome.model = "\(provider)/\(model)" }
         if message["stopReason"] as? String == "error" {
             outcome.failure = message["errorMessage"] as? String ?? "error"
@@ -413,7 +418,8 @@ public enum AgentCLI: String, CaseIterable, Sendable {
             }
         case "turn.completed":
             let usage = event["usage"] as? [String: Any]
-            outcome.usage = "\(usage?["input_tokens"] as? Int ?? 0) tokens in, \(usage?["output_tokens"] as? Int ?? 0) out"
+            outcome.inputTokens += usage?["input_tokens"] as? Int ?? 0
+            outcome.outputTokens += usage?["output_tokens"] as? Int ?? 0
         case "turn.failed":
             outcome.failure = message((event["error"] as? [String: Any])?["message"] as? String)
         case "error":
@@ -435,8 +441,7 @@ public enum AgentCLI: String, CaseIterable, Sendable {
         case "session.error":
             outcome.failure = message(data?["message"] as? String)
         case "result":
-            let requests = (event["usage"] as? [String: Any])?["premiumRequests"] as? Double ?? 0
-            outcome.usage = "\(requests.formatted()) premium requests"
+            outcome.premiumRequests = (event["usage"] as? [String: Any])?["premiumRequests"] as? Double ?? 0
             if let code = event["exitCode"] as? Int, code != 0, outcome.failure == nil { outcome.failure = "exit \(code)" }
         default:
             return
@@ -453,12 +458,13 @@ public enum AgentCLI: String, CaseIterable, Sendable {
             outcome.reply = text
         }
         let usage = event["usage"] as? [String: Any]
-        outcome.usage = "\(usage?["input_tokens"] as? Int ?? 0) tokens in, \(usage?["output_tokens"] as? Int ?? 0) out"
+        outcome.inputTokens += usage?["input_tokens"] as? Int ?? 0
+        outcome.outputTokens += usage?["output_tokens"] as? Int ?? 0
         outcome.toolCalls += (event["permission_denials"] as? [Any])?.count ?? 0
         outcome.model = (event["modelUsage"] as? [String: Any])?.keys.sorted().joined(separator: ", ")
     }
 
-    private static func readOpenCode(_ type: String, _ event: [String: Any], into outcome: inout Outcome, tokens: inout (input: Int, output: Int)) {
+    private static func readOpenCode(_ type: String, _ event: [String: Any], into outcome: inout Outcome) {
         outcome.session = outcome.session ?? event["sessionID"] as? String
         let part = event["part"] as? [String: Any]
         switch type {
@@ -466,9 +472,8 @@ public enum AgentCLI: String, CaseIterable, Sendable {
             if let text = part?["text"] as? String, !text.isEmpty { outcome.reply = text }
         case "step_finish":
             let used = part?["tokens"] as? [String: Any]
-            tokens.input += used?["input"] as? Int ?? 0
-            tokens.output += used?["output"] as? Int ?? 0
-            outcome.usage = "\(tokens.input) tokens in, \(tokens.output) out"
+            outcome.inputTokens += used?["input"] as? Int ?? 0
+            outcome.outputTokens += used?["output"] as? Int ?? 0
         case "error":
             let error = event["error"] as? [String: Any]
             outcome.failure = message(error?["message"] as? String) ?? error?["type"] as? String ?? "error"

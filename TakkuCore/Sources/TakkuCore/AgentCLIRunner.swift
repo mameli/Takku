@@ -6,7 +6,7 @@ extension AgentCLI {
     /// (Bundle.main), so the app can translate them.
     public enum Failure: LocalizedError, Equatable {
         case notInstalled(AgentCLI), notSignedIn(AgentCLI), timedOut(AgentCLI), emptyReply(AgentCLI)
-        /// OpenCode has no model of its own.
+        /// The agent has no model of its own (OpenCode, Pi) and the Profile names none.
         case noModel(AgentCLI)
         /// The agent's own message, as it wrote it.
         case failed(AgentCLI, String)
@@ -32,7 +32,7 @@ extension AgentCLI {
     /// Runs the user's CLI: one run per Chat Completions request, the sign-in check and the list
     /// of models. Cancelling the task, as *Stop processing* does, ends the run.
     public struct Runner: Sendable {
-        public let cli: AgentCLI
+        let cli: AgentCLI
         private let locate: @Sendable () -> URL?
         private let environment: [String: String]
         private let timeout: Duration
@@ -300,7 +300,7 @@ extension AgentCLI {
 
     /// The CLI's executable: in the usual places, else where the user's login shell finds it;
     /// `nil` if neither has it.
-    public func locate(home: URL = FileManager.default.homeDirectoryForCurrentUser) -> URL? {
+    func locate(home: URL = FileManager.default.homeDirectoryForCurrentUser) -> URL? {
         let fileManager = FileManager.default
         if let path = candidatePaths(home: home).first(where: fileManager.isExecutableFile) {
             return URL(filePath: path)
