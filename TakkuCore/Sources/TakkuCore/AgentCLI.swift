@@ -97,7 +97,7 @@ public enum AgentCLI: String, CaseIterable, Sendable {
         switch self {
         case .codex: ["debug", "models"]
         case .copilot: arguments(model: Self.noModel, reasoning: nil, folder: folder) + ["--log-level", "all"]
-        case .opencode: ["models"]
+        case .opencode: ["models", "--standalone"]
         case .pi: ["--list-models", "--offline"]
         case .claude: nil
         }
@@ -494,7 +494,8 @@ public enum AgentCLI: String, CaseIterable, Sendable {
         switch self {
         case .codex: ["login", "status"]
         case .claude: ["auth", "status"]
-        case .opencode: ["auth", "list", "--format", "json"]
+        // Standalone: with its state moved, the background service would clash with the user's.
+        case .opencode: ["auth", "list", "--standalone", "--format", "json"]
         case .copilot, .pi: nil
         }
     }

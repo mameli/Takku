@@ -580,7 +580,7 @@ struct AgentCLITests {
     func signedOut() async throws {
         let codex = try FakeCLI(.codex, [.init(pattern: "login status", script: "echo 'Not logged in' >&2\nexit 1")])
         let claude = try FakeCLI(.claude, [.init(pattern: "auth status", script: FakeCLI.prints(#"{"loggedIn":false,"authMethod":"none"}"#, exit: 1))])
-        let openCode = try FakeCLI(.opencode, [.init(pattern: "auth list*", script: FakeCLI.prints("[]"))])
+        let openCode = try FakeCLI(.opencode, [.init(pattern: "auth list --standalone*", script: FakeCLI.prints("[]"))])
         let copilot = try FakeCLI(.copilot, [])
 
         #expect(await codex.runner().unavailability() == .notSignedIn(.codex))
@@ -594,7 +594,7 @@ struct AgentCLITests {
     func signedIn() async throws {
         let codex = try FakeCLI(.codex, [.init(pattern: "login status", script: "echo 'Logged in using ChatGPT'")])
         let claude = try FakeCLI(.claude, [.init(pattern: "auth status", script: FakeCLI.prints(#"{"loggedIn":true,"authMethod":"claude.ai"}"#))])
-        let openCode = try FakeCLI(.opencode, [.init(pattern: "auth list*", script: FakeCLI.prints("""
+        let openCode = try FakeCLI(.opencode, [.init(pattern: "auth list --standalone*", script: FakeCLI.prints("""
             [{"id":"openrouter","name":"OpenRouter","connections":[{"type":"credential","id":"cred_1","label":"OpenRouter","method":"key"}]}]
             """))])
 
@@ -621,7 +621,7 @@ struct AgentCLITests {
 
     @Test("OpenCode lists the models of the Providers signed in to")
     func openCodeModels() async throws {
-        let fake = try FakeCLI(.opencode, [.init(pattern: "models", script: FakeCLI.prints("""
+        let fake = try FakeCLI(.opencode, [.init(pattern: "models --standalone", script: FakeCLI.prints("""
             opencode/big-pickle
             openrouter/~anthropic/claude-haiku-latest
             """))])

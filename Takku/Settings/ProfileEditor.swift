@@ -169,16 +169,20 @@ struct ProfileEditor: View {
         .font(.caption)
         .foregroundStyle(.secondary)
         .fixedSize(horizontal: false, vertical: true)
-        Picker("Model", selection: modelChoice(cli)) {
-            if cli.hasDefaultModel {
-                Text("\(cli.name)'s default model").tag(ModelChoice.agentDefault)
-            } else if profile.model.isEmpty && !typesModel {
-                Text("Choose a model").tag(ModelChoice.unset)
+        if let groups = providerGroups {
+            groupedModelMenu(cli, groups)
+        } else {
+            Picker("Model", selection: modelChoice(cli)) {
+                if cli.hasDefaultModel {
+                    Text("\(cli.name)'s default model").tag(ModelChoice.agentDefault)
+                } else if profile.model.isEmpty && !typesModel {
+                    Text("Choose a model").tag(ModelChoice.unset)
+                }
+                ForEach(agentModels ?? [], id: \.name) { model in
+                    Text(verbatim: model.name).tag(ModelChoice.named(model.name))
+                }
+                Text("Other…").tag(ModelChoice.other)
             }
-            ForEach(agentModels ?? [], id: \.name) { model in
-                Text(verbatim: model.name).tag(ModelChoice.named(model.name))
-            }
-            Text("Other…").tag(ModelChoice.other)
         }
         if modelChoice(cli).wrappedValue == .other {
             LabeledContent("Model name") {
@@ -209,6 +213,44 @@ struct ProfileEditor: View {
 
     private enum ModelChoice: Hashable {
         case agentDefault, named(String), other, unset
+    }
+
+    /// OpenCode's and Pi's `provider/model` lists run to hundreds: one submenu per provider.
+    private var providerGroups: [(provider: String, models: [AgentCLI.Model])]? {
+        guard let models = agentModels, models.count > 20, models.allSatisfy({ $0.name.contains("/") }) else { return nil }
+        return Dictionary(grouping: models) { String($0.name.prefix { $0 != "/" }) }
+            .sorted { $0.key < $1.key }
+            .map { (provider: $0.key, models: $0.value) }
+    }
+
+    @ViewBuilder private func groupedModelMenu(_ cli: AgentCLI, _ groups: [(provider: String, models: [AgentCLI.Model])]) -> some View {
+        let choice = modelChoice(cli)
+        LabeledContent("Model") {
+            Menu {
+                if cli.hasDefaultModel {
+                    Button("\(cli.name)'s default model") { choice.wrappedValue = .agentDefault }
+                }
+                ForEach(groups, id: \.provider) { group in
+                    Menu(group.provider) {
+                        ForEach(group.models, id: \.name) { model in
+                            Button { choice.wrappedValue = .named(model.name) } label: {
+                                Text(verbatim: String(model.name.dropFirst(group.provider.count + 1)))
+                            }
+                        }
+                    }
+                }
+                Divider()
+                Button("Other…") { choice.wrappedValue = .other }
+            } label: {
+                switch choice.wrappedValue {
+                case .agentDefault: Text("\(cli.name)'s default model")
+                case .unset: Text("Choose a model")
+                case .named(let model): Text(verbatim: model)
+                case .other: Text("Other…")
+                }
+            }
+            .fixedSize()
+        }
     }
 
     /// The model menu's choice: the agent's default for no model, *Other…* for a model the menu
