@@ -27,6 +27,7 @@ struct ProfileRow: View {
     private var caption: String {
         if profile.isTakkuCredit { return String(localized: "Prepaid credit") }
         if profile.isAppleIntelligence { return String(localized: "On this Mac") }
+        if profile.isCodex { return String(localized: "Your ChatGPT plan, through Codex") }
         return profile.model.isEmpty ? String(localized: "To be configured") : profile.model
     }
 }
@@ -47,6 +48,8 @@ struct ProfileEditor: View {
     @State private var credit: TakkuCredit.Balance?
     @State private var creditProblem: String?
     @State private var isReadingCredit = false
+    /// Codex only: why it cannot be used now (not installed, not signed in), `nil` when it can.
+    @State private var codexProblem: String?
 
     var body: some View {
         Section {
@@ -54,13 +57,15 @@ struct ProfileEditor: View {
                 creditRows
             } else if profile.isAppleIntelligence {
                 appleIntelligenceRows
+            } else if profile.isCodex {
+                codexRows
             } else {
                 providerRows
             }
 
             // The only place where the key is entered. It is saved only on Return or with the
             // button, never while typing: a stray keystroke must not replace a working key.
-            if !profile.isAppleIntelligence { LabeledContent("API key") {
+            if !profile.isAppleIntelligence && !profile.isCodex { LabeledContent("API key") {
                 HStack {
                     PasteableTextField(
                         placeholder: storedKeySuffix.map { String(localized: "Saved in the Keychain (…\($0)) · paste here to replace it") }
@@ -84,7 +89,7 @@ struct ProfileEditor: View {
 
             HStack {
                 Button("Test connection") { Task { await test() } }
-                    .disabled(isTesting || profile.baseURL.isEmpty || profile.model.isEmpty || extraParametersProblem != nil)
+                    .disabled(isTesting || profile.baseURL.isEmpty || (profile.model.isEmpty && !profile.isCodex) || extraParametersProblem != nil)
                 if isTesting { ProgressView().controlSize(.small) }
                 Spacer()
                 if isActive {
@@ -106,10 +111,13 @@ struct ProfileEditor: View {
             refreshStoredKey()
             extraParameters = profile.extraParameters ?? ""
             Task { await readCredit() }
+            Task { await checkCodex() }
         }
         // Back from the browser after paying: the new balance without pressing anything.
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             Task { await readCredit() }
+            // Back from Terminal after codex login.
+            Task { await checkCodex() }
         }
     }
 
@@ -121,6 +129,27 @@ struct ProfileEditor: View {
             .fixedSize(horizontal: false, vertical: true)
         if let unavailability = AppleIntelligenceModel.unavailability {
             Text(unavailability.localizedDescription).foregroundStyle(.orange)
+        }
+    }
+
+    /// Codex needs no key: it is the user's own CLI, signed in with their ChatGPT plan. Only the
+    /// model and how much it reasons can change; an empty model is Codex's default.
+    @ViewBuilder private var codexRows: some View {
+        Text("Summaries written by the Codex CLI installed on this Mac, with the ChatGPT plan you signed in to it with: no key and no credit here. The Transcript and your notes go to OpenAI under your plan's terms. Each request is a run of codex exec that keeps nothing and uses none of your Codex settings.")
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
+        LabeledContent("Model") {
+            PasteableTextField(placeholder: String(localized: "Codex's default"), text: $profile.model)
+        }
+        Picker("Reasoning", selection: $profile.reasoning) {
+            Text("Model default").tag(ProviderProfile.ReasoningEffort?.none)
+            ForEach(ProviderProfile.ReasoningEffort.allCases, id: \.self) { effort in
+                Text(effort.displayName).tag(ProviderProfile.ReasoningEffort?.some(effort))
+            }
+        }
+        if let codexProblem {
+            Text(codexProblem).foregroundStyle(.orange).textSelection(.enabled)
         }
     }
 
@@ -262,6 +291,11 @@ struct ProfileEditor: View {
             credit = nil
             creditProblem = String(localized: "Could not read the credit: \(error.localizedDescription)")
         }
+    }
+
+    private func checkCodex() async {
+        guard profile.isCodex else { return }
+        codexProblem = await CodexModel.unavailability()?.localizedDescription
     }
 
     private func test() async {

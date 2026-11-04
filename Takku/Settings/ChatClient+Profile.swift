@@ -26,6 +26,10 @@ extension ChatClient {
             self = AppleIntelligenceModel.client()!
             return
         }
+        if profile.isCodex {
+            self = CodexModel.client(profile: profile)
+            return
+        }
         let url = try profile.validatedBaseURL()
         let model = profile.model
         // Never the address: the log goes in *Report a problem…*, and a Profile's address can name a company.
