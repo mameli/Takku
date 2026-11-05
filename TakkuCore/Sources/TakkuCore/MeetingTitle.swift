@@ -4,7 +4,17 @@ import Foundation
 public enum MeetingTitle {
     public static let maxWords = 6
 
-    public static func request(summary: String, language: String, vocabulary: Vocabulary = .empty) -> [ChatMessage] {
+    /// How much of the Summary a title is written from: its start, where the meeting says what it
+    /// is about. The title is billed by tokens, so the whole Summary would be paid for six words.
+    public static let summaryExcerptCharacters = 1_500
+
+    /// For Apple Intelligence, which costs nothing, the same amount as from a Transcript: more
+    /// context, a better title, and still small enough for its 4,096 tokens.
+    public static let localSummaryExcerptCharacters = transcriptExcerptCharacters
+
+    public static func request(
+        summary: String, language: String, vocabulary: Vocabulary = .empty, excerptCharacters: Int = summaryExcerptCharacters
+    ) -> [ChatMessage] {
         let terms = vocabulary.entries.isEmpty
             ? "" : "\nSpell these names and terms exactly like this: \(vocabulary.entries.map(\.term).joined(separator: ", "))."
         return [
@@ -13,7 +23,7 @@ public enum MeetingTitle {
                 in \(Language.name(language)), no date, no quotes and no final period. \
                 Reply with the title only.
                 """ + terms),
-            ChatMessage(role: .user, content: summary),
+            ChatMessage(role: .user, content: String(summary.prefix(excerptCharacters))),
         ]
     }
 

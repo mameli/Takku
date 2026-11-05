@@ -17,3 +17,5 @@ Measured on a real 53-minute Italian Meeting on macOS 27: 3 partial summaries an
 
 - On macOS 15, or without Apple Intelligence turned on, the Profile is not offered, and an existing one fails with a message that says why.
 - The title without a Summary is written only when Apple Intelligence is available; otherwise the note keeps its provisional name, as before.
+- The title of a Meeting with a Summary from another Provider is also asked of Apple Intelligence first, when it is available: it costs no credit and nothing leaves the Mac. If it fails or answers nothing, the Profile writes it. That request is not in the Summary log, which holds the Profile's.
+- A title is written from the start of the Summary, not all of it: the first 1,500 characters for a Profile billed by tokens, the first 6,000 for Apple Intelligence, which is free and has the room.

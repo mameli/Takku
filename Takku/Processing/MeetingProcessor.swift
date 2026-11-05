@@ -871,14 +871,29 @@ final class MeetingProcessor {
             )
                 .summarize(prompt)
             logger.notice("Summary written in \(secondsSince(started), privacy: .public)")
-            let titleClient = log.map { client.recording(into: $0.recorder, as: .title) } ?? client
             // On the text alone: the Screenshots' names would reach the model.
-            let reply = wantsTitle
-                ? try? await titleClient.complete(MeetingTitle.request(summary: summary.text, language: prompt.summaryLanguage, vocabulary: vocabulary))
-                : nil
+            let titleRequest = MeetingTitle.request(summary: summary.text, language: prompt.summaryLanguage, vocabulary: vocabulary)
+            let localTitleRequest = MeetingTitle.request(
+                summary: summary.text, language: prompt.summaryLanguage, vocabulary: vocabulary,
+                excerptCharacters: MeetingTitle.localSummaryExcerptCharacters
+            )
+            var title: String?
+            if wantsTitle {
+                // A Summary paid by tokens gets its title free on this Mac when Apple Intelligence is there;
+                // if it fails or answers nothing, the Profile writes it. Not in the Summary log, which is
+                // the Profile's requests.
+                if !profile.isAppleIntelligence, let local = AppleIntelligenceModel.client() {
+                    title = (try? await local.complete(localTitleRequest)).flatMap(MeetingTitle.clean)
+                    logger.notice("Title from Apple Intelligence: \(title == nil ? "empty, asking the Profile" : "written", privacy: .public)")
+                }
+                if title == nil {
+                    let titleClient = log.map { client.recording(into: $0.recorder, as: .title) } ?? client
+                    title = (try? await titleClient.complete(titleRequest)).flatMap(MeetingTitle.clean)
+                }
+            }
             return (
                 .written(text: summary.withScreenshots, template: template.name, provider: profile.displayName),
-                reply.flatMap(MeetingTitle.clean), log
+                title, log
             )
         } catch {
             logger.error("Summary not generated after \(secondsSince(started), privacy: .public): \(error.localizedDescription, privacy: .public)")

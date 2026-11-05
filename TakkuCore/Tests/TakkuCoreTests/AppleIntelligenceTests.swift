@@ -75,6 +75,19 @@ struct AppleIntelligenceTests {
         #expect(request[1].content.hasPrefix("**[00:00]"))
     }
 
+    @Test("a title is asked from the start of the Summary only")
+    func titleFromSummary() {
+        let request = MeetingTitle.request(summary: String(repeating: "Il rilascio slitta. ", count: 500), language: "it")
+
+        let local = MeetingTitle.request(
+            summary: String(repeating: "Il rilascio slitta. ", count: 500), language: "it",
+            excerptCharacters: MeetingTitle.localSummaryExcerptCharacters
+        )
+
+        #expect(request[1].content.count == MeetingTitle.summaryExcerptCharacters)
+        #expect(local[1].content.count == MeetingTitle.localSummaryExcerptCharacters)
+    }
+
     @Test("a repeated list marker becomes one, keeping the indent and the checkbox")
     func repeatedMarkers() {
         #expect(AppleIntelligence.cleaned("""
