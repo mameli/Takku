@@ -4,6 +4,10 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
+## 1.19.1 (2026-11-05)
+
+- **Titles that cost less credit**: the title of a meeting used to send the whole summary to your Summary Profile just to get six words back. Now Apple Intelligence on your Mac writes it first, free and without anything leaving the Mac, and your Profile only does it if the Mac cannot. When it does, it reads the start of the summary, not all of it, so the title costs a fraction of what it did.
+
 ## 1.19.0 (2026-11-04)
 
 - **Summaries with the coding agent you already pay for**: + in *Settings → Summary* adds **Codex**, **GitHub Copilot**, **Claude Code**, **OpenCode** or **Pi** as a Summary Profile. Takku runs the CLI you installed and signed in to, so the summary uses your plan and there is no key to paste. Each run has no tools and none of your coding setup, and keeps no session: a sentence said in a meeting cannot make the agent run a command or read a file. The profile says when the CLI is missing or signed out and what to run in Terminal, and its menu lists the models your agent offers. Claude Code at your own risk: [README → First setup](README.md#first-setup).
