@@ -121,10 +121,10 @@ struct SummaryPromptTests {
         #expect(prompt.partialRequests(maxContextTokens: 8_192)[0][0].content.contains(rule))
     }
 
-    @Test("passages that make no sense are left out, not copied, also in the partial requests")
+    @Test("passages that make no sense are left out, not copied nor flagged as unclear, also in the partial requests")
     func nonsense() {
         let prompt = SummaryPrompt(template: template, personalNotes: "", transcript: transcript, meetingLanguage: "it")
-        let rule = "Leave out passages that make no sense, such as a misheard figure or date, instead of copying them."
+        let rule = "Leave out passages that make no sense, such as a misheard figure or date, instead of copying them, and without saying so: never a bullet saying that a term or a passage is unclear."
 
         #expect(prompt.singleRequest()[0].content.contains("Do not invent: use only what is in the Transcript and in the personal notes. " + rule))
         #expect(prompt.partialRequests(maxContextTokens: 8_192)[0][0].content.contains(rule))
@@ -172,6 +172,39 @@ struct SummaryPromptTests {
         #expect(system.contains("Do not bring in a term that nobody said."))
         // The Vocabulary is not part of what the user message carries.
         #expect(!messages[1].content.contains("Scaleway"))
+    }
+
+    @Test("only the first three variants of a term go into the system message: they show how it is misheard, the replacement uses them all")
+    func fewVariantsInSystemMessage() {
+        let vocabulary = Vocabulary(fileContent: "- Witboost = with boost, wit boost, Witbust, Weatboost, WePost")
+        let system = SummaryPrompt(
+            template: template, personalNotes: "", transcript: transcript, meetingLanguage: "it", vocabulary: vocabulary
+        ).singleRequest()[0].content
+
+        #expect(system.contains("- Witboost (may be written as \"with boost\", \"wit boost\", \"Witbust\")\n"))
+        #expect(!system.contains("Weatboost"))
+        #expect(!system.contains("WePost"))
+    }
+
+    @Test("a Transcript read back from the Vault gets the variants added to the Vocabulary since, in what the model reads only")
+    func variantsReplacedInTranscriptReadBack() {
+        let vaultFile = """
+            ---
+            takku_id: 6F1C2B9E-0000-0000-0000-000000000000
+            ---
+            **[00:05] Speaker 1:** Il deploy di WePost è pronto.
+
+            **[00:40] Me:** ⭐ Bene, with boost anche in staging.
+            """
+        let (readBack, _) = Transcript.parse(vaultFile: vaultFile)
+        let vocabulary = Vocabulary(fileContent: "- Witboost = with boost, wit boost, Witbust, Weatboost, WePost")
+        let prompt = SummaryPrompt(template: template, personalNotes: "", transcript: readBack, meetingLanguage: "it", vocabulary: vocabulary)
+
+        #expect(prompt.singleRequest()[1].content.contains("**[00:05] Speaker 1:** Il deploy di Witboost è pronto."))
+        #expect(prompt.partialRequests(maxContextTokens: 8_192)[0][1].content.contains("Il deploy di Witboost è pronto."))
+        #expect(prompt.singleRequest()[1].content.contains("**[00:40] Me:** ⭐ Bene, Witboost anche in staging."))
+        // The Transcript in the Vault is the user's: only the request changes.
+        #expect(readBack.paragraphs[0].text == "Il deploy di WePost è pronto.")
     }
 
     @Test("without a Vocabulary the system message has no trace of it")

@@ -32,6 +32,9 @@ public struct Vocabulary: Equatable, Sendable {
 
     public let entries: [Entry]
 
+    /// Variants of a term shown to the model, the first ones of its line.
+    static let promptVariants = 3
+
     public init(fileContent: String) {
         var seenTerms = Set<String>()
         var seenVariants = Set<String>()
@@ -52,13 +55,16 @@ public struct Vocabulary: Equatable, Sendable {
     /// description and variants, and the rule for using them. `nil` if there are no entries.
     /// A listed variant is certain: told only to correct when sure, the model left "Carpenter" next to
     /// "Karpenter = Carpenter". A term nobody said is not: it once turned up in a Summary by association.
+    /// The Transcript the model reads has every variant replaced already: the first `promptVariants`
+    /// only show how a term gets misheard, the rest made the Vocabulary most of the system message.
     var promptBlock: String? {
         guard !entries.isEmpty else { return nil }
         let lines = entries.map { entry in
             var line = "- \(entry.term)"
             if let description = entry.description { line += ": \(description)" }
             if !entry.variants.isEmpty {
-                line += " (may be written as \(entry.variants.map { "\"\($0)\"" }.joined(separator: ", ")))"
+                let shown = entry.variants.prefix(Self.promptVariants)
+                line += " (may be written as \(shown.map { "\"\($0)\"" }.joined(separator: ", ")))"
             }
             return line
         }

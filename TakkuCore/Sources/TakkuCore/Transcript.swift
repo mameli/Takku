@@ -97,11 +97,20 @@ public struct Transcript: Sendable {
                 ))
             }
         }
-        let replaceVariants = vocabulary.variantReplacer()
-        self.paragraphs = paragraphs.map {
-            Paragraph(track: $0.track, start: $0.start, text: replaceVariants($0.text), speaker: $0.speaker)
-        }
+        self.paragraphs = Self.replacingVariants(in: paragraphs, vocabulary: vocabulary)
         screenshots = []
+    }
+
+    /// The Transcript with the variants the Vocabulary knows replaced by their term, for what the
+    /// model reads: one read back from the Vault was corrected with the Vocabulary of its time.
+    func replacingVariants(_ vocabulary: Vocabulary) -> Transcript {
+        guard !vocabulary.entries.isEmpty else { return self }
+        return Transcript(paragraphs: Self.replacingVariants(in: paragraphs, vocabulary: vocabulary), screenshots: screenshots)
+    }
+
+    private static func replacingVariants(in paragraphs: [Paragraph], vocabulary: Vocabulary) -> [Paragraph] {
+        let replaceVariants = vocabulary.variantReplacer()
+        return paragraphs.map { $0.with(text: replaceVariants($0.text), name: $0.name) }
     }
 
     private init(paragraphs: [Paragraph], screenshots: [Screenshot]) {

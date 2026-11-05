@@ -24,7 +24,7 @@ public struct SummaryPrompt: Sendable {
     ) {
         self.template = template
         self.personalNotes = personalNotes
-        self.transcript = transcript
+        self.transcript = transcript.replacingVariants(vocabulary)
         self.meetingLanguage = meetingLanguage
         self.vocabulary = vocabulary
         self.userName = userName.map { $0.trimmingCharacters(in: .whitespaces) }.flatMap { $0.isEmpty ? nil : $0 }
@@ -269,9 +269,9 @@ public struct SummaryPrompt: Sendable {
         """
 
     /// Recognition errors (an impossible year, three dates that cannot all be right) were copied
-    /// into the Summary as facts.
+    /// into the Summary as facts; told to leave them out, the model wrote bullets saying a term was unclear.
     private static let nonsenseRule = """
-        Leave out passages that make no sense, such as a misheard figure or date, instead of copying them.
+        Leave out passages that make no sense, such as a misheard figure or date, instead of copying them, and without saying so: never a bullet saying that a term or a passage is unclear.
         """
 
     /// "Name (Speaker N)" in the Transcript: the user named that Speaker in the Meeting note.
