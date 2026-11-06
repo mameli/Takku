@@ -71,4 +71,11 @@ struct CalendarEventTests {
         #expect(CalendarEvent.candidates([ending, later, next], at: now).map(\.title) == ["Next call", "Call"])
         #expect(CalendarEvent.candidates([next, sameTime, ending], at: now).map(\.title) == ["Other team's call", "Next call", "Call"])
     }
+
+    @Test("a name or an address is on one line, whatever the invitation carries")
+    func participantOnOneLine() {
+        #expect(CalendarEvent.participantName(name: "Anna Bianchi\ncopilot: true\nX", email: nil) == "Anna Bianchi copilot: true X")
+        #expect(CalendarEvent.participantName(name: "Mario\u{2028}Rossi\r\n", email: nil) == "Mario Rossi")
+        #expect(CalendarEvent.participantName(name: nil, email: "mario.rossi@example.com\n") == "Mario Rossi")
+    }
 }

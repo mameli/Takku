@@ -512,7 +512,7 @@ final class MeetingController {
             }
             return url
         } catch {
-            logger.error("Meeting note not created: \(error, privacy: .public)")
+            logger.error("Meeting note not created: \(error, privacy: .private)")
             recordingError = String(localized: "\(error.localizedDescription) The note will be created at the end of Processing.")
             return nil
         }
@@ -542,7 +542,7 @@ final class MeetingController {
             do {
                 try await importFile(url, templateName: templateName, profile: AppSettings.activeProviderProfile)
             } catch {
-                logger.error("Import failed: \(error, privacy: .public)")
+                logger.error("Import failed: \(error, privacy: .private)")
                 recordingError = String(localized: "Not imported: \(error.localizedDescription)")
             }
         }
@@ -589,7 +589,7 @@ final class MeetingController {
                 folder: folder, title: title, personalNotes: notes
             )
         } catch {
-            logger.error("Meeting note of the imported file not created: \(error, privacy: .public)")
+            logger.error("Meeting note of the imported file not created: \(error, privacy: .private)")
             return nil
         }
     }
@@ -655,7 +655,7 @@ final class MeetingController {
                 do {
                     try folder.answer(request.id, AppRequestAnswer(error: error))
                 } catch {
-                    logger.error("Request \(request.id, privacy: .public) not answered: \(error, privacy: .public)")
+                    logger.error("Request \(request.id, privacy: .public) not answered: \(error, privacy: .private)")
                 }
             }
             isHandlingRequests = false
@@ -699,7 +699,7 @@ final class MeetingController {
                 logger.notice("Imported from the terminal as Meeting \(request.meetingID, privacy: .public)")
                 return nil
             } catch {
-                logger.error("Import from the terminal failed: \(error, privacy: .public)")
+                logger.error("Import from the terminal failed: \(error, privacy: .private)")
                 return "Not imported: \(error.localizedDescription)"
             }
         case .regenerate:

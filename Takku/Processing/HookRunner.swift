@@ -38,7 +38,7 @@ final class HookRunner {
                 outcome: outcome, output: output
             ))
             guard outcome.failed else { return }
-            logger.error("Hook failed for \(noteName, privacy: .public): \(String(describing: outcome), privacy: .public)")
+            logger.error("Hook failed for \(noteName, privacy: .private): \(String(describing: outcome), privacy: .public)")
             Notifications.shared.notify(
                 title: String(localized: "Hook failed"),
                 body: String(localized: "\(noteName): see ~/.takku/hooks/after-processing.log"),
@@ -123,7 +123,7 @@ final class HookRunner {
     private static func appendToLog(_ entry: String) {
         let existing = (try? String(contentsOf: logURL, encoding: .utf8)) ?? ""
         do {
-            try FileManager.default.createDirectory(at: TakkuFolder.hooksFolder, withIntermediateDirectories: true)
+            try TakkuFolder.ensureFolder(TakkuFolder.hooksFolder)
             try Hook.trimmedLog(existing + entry).write(to: logURL, atomically: true, encoding: .utf8)
         } catch {
             logger.error("Hook log not written: \(error, privacy: .public)")

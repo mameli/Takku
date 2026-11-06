@@ -38,7 +38,10 @@ public enum TakkuCredit {
             return (raw ?? [])
                 .compactMap { lossy in
                     lossy.pack.flatMap { pack in
-                        URL(string: pack.url).map { Pack(priceEuros: pack.price_eur, url: $0, isRecommended: pack.recommended == true) }
+                        // A payment page: https only, since the link is opened on a click and a gateway's reply
+                        // could name a file, a share or another app's scheme.
+                        URL(string: pack.url).flatMap { $0.scheme?.lowercased() == "https" && $0.host() != nil ? $0 : nil }
+                            .map { Pack(priceEuros: pack.price_eur, url: $0, isRecommended: pack.recommended == true) }
                     }
                 }
                 .sorted { $0.priceEuros < $1.priceEuros }

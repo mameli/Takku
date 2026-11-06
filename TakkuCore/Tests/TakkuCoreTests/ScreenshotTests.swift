@@ -219,4 +219,10 @@ struct ScreenshotTests {
         }
         #expect(Screenshot.load(fromFolder: folder).map(\.time) == [5, 60])
     }
+
+    @Test("a name with hours that no Recording has is not a Screenshot's")
+    func absurdScreenshotTime() {
+        #expect(Screenshot(fileName: "2026-10-04 1430 - 99999999999999999999999h00m00s.jpg") == nil)
+        #expect(Screenshot.baseName(startedAt: Date(timeIntervalSince1970: 0), time: 1e30, timeZone: .gmt).hasSuffix("0m00s"))
+    }
 }

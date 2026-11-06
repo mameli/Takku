@@ -172,4 +172,15 @@ struct TranscriptTests {
             Paragraph(track: .me, start: 12, text: "Fine."),
         ])
     }
+
+    @Test("a time with more digits than any Recording has is read as text, not as a time")
+    func absurdTime() {
+        let file = "---\ntakku_id: 1\n---\n**[00:05] Me:** hello\n**[99999999999999999999999:00:00] Speaker 1:** edited\n"
+        let (parsed, _) = Transcript.parse(vaultFile: file)
+
+        #expect(parsed.paragraphs.count == 1)
+        #expect(parsed.paragraphs[0].start == 5)
+        #expect(parsed.paragraphs[0].text.contains("edited"))
+        #expect(parsed.markdown.contains("[00:05]"))
+    }
 }

@@ -58,13 +58,13 @@ final class Notifications: NSObject, UNUserNotificationCenterDelegate {
             let center = UNUserNotificationCenter.current()
             let status = await center.notificationSettings().authorizationStatus
             guard status == .authorized || status == .provisional else {
-                logger.notice("Notification \"\(title, privacy: .public)\" not shown: permission status \(status.rawValue, privacy: .public)")
+                logger.notice("Notification \"\(title, privacy: .private)\" not shown: permission status \(status.rawValue, privacy: .public)")
                 return
             }
             do {
                 try await center.add(UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil))
             } catch {
-                logger.error("Notification \"\(title, privacy: .public)\" not delivered: \(error, privacy: .public)")
+                logger.error("Notification \"\(title, privacy: .private)\" not delivered: \(error, privacy: .public)")
             }
         }
     }

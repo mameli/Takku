@@ -101,7 +101,7 @@ When you stop, Takku finishes transcribing, writes the summary at the top of the
   - **Name speakers…**: assign names to Speaker 1, Speaker 2… (see below).
   - **Regenerate Summary**: writes a new summary from the current transcript in your notes folder, using the Template and Profile currently selected in the menu.
   - **Reprocess Recording…**: rebuilds the transcript from the audio with your current Vocabulary and speaker names (reusing valid cached segments, or from scratch if you tick *Transcribe again from scratch*), then writes a new summary. If a retry fails, your previous summary and transcript are kept.
-- **Report a problem…**: creates a diagnostic file (Takku version, Mac model, active models and the last 3 days of logs), reveals it in Finder and opens a pre-filled GitHub issue. Nothing is uploaded automatically.
+- **Report a problem…** (Settings → *About*): creates a diagnostic file (Takku version, Mac model, active models and the last 3 days of logs), reveals it in Finder and opens a pre-filled GitHub issue. Nothing is uploaded automatically.
 
 ### Calendar
 

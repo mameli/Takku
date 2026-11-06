@@ -21,4 +21,9 @@ struct ElapsedLabelTests {
     func hours() {
         #expect(elapsedLabel(3723) == "1:02:03")
     }
+
+    @Test("a time that does not fit an Int does not stop the app", arguments: [1e19, 1e300, Double.infinity, Double.nan])
+    func outOfRange(elapsed: Double) {
+        #expect(elapsedLabel(elapsed) == "00:00")
+    }
 }

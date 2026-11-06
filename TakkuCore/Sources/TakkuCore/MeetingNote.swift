@@ -133,7 +133,7 @@ public struct MeetingNote: Equatable, Sendable {
     public mutating func replaceSpeakerNames(with names: [Int: String]) {
         var markdown = MarkdownLines(content)
         let cleaned = names.compactMap { number, name -> (Int, String)? in
-            let name = name.trimmingCharacters(in: .whitespacesAndNewlines)
+            let name = CalendarEvent.oneLine(name)
             return name.isEmpty ? nil : (number, name)
         }
         .sorted { $0.0 < $1.0 }
@@ -155,7 +155,10 @@ public struct MeetingNote: Equatable, Sendable {
     public mutating func replaceManagedSection(with body: String) {
         var markdown = MarkdownLines(content)
         // A marker inside the text (e.g. in the model's reply) would close the Managed section next time.
-        let bodyLines = body.components(separatedBy: "\n").filter { Marker($0) == nil }
+        // Lines as the note is read back: `\r` is a line break there too, so a marker after one counts.
+        var bodyLines = MarkdownLines(body).lines.filter { Marker($0) == nil }.map(Self.defused)
+        // A code block the reply leaves open would hide the end marker and put the rest of the note outside.
+        if let open = Self.openFence(in: bodyLines) { bodyLines.append(open) }
         let section = [Self.managedStart] + bodyLines + [Self.managedEnd]
 
         if let managed = Self.managedRange(in: markdown) {
@@ -285,7 +288,7 @@ public struct MeetingNote: Equatable, Sendable {
     /// The `participants` entry as YAML lines, quoted; none without participants.
     private static func participantsLines(_ participants: [String]) -> [String] {
         participants.isEmpty ? [] : ["participants:"] + participants.map {
-            "  - \"\($0.replacingOccurrences(of: "\\", with: "").replacingOccurrences(of: "\"", with: "\\\""))\""
+            "  - \"\(CalendarEvent.oneLine($0).replacingOccurrences(of: "\\", with: "").replacingOccurrences(of: "\"", with: "\\\""))\""
         }
     }
 
@@ -335,6 +338,30 @@ public struct MeetingNote: Equatable, Sendable {
     private static func durationValue(_ seconds: TimeInterval) -> String {
         let minutes = max(1, Int((seconds / 60).rounded()))
         return minutes < 60 ? "\(minutes)m" : String(format: "%dh %02dm", minutes / 60, minutes % 60)
+    }
+
+    /// A line of the model's reply without what Obsidian would fetch or run by itself when the note is
+    /// opened: a remote image becomes a link (the address stays, nothing is loaded), HTML tags that load
+    /// or run something are shown as text, and a Dataview query block is a plain block. The reply is
+    /// written from a Transcript that other people said, so it is not trusted. Screenshots are `![[…]]`
+    /// embeds of the Vault: they stay.
+    private static func defused(_ line: String) -> String {
+        var line = line
+        line.replace(/!(\[[^\]]*\]\(\s*<?(?:(?i:https?:)|\/\/))/) { $0.output.1 }
+        line.replace(/<(?=(?i:img|iframe|script|object|embed|video|audio|source|link|style|svg|form|input|base|meta)\b)/, with: "&lt;")
+        line.replace(/^(\s*(?:```|~~~)\s*)(?i:dataviewjs?)\b/) { "\($0.output.1)text" }
+        return line
+    }
+
+    /// The fence that closes the code block still open at the end of `lines`, `nil` if there is none.
+    private static func openFence(in lines: [String]) -> String? {
+        var fence: String?
+        for line in lines.map({ $0.trimmingCharacters(in: .whitespaces) }) {
+            if line.hasPrefix("```") || line.hasPrefix("~~~") {
+                fence = fence == nil ? String(line.prefix(3)) : nil
+            }
+        }
+        return fence
     }
 
     /// Body lines that are Managed section markers, except those inside code blocks.

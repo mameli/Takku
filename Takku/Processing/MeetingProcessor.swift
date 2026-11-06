@@ -668,7 +668,7 @@ final class MeetingProcessor {
             let reason = problems.joined(separator: " ")
             record.status = .failed(reason: reason)
             lastError = reason
-            logger.error("\(reason, privacy: .public)")
+            logger.error("Processing failed: \(reason, privacy: .private)")
         }
         // Without a note, this Meeting's own local Transcript: `lastTranscriptURL` may belong to an
         // earlier Meeting when this one's transcription failed.
@@ -691,7 +691,7 @@ final class MeetingProcessor {
                 }
             } catch {
                 lastError = String(localized: "Hook not run: \(error.localizedDescription)")
-                logger.error("Hook not run: \(error, privacy: .public)")
+                logger.error("Hook not run: \(error, privacy: .private)")
             }
         }
     }
@@ -820,7 +820,7 @@ final class MeetingProcessor {
             let renamed = try vault.rename(noteURL, to: newName)
             return (renamed, wasShownInObsidian && AppSettings.opensNotes)
         } catch {
-            logger.error("Renaming the note failed: \(error, privacy: .public)")
+            logger.error("Renaming the note failed: \(error, privacy: .private)")
             return (noteURL, false)
         }
     }
@@ -849,6 +849,13 @@ final class MeetingProcessor {
         // A Profile deleted after the Meeting started has lost its key in the Keychain too.
         guard isTestProfile || AppSettings.summaryProfiles.contains(where: { $0.id == profile.id }) else {
             return (.failed(reason: String(localized: "the Profile \"\(profile.displayName)\" was deleted: choose another one in the menu and Retry.")), nil, nil)
+        }
+        // The key is looked up by the Profile's id and sent to the address of the Meeting's copy of it: if the
+        // Profile's address was edited since, or the copy on disk was, the key would go to the old one.
+        guard isTestProfile || AppSettings.summaryProfiles.first(where: { $0.id == profile.id })?.baseURL.trimmingCharacters(in: .whitespaces)
+            == profile.baseURL.trimmingCharacters(in: .whitespaces)
+        else {
+            return (.failed(reason: String(localized: "the address of the Profile \"\(profile.displayName)\" changed since this Meeting: Retry to use the new one.")), nil, nil)
         }
         guard !transcript.paragraphs.isEmpty else {
             return (.failed(reason: String(localized: "there is no speech in the Recording.")), nil, nil)
@@ -896,7 +903,7 @@ final class MeetingProcessor {
                 title, log
             )
         } catch {
-            logger.error("Summary not generated after \(secondsSince(started), privacy: .public): \(error.localizedDescription, privacy: .public)")
+            logger.error("Summary not generated after \(secondsSince(started), privacy: .public): \(error.localizedDescription, privacy: .private)")
             return (.failed(reason: error.localizedDescription), nil, log)
         }
     }
@@ -911,7 +918,7 @@ final class MeetingProcessor {
             logger.notice("Title without a Summary from Apple Intelligence: \(title == nil ? "empty" : "written", privacy: .public)")
             return title
         } catch {
-            logger.error("Title without a Summary not written: \(error.localizedDescription, privacy: .public)")
+            logger.error("Title without a Summary not written: \(error.localizedDescription, privacy: .private)")
             return nil
         }
     }
@@ -1018,7 +1025,7 @@ final class MeetingProcessor {
     /// the log and in Settings → Recordings → *Delete audio…*.
     func cleanUpExpiredRecordings() {
         let problems = RecordingStorage.deleteAudio(olderThanDays: AppSettings.retentionDays)
-        for problem in problems { logger.error("Cleanup: \(problem, privacy: .public)") }
+        for problem in problems { logger.error("Cleanup: \(problem, privacy: .private)") }
         let reported = Set(UserDefaults.standard.stringArray(forKey: Self.reportedCleanupProblemsKey) ?? [])
         UserDefaults.standard.set(problems, forKey: Self.reportedCleanupProblemsKey)
         let new = problems.filter { !reported.contains($0) }

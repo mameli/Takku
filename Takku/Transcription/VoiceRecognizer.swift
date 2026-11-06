@@ -29,6 +29,8 @@ actor VoiceRecognizer {
         guard let (segment, offset) = recording.segment(of: .others, at: sample.start) else { return [] }
         let file = try AVAudioFile(forReading: directory.appending(path: segment.fileName))
         let rate = file.processingFormat.sampleRate
+        // The time comes from the Transcript in the Vault: one outside the file must not reach the conversion.
+        guard offset.isFinite, offset >= 0, offset * rate < Double(file.length) else { return [] }
         file.framePosition = AVAudioFramePosition(offset * rate)
         // A sample may run past the end of its Segment: it is cut there.
         let frames = AVAudioFrameCount(min(sample.duration * rate, Double(max(0, file.length - file.framePosition))))

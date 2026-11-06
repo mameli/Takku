@@ -228,6 +228,8 @@ public enum AgentCLI: String, CaseIterable, Sendable {
                 "exec", "--ephemeral", "--skip-git-repo-check", "--ignore-user-config", "--ignore-rules",
                 "--sandbox", "read-only", "--color", "never", "--json",
                 "-c", "project_doc_max_bytes=0",
+                // The denylist below names features, not every tool: web search is a setting of its own.
+                "-c", "web_search=\"disabled\"",
             ]
             for feature in ["shell_tool", "unified_exec", "apps", "browser_use", "computer_use", "in_app_browser", "hooks", "memories", "plugins"] {
                 arguments += ["--disable", feature]

@@ -20,6 +20,16 @@ enum TakkuFolder {
     static var hooksFolder: URL { root.appending(path: "hooks", directoryHint: .isDirectory) }
     static var summaryLogFolder: URL { root.appending(path: "summary-log", directoryHint: .isDirectory) }
 
+    /// Creates `folder` inside `~/.takku` and keeps `~/.takku` for the user alone: the Summary log holds
+    /// the whole text of Meetings, and the default mode would let another account of the Mac read it.
+    /// The mode of the folder protects what is in it, files and folders made before this too.
+    static func ensureFolder(_ folder: URL) throws {
+        let manager = FileManager.default
+        try manager.createDirectory(at: root, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
+        try manager.setAttributes([.posixPermissions: 0o700], ofItemAtPath: root.path(percentEncoded: false))
+        if folder != root { try manager.createDirectory(at: folder, withIntermediateDirectories: true) }
+    }
+
     // MARK: - Templates
 
     /// The available Templates, by file name (without `.md`), in alphabetical order.
@@ -41,7 +51,7 @@ enum TakkuFolder {
     static func ensureDefaultTemplate() throws {
         let names = templateNames()
         guard names.isEmpty || !names.contains(AppSettings.defaultTemplate) else { return }
-        try FileManager.default.createDirectory(at: templatesFolder, withIntermediateDirectories: true)
+        try ensureFolder(templatesFolder)
         if !names.contains(Template.defaultName) {
             try Template.defaultFileContent.write(to: templateURL(Template.defaultName), atomically: true, encoding: .utf8)
         }
@@ -56,7 +66,7 @@ enum TakkuFolder {
     /// Creates a new Template from the default one and returns its file name (without `.md`).
     static func createTemplate(named name: String) throws -> String {
         guard let safeName = VaultNaming.fileName(name) else { throw VaultError.invalidName(name) }
-        try FileManager.default.createDirectory(at: templatesFolder, withIntermediateDirectories: true)
+        try ensureFolder(templatesFolder)
         let fileName = VaultNaming.available(safeName, taken: Set(templateNames()))
         try Template.newFileContent(name: fileName)
             .write(to: templateURL(fileName), atomically: true, encoding: .utf8)
@@ -93,7 +103,7 @@ enum TakkuFolder {
     /// Creates the Vocabulary file with the example text if it does not exist.
     static func ensureVocabularyFile() throws {
         guard !FileManager.default.fileExists(atPath: vocabularyURL.path(percentEncoded: false)) else { return }
-        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        try ensureFolder(root)
         try Vocabulary.exampleFileContent.write(to: vocabularyURL, atomically: true, encoding: .utf8)
     }
 }

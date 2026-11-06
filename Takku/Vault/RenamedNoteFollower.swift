@@ -40,7 +40,7 @@ enum RenamedNoteFollower {
                 }
             }
             if !Task.isCancelled, vault.isShownInObsidian(note) == false {
-                logger.error("Obsidian does not show the renamed note \(note.lastPathComponent, privacy: .public)")
+                logger.error("Obsidian does not show the renamed note \(note.lastPathComponent, privacy: .private)")
             }
         }
     }

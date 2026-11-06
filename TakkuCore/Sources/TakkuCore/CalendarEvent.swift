@@ -26,14 +26,21 @@ public struct CalendarEvent: Hashable, Sendable {
     /// Transcript. An address without two words in it ("mrossi@…") stays whole. `nil` without
     /// a name or an email.
     public static func participantName(name: String?, email: String?) -> String? {
-        let name = name?.trimmingCharacters(in: .whitespaces) ?? ""
+        let name = oneLine(name)
         if !name.isEmpty, !name.contains("@") {
             if !name.contains(" "), let handleName = nameFromHandle(name) { return handleName }
             return recased(surnameLast(name))
         }
-        let address = name.isEmpty ? email?.trimmingCharacters(in: .whitespaces) ?? "" : name
+        let address = name.isEmpty ? oneLine(email) : name
         guard !address.isEmpty else { return nil }
         return nameFromHandle(String(address.prefix { $0 != "@" })) ?? address
+    }
+
+    /// The text on one line: every run of spaces, line breaks and control characters becomes one space.
+    /// A name or an address comes from an invitation, and the Meeting note is a file of lines.
+    static func oneLine(_ text: String?) -> String {
+        (text ?? "").components(separatedBy: CharacterSet.whitespacesAndNewlines.union(.controlCharacters))
+            .filter { !$0.isEmpty }.joined(separator: " ")
     }
 
     /// "Rossi, Mario" → "Mario Rossi"; a name with no comma, or more than one, stays as it is.

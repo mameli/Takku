@@ -32,7 +32,7 @@ public struct Screenshot: Equatable, Sendable {
 
     /// `2026-10-04 1430 - 12m30s`, without extension: the Meeting start, then the time from it.
     public static func baseName(startedAt: Date, time: TimeInterval, timeZone: TimeZone = .current) -> String {
-        let total = max(0, Int(time))
+        let total = max(0, Int(exactly: time.rounded(.towardZero)) ?? 0)
         let (hours, minutes, seconds) = (total / 3600, total % 3600 / 60, total % 60)
         let elapsed = hours > 0
             ? String(format: "%dh%02dm%02ds", hours, minutes, seconds)
@@ -107,7 +107,7 @@ public struct Screenshot: Equatable, Sendable {
 
     /// The time in a name made by `baseName`, with or without the ` (2)` suffix and the extension.
     private static func time(inName name: String) -> TimeInterval? {
-        let pattern = /\d{4}-\d{2}-\d{2} \d{4} - (?:(\d+)h)?(\d+)m(\d{2})s(?: \(\d+\))?\.jpg/
+        let pattern = /\d{4}-\d{2}-\d{2} \d{4} - (?:(\d{1,4})h)?(\d{1,4})m(\d{2})s(?: \(\d+\))?\.jpg/
         guard let match = name.wholeMatch(of: pattern) else { return nil }
         let hours = match.1.flatMap { Double($0) } ?? 0
         return hours * 3600 + (Double(match.2) ?? 0) * 60 + (Double(match.3) ?? 0)

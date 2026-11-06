@@ -54,4 +54,19 @@ struct ProblemReportTests {
         #expect(ProblemReport.summary(of: local) == "gemma (on this Mac)")
         #expect(ProblemReport.summary(of: remote) == "qwen (remote)")
     }
+
+    @Test("the logs in the file hide an address and a path a log call left public")
+    func logsAreRedacted() {
+        let report = ProblemReport(version: "1.0 (1)", system: "macOS", installedWith: nil, transcriptionModel: "m", summary: "x (remote)")
+        let text = report.text(logs: """
+            error Summary not generated: the address https://llm.acme-corp.example/v1 is not secure
+            error Hook failed: /Users/mario/Vault/Meeting with Acme.md: no such file
+            notice LLM reply HTTP 200, 1200 bytes in 3.1 s
+            """)
+
+        #expect(!text.contains("acme-corp"))
+        #expect(!text.contains("Meeting with Acme"))
+        #expect(!text.contains("/Users/mario"))
+        #expect(text.contains("LLM reply HTTP 200, 1200 bytes in 3.1 s"))
+    }
 }

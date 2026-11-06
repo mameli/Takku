@@ -158,7 +158,11 @@ final class SegmentedTrackWriter: @unchecked Sendable {
         }
 
         let ratio = outputFormat.sampleRate / buffer.format.sampleRate
-        let capacity = AVAudioFrameCount((Double(buffer.frameLength) * ratio).rounded(.up)) + 1
+        let frames = (Double(buffer.frameLength) * ratio).rounded(.up)
+        guard frames.isFinite, frames < Double(UInt32.max) - 1 else {
+            throw CaptureError.unsupportedFormat(buffer.format.description)
+        }
+        let capacity = AVAudioFrameCount(frames) + 1
         let output = AVAudioPCMBuffer(pcmFormat: outputFormat, frameCapacity: capacity)!
 
         var consumed = false

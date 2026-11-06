@@ -213,13 +213,15 @@ public struct Transcript: Sendable {
         return changed ? markdown.text : nil
     }
 
-    /// The first line of a paragraph in the Transcript file: `**[12:34] Speaker 2:** text`.
+    /// The first line of a paragraph in the Transcript file: `**[12:34] Speaker 2:** text`. The time has
+    /// at most four digits in its first part: a longer one in a file edited by hand or by Sync is read as
+    /// text, not as a time that no Recording can have.
     private struct Header {
         let time: Substring
         let paragraph: Paragraph
 
         init?(_ line: String) {
-            let pattern = /^\*\*\[(\d+(?::\d{2}){1,2})\] (Me|Others|Speaker (\d+)|(.+?) \(Speaker (\d+)\)):\*\* ?(.*)$/
+            let pattern = /^\*\*\[(\d{1,4}(?::\d{2}){1,2})\] (Me|Others|Speaker (\d+)|(.+?) \(Speaker (\d+)\)):\*\* ?(.*)$/
             guard let match = line.wholeMatch(of: pattern) else { return nil }
             time = match.1
             let seconds = match.1.split(separator: ":").reduce(0) { $0 * 60 + (Double($1) ?? 0) }

@@ -37,6 +37,8 @@ enum AudioFileImport {
         }
         guard file.length > 0 else { throw CaptureError.noAudio(name) }
         let sampleRate = file.processingFormat.sampleRate
+        // A header can declare 0 Hz and the decoder still opens the file: the conversion would divide by it.
+        guard sampleRate.isFinite, sampleRate > 0 else { throw CaptureError.unsupportedFormat(file.processingFormat.description) }
         let (startedAt, isRecordingDate) = await startDate(of: url)
 
         let directory = recordingsDirectory.appending(path: meetingID.uuidString, directoryHint: .isDirectory)
@@ -87,11 +89,11 @@ enum AudioFileImport {
             var warnings: [String] = []
             for stretch in skipped {
                 let start = Double(stretch.lowerBound) / sampleRate, end = Double(stretch.upperBound) / sampleRate
-                logger.warning("Skipped unreadable audio in \(name, privacy: .public) from \(start, format: .fixed(precision: 3)) s to \(end, format: .fixed(precision: 3)) s")
+                logger.warning("Skipped unreadable audio in \(name, privacy: .private) from \(start, format: .fixed(precision: 3)) s to \(end, format: .fixed(precision: 3)) s")
                 warnings.append(String(localized: "Unreadable audio skipped from \(String(format: "%.3f", start)) s to \(String(format: "%.3f", end)) s; the Transcript and Summary may be incomplete."))
             }
             if let firstError {
-                logger.notice("Read errors in \(name, privacy: .public), stretches skipped: \(skipped.count); the first error: \(firstError, privacy: .public)")
+                logger.notice("Read errors in \(name, privacy: .private), stretches skipped: \(skipped.count); the first error: \(firstError, privacy: .private)")
             }
             let recording = Recording(
                 meetingID: meetingID, startedAt: startedAt,

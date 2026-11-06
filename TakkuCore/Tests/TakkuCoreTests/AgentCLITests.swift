@@ -38,6 +38,7 @@ struct AgentCLITests {
         }
         #expect(line.contains("--sandbox read-only"))
         #expect(line.contains("-c project_doc_max_bytes=0"))
+        #expect(line.contains("-c web_search=\"disabled\""))
         #expect(run.ranIn(run.value(after: "-C")))
         #expect(run.files.isEmpty)
         #expect(line.contains("-c model_reasoning_effort=\"low\""))

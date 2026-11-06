@@ -36,6 +36,14 @@ public struct ProblemReport: Equatable, Sendable {
         return components.url!
     }
 
+    /// A second layer behind the log calls: an address or a path that one of them left public (an error
+    /// that quotes the Profile's address, a file error that names the note) does not go in a file made
+    /// to be attached to a public issue. A path hides the rest of its line, which may be the note's name.
+    public static func redacted(logs: String) -> String {
+        logs.replacing(/https?:\/\/[^\s"'<>)]+/, with: "<address>")
+            .replacing(/\/Users\/[^\n]*/, with: "<path>")
+    }
+
     public func text(logs: String) -> String {
         """
         Takku problem report
@@ -48,7 +56,7 @@ public struct ProblemReport: Equatable, Sendable {
         Summary: \(summary)
 
         Logs:
-        \(logs)
+        \(Self.redacted(logs: logs))
 
         """
     }

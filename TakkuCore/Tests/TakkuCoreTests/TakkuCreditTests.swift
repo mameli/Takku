@@ -102,4 +102,11 @@ struct TakkuCreditTests {
             try await TakkuCredit.balance(apiKey: "tk_wrong", transport: gateway.transport)
         }
     }
+
+    @Test("a pack link that is not https is left out: it would open a file, a share or another app")
+    func packsOnlyHTTPS() async throws {
+        let body = #"{"packs":[{"price_eur":5,"url":"file:///Applications/Calculator.app"},{"price_eur":10,"url":"smb://host/share"},{"price_eur":20,"url":"https://buy.stripe.com/twenty"},{"price_eur":50,"url":"http://buy.stripe.com/fifty"},{"price_eur":100,"url":"https://"}]}"#
+        let packs = try await TakkuCredit.packs(transport: Gateway(status: 200, body: body).transport)
+        #expect(packs.map(\.priceEuros) == [20])
+    }
 }

@@ -13,7 +13,7 @@ enum SummaryLogStorage {
     static func write(_ entry: SummaryLog.Entry) {
         let folder = TakkuFolder.summaryLogFolder
         do {
-            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            try TakkuFolder.ensureFolder(folder)
             let taken = Set(entries().map { $0.url.deletingPathExtension().lastPathComponent })
             let name = VaultNaming.available(entry.fileName(), taken: taken)
             try entry.json().write(to: folder.appending(path: name + ".json"), options: .atomic)
