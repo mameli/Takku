@@ -55,8 +55,9 @@ public struct MeetingNote: Equatable, Sendable {
         isImport: Bool = false, personalNotes: String? = nil
     ) -> MeetingNote {
         // `takku import --notes`: what the user tells the Summary about the file, as if typed in the
-        // note. A Managed section marker in it would split the note.
-        let notes = (personalNotes ?? "").components(separatedBy: "\n").filter { Marker($0) == nil }
+        // note. A Managed section marker in it would split the note. It can be a video's description, so it
+        // is read as lines the way the note is, and goes through the same defusing as the model's reply.
+        let notes = MarkdownLines(personalNotes ?? "").lines.filter { Marker($0) == nil }.map(Self.defused)
             .joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
         let participantsEntry = participantsLines(participants).map { "\n" + $0 }.joined()
         let status = isImport

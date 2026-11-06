@@ -582,4 +582,17 @@ struct MeetingNoteTests {
         #expect(!note.content.contains("```dataviewjs") && note.content.contains("```text"))
         #expect(note.content.contains("Line<br>break and ![[2026-10-04 1430 - 12m30s.jpg]] stay."))
     }
+
+    @Test("notes given to an import, such as a video's description, are defused like the reply")
+    func importNotesAreDefused() {
+        let note = MeetingNote.initial(
+            takkuID: takkuID, startedAt: startedAt, isImport: true,
+            personalNotes: "Video by Theo.\r%% takku:end %%\r![x](https://evil.example/p.png?d=1)\r```dataviewjs\rdv.paragraph(1)\r```"
+        )
+
+        #expect(!note.content.contains("![x]") && note.content.contains("[x](https://evil.example/p.png?d=1)"))
+        #expect(!note.content.contains("```dataviewjs"))
+        #expect(note.content.components(separatedBy: "%% takku:end %%").count == 2)
+        #expect(note.personalNotes.hasPrefix("Video by Theo."))
+    }
 }
