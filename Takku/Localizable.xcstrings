@@ -9369,6 +9369,34 @@
         }
       }
     },
+    "the address of the Profile \"%@\" changed since this Meeting: Retry to use the new one.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "l'indirizzo del Profilo \"%@\" è cambiato dopo questa riunione: premi Riprova per usare quello nuovo."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Adresse des Profils „%@“ hat sich seit diesem Meeting geändert: Versuche es erneut, um die neue zu verwenden."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "la dirección del perfil «%@» cambió después de esta reunión: vuelve a intentarlo para usar la nueva."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "l’adresse du profil « %@ » a changé depuis cette réunion : réessayez pour utiliser la nouvelle."
+          }
+        }
+      }
+    },
     "the Profile \"%@\" was deleted: choose another one in the menu and Retry.": {
       "localizations": {
         "it": {

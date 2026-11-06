@@ -4,6 +4,19 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
+## 1.19.2 (2026-11-06)
+
+- **What a meeting says stays text in your note**: a summary is written from what other people said, and an import can carry a video's description, so neither can now make Obsidian do anything by itself. Remote images become links, HTML is shown as text (except a few plain tags such as `<br>` and `<b>`) and Dataview blocks and inline queries do not run. The images of your notes folder, such as Screenshots, stay as they are.
+- **The summary stays in its place**: a reply with a code block left open, or with carriage returns, could push the rest of the note out of the part Takku manages. Now the whole reply stays inside it, and a participant or speaker name with a line break in it stays on one line.
+- **Files that stopped Takku**: an audio file whose header says 0 Hz is refused as an unsupported format, and a time too large in a Transcript or a Screenshot name edited by hand is read as text. Neither stops Takku any more.
+- **A lighter Vocabulary in the summary**: the prompt carries only the first three variants of a term, since the transcript the model reads has them all replaced, also when a summary is regenerated from your notes folder. A passage that makes no sense is left out, with no bullet saying it is unclear.
+- **Your key goes only to the address you see**: if you edit a Profile's address after a meeting started, its key is no longer sent to the old one: the note says so, and *Retry* uses the new address.
+- **Less in a problem report**: the logs no longer quote the text of errors, and any address or path left in them is hidden when the file is written. *Report a problem…* is now only in *Settings → About*, no longer in the menu.
+- **`~/.takku` is for your account alone**: the Summary log holds the whole text of your meetings, and another account on the Mac could read it.
+- **Codex runs with web search off**, like every other tool, and the import skill keeps what a video says out of the shell commands it writes.
+
+**Before you update**: a Template that asks the model for HTML, remote images or Dataview blocks now gets them as plain text or links.
+
 ## 1.19.1 (2026-11-05)
 
 - **Titles that cost less credit**: the title of a meeting used to send the whole summary to your Summary Profile just to get six words back. Now Apple Intelligence on your Mac writes it first, free and without anything leaving the Mac, and your Profile only does it if the Mac cannot. When it does, it reads the start of the summary, not all of it, so the title costs a fraction of what it did.
