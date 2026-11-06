@@ -18,7 +18,7 @@ enum SummaryLogStorage {
             let name = VaultNaming.available(entry.fileName(), taken: taken)
             try entry.json().write(to: folder.appending(path: name + ".json"), options: .atomic)
         } catch {
-            logger.error("Summary log entry not written: \(error, privacy: .public)")
+            logger.error("Summary log entry not written: \(error.logCode, privacy: .public) \(error, privacy: .private)")
             return
         }
         for url in SummaryLog.overLimit(entries()) {

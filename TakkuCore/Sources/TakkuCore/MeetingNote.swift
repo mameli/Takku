@@ -341,39 +341,71 @@ public struct MeetingNote: Equatable, Sendable {
         return minutes < 60 ? "\(minutes)m" : String(format: "%dh %02dm", minutes / 60, minutes % 60)
     }
 
-    /// A line of the model's reply without what Obsidian would fetch or run by itself when the note is
-    /// opened: a remote image becomes a link (the address stays, nothing is loaded), HTML tags that load
-    /// or run something are shown as text, and a Dataview query block is a plain block. The reply is
-    /// written from a Transcript that other people said, so it is not trusted. Screenshots are `![[…]]`
-    /// embeds of the Vault: they stay.
+    /// A line of the model's reply (or of the notes given to an import) without what Obsidian would
+    /// fetch or run by itself when the note is opened. The text comes from a Transcript that other
+    /// people said, or from a video's description, so it is not trusted, and what is not known to be
+    /// harmless is made harmless instead of looked for:
+    /// - every Markdown image becomes a link (the address stays, nothing is loaded), whatever its
+    ///   form; only the `![[…]]` embeds of the Vault stay, which are how Screenshots are placed;
+    /// - an HTML tag is shown as text, but a few without attributes (`<br>`, `<b>`…);
+    /// - a Dataview block, after any quote, list marker or fence length, is a plain block, and
+    ///   an inline Dataview query is not one any more.
     private static func defused(_ line: String) -> String {
         var line = line
-        line.replace(/!(\[[^\]]*\]\(\s*<?(?:(?i:https?:)|\/\/))/) { $0.output.1 }
-        line.replace(/<(?=(?i:img|iframe|script|object|embed|video|audio|source|link|style|svg|form|input|base|meta)\b)/, with: "&lt;")
-        line.replace(/^(\s*(?:```|~~~)\s*)(?i:dataviewjs?)\b/) { "\($0.output.1)text" }
+        line.replace(/!(?=\[(?!\[))/, with: "")
+        line.replace(/<(?!\/?(?:br|b|i|u|s|sub|sup|kbd|mark|code|em|strong)\s*\/?>)(?=[A-Za-z\/!?])/, with: "&lt;")
+        line.replace(/^((?:\s*(?:>|-|\*|\+|\d+[.)]))*\s*(?:`{3,}|~{3,})\s*)(?i:dataview(?:js)?)\b/) { "\($0.output.1)text" }
+        line.replace(/`(\$?=)/, with: "` $1")
         return line
+    }
+
+    /// Which lines are inside a fenced code block, by CommonMark's rule: a block is closed by a fence of
+    /// the same character, at least as long as the one that opened it, with nothing after it. Obsidian
+    /// reads the note that way: a block Takku thought closed must not be one it thinks open.
+    private struct Fences {
+        private var open: (character: Character, length: Int)?
+
+        var isInside: Bool { open != nil }
+
+        /// The fence that closes the block that is still open.
+        var closing: String? { open.map { String(repeating: $0.character, count: $0.length) } }
+
+        /// Reads a line; `true` when it is a fence (opening or closing), which is not content.
+        mutating func read(_ rawLine: String) -> Bool {
+            let line = rawLine.trimmingCharacters(in: .whitespaces)
+            guard let character = line.first, character == "`" || character == "~" else { return false }
+            let length = line.prefix { $0 == character }.count
+            guard length >= 3 else { return false }
+            let rest = line.dropFirst(length)
+            if let current = open {
+                guard character == current.character, length >= current.length,
+                      rest.trimmingCharacters(in: .whitespaces).isEmpty
+                else { return false }
+                open = nil
+                return true
+            }
+            // A backtick fence cannot have a backtick in its info string: it is not a fence then.
+            guard character == "~" || !rest.contains("`") else { return false }
+            open = (character, length)
+            return true
+        }
     }
 
     /// The fence that closes the code block still open at the end of `lines`, `nil` if there is none.
     private static func openFence(in lines: [String]) -> String? {
-        var fence: String?
-        for line in lines.map({ $0.trimmingCharacters(in: .whitespaces) }) {
-            if line.hasPrefix("```") || line.hasPrefix("~~~") {
-                fence = fence == nil ? String(line.prefix(3)) : nil
-            }
-        }
-        return fence
+        var fences = Fences()
+        for line in lines { _ = fences.read(line) }
+        return fences.closing
     }
 
     /// Body lines that are Managed section markers, except those inside code blocks.
     private static func markerLines(in markdown: MarkdownLines) -> [(index: Int, marker: Marker)] {
         var markers: [(index: Int, marker: Marker)] = []
-        var inCodeBlock = false
+        var fences = Fences()
         for index in markdown.bodyStart..<markdown.lines.count {
             let line = markdown.lines[index].trimmingCharacters(in: .whitespaces)
-            if line.hasPrefix("```") || line.hasPrefix("~~~") {
-                inCodeBlock.toggle()
-            } else if !inCodeBlock, let marker = Marker(line) {
+            if fences.read(line) { continue }
+            if !fences.isInside, let marker = Marker(line) {
                 markers.append((index, marker))
             }
         }

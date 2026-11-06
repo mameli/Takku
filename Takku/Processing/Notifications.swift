@@ -40,7 +40,7 @@ final class Notifications: NSObject, UNUserNotificationCenterDelegate {
                 let granted = try await center.requestAuthorization(options: [.alert, .sound])
                 logger.info("Notification permission requested: granted \(granted, privacy: .public)")
             } catch {
-                logger.error("Notification permission request failed: \(error, privacy: .public)")
+                logger.error("Notification permission request failed: \(error.logCode, privacy: .public) \(error, privacy: .private)")
             }
         }
     }
@@ -64,7 +64,7 @@ final class Notifications: NSObject, UNUserNotificationCenterDelegate {
             do {
                 try await center.add(UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil))
             } catch {
-                logger.error("Notification \"\(title, privacy: .private)\" not delivered: \(error, privacy: .public)")
+                logger.error("Notification \"\(title, privacy: .private)\" not delivered: \(error.logCode, privacy: .public) \(error, privacy: .private)")
             }
         }
     }

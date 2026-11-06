@@ -50,7 +50,7 @@ extension ChatClient {
                 logger.notice("LLM reply HTTP \(http.statusCode), \(data.count) bytes in \(secondsSince(started), privacy: .public)")
                 return (data, http)
             } catch {
-                logger.error("LLM request failed after \(secondsSince(started), privacy: .public): \(error.localizedDescription, privacy: .public)")
+                logger.error("LLM request failed after \(secondsSince(started), privacy: .public): \(error.logCode, privacy: .public) \(error.localizedDescription, privacy: .private)")
                 throw error
             }
         }

@@ -61,12 +61,20 @@ struct ProblemReportTests {
         let text = report.text(logs: """
             error Summary not generated: the address https://llm.acme-corp.example/v1 is not secure
             error Hook failed: /Users/mario/Vault/Meeting with Acme.md: no such file
+            error Rename failed: file:///Volumes/Work/Meetings/2026-10-10 Acme.md and /private/tmp/Acme renewal.md moved
             notice LLM reply HTTP 200, 1200 bytes in 3.1 s
             """)
 
         #expect(!text.contains("acme-corp"))
         #expect(!text.contains("Meeting with Acme"))
-        #expect(!text.contains("/Users/mario"))
+        #expect(!text.contains("/Users/mario") && !text.contains("/Volumes") && !text.contains("/private") && !text.contains("Acme renewal"))
         #expect(text.contains("LLM reply HTTP 200, 1200 bytes in 3.1 s"))
+    }
+
+    @Test("an error is logged by its domain and code, not by its text")
+    func logCode() {
+        let error = CocoaError(.fileReadNoSuchFile, userInfo: [NSFilePathErrorKey: "/Users/mario/Vault/Acme renewal.md"])
+        #expect(error.logCode == "NSCocoaErrorDomain 260")
+        #expect(!error.logCode.contains("Acme"))
     }
 }

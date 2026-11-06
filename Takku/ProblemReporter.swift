@@ -28,7 +28,7 @@ enum ProblemReporter {
                 try report.text(logs: logs).write(to: file, atomically: true, encoding: .utf8)
                 NSWorkspace.shared.activateFileViewerSelecting([file])
             } catch {
-                logger.error("Report not written: \(error, privacy: .public)")
+                logger.error("Report not written: \(error.logCode, privacy: .public) \(error, privacy: .private)")
             }
             NSWorkspace.shared.open(report.issueURL)
         }

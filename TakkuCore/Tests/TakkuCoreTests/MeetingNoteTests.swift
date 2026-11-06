@@ -595,4 +595,45 @@ struct MeetingNoteTests {
         #expect(note.content.components(separatedBy: "%% takku:end %%").count == 2)
         #expect(note.personalNotes.hasPrefix("Video by Theo."))
     }
+
+    @Test("every form of image and of Dataview block is made harmless, not only the ones looked for")
+    func defusingForms() {
+        var note = MeetingNote(content: "---\ntakku_id: 1\n---\n%% takku:start %%\n%% takku:end %%\n")
+        note.replaceManagedSection(with: """
+            ![x][r] and ![r][] and ![a [b] c](https://evil.example/1.png) and ![a\\]b](https://evil.example/2.png)
+            ![x](&#104;ttps://evil.example/3.png)
+            [r]: https://evil.example/ref.png
+            <div style="background:url(https://evil.example/c.png)">.</div> <picture></picture> <b>bold</b>
+            ````dataviewjs
+            dv.paragraph(1)
+            ````
+            > ```dataviewjs
+            > dv.paragraph(2)
+            - ~~~~dataview
+            Inline `= this.file.name` and `$= dv.current()` and `a = b`.
+            ![[2026-10-04 1430 - 12m30s.jpg]]
+            """)
+        let text = note.content
+
+        #expect(!text.contains("![x]") && !text.contains("![r]") && !text.contains("![a"), "no Markdown image is left: \(text)")
+        #expect(text.contains("![[2026-10-04 1430 - 12m30s.jpg]]"), "the Vault's embeds stay")
+        #expect(!text.contains("<div") && !text.contains("<picture") && text.contains("<b>bold</b>"))
+        #expect(!text.contains("dataviewjs") && !text.contains("~~~~dataview") && !text.contains("````dataview"), "\(text)")
+        #expect(!text.contains("`=") && !text.contains("`$="))
+        #expect(text.contains("`a = b`"))
+    }
+
+    @Test("code blocks are paired the way Obsidian reads them, by character and length")
+    func fencesPairLikeCommonMark() {
+        for reply in ["Summary.\n````\n```\nstill code", "Summary.\n~~~\n```\nstill code", "Summary.\n```js\ncode\n````\nafter"] {
+            var note = MeetingNote(content: "---\ntakku_id: 1\n---\n%% takku:start %%\nold\n%% takku:end %%\n\n## Personal notes\nMine.\n")
+            note.replaceManagedSection(with: reply)
+            #expect(note.personalNotes == "Mine.", "\(reply.debugDescription)")
+            note.replaceManagedSection(with: "Second.")
+            #expect(note.personalNotes == "Mine.", "\(reply.debugDescription)")
+        }
+        // A marker inside a block that a longer fence keeps open is still inside it.
+        let note = MeetingNote(content: "---\ntakku_id: 1\n---\n````\n```\n%% takku:start %%\n```\n%% takku:end %%\n````\nText.")
+        #expect(note.summary == nil)
+    }
 }

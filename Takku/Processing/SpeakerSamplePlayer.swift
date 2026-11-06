@@ -55,7 +55,7 @@ final class SpeakerSamplePlayer {
                 self?.stop()
             }
         } catch {
-            logger.error("Speaker sample not played: \(error, privacy: .public)")
+            logger.error("Speaker sample not played: \(error.logCode, privacy: .public) \(error, privacy: .private)")
             self.error = String(localized: "Cannot play the audio: \(error.localizedDescription)")
         }
     }

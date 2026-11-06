@@ -100,7 +100,7 @@ final class MicrophoneCapture {
             try engine.start()
             logger.info("Microphone resumed after a configuration change")
         } catch {
-            logger.error("Microphone resume failed: \(error, privacy: .public)")
+            logger.error("Microphone resume failed: \(error.logCode, privacy: .public) \(error, privacy: .private)")
         }
         let resumedAt = Date()
         Task {
@@ -117,7 +117,7 @@ final class MicrophoneCapture {
             try startEngine()
             logger.info("Microphone restarted on the new default device")
         } catch {
-            logger.error("Microphone restart failed, trying again: \(error, privacy: .public)")
+            logger.error("Microphone restart failed, trying again: \(error.logCode, privacy: .public) \(error, privacy: .private)")
             devicesChanged()
         }
     }

@@ -19,7 +19,7 @@ enum AudioPermissions {
             try? await Task.sleep(for: .seconds(1))
             capture.stop()
         } catch {
-            logger.error("System audio tap for the permission failed: \(error, privacy: .public)")
+            logger.error("System audio tap for the permission failed: \(error.logCode, privacy: .public) \(error, privacy: .private)")
         }
     }
 
@@ -37,7 +37,7 @@ enum AudioPermissions {
                 if isSound { heard.withLock { $0 = true } }
             }
         } catch {
-            logger.error("System audio tap for the test failed: \(error, privacy: .public)")
+            logger.error("System audio tap for the test failed: \(error.logCode, privacy: .public) \(error, privacy: .private)")
             return false
         }
         try? await Task.sleep(for: .milliseconds(300))

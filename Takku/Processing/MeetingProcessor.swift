@@ -333,7 +333,7 @@ final class MeetingProcessor {
         logger.notice("""
             Retry \(takkuID, privacy: .public): \(regenerating ? "Regeneration" : "full Processing", privacy: .public)\
             \(reprocessing.map { " (\($0.rawValue))" } ?? "", privacy: .public), \
-            Template \(record.templateName, privacy: .public), model \(profile?.model ?? "none", privacy: .public), \
+            Template \(record.templateName, privacy: .private), model \(profile?.model ?? "none", privacy: .public), \
             \(self.pendingCount) ahead in the queue
             """)
         save(record)
@@ -966,7 +966,7 @@ final class MeetingProcessor {
         do {
             try record.save(inFolder: Self.directory(for: record.takkuID))
         } catch {
-            logger.error("Processing state not saved: \(error, privacy: .public)")
+            logger.error("Processing state not saved: \(error.logCode, privacy: .public) \(error, privacy: .private)")
             lastError = String(localized: "Meeting state not saved to disk: a restart now would not resume it. \(error.localizedDescription)")
         }
         refreshRecent()

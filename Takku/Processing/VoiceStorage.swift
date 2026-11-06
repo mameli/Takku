@@ -24,7 +24,7 @@ enum VoiceStorage {
         do {
             return try JSONDecoder().decode(VoiceLibrary.self, from: data)
         } catch {
-            logger.error("Voices not read: \(error, privacy: .public)")
+            logger.error("Voices not read: \(error.logCode, privacy: .public) \(error, privacy: .private)")
             return VoiceLibrary()
         }
     }

@@ -21,7 +21,7 @@ actor SpeechDetector {
         do {
             return try await manager.process(samples).map(\.probability)
         } catch {
-            logger.error("Speech detection failed: \(error, privacy: .public)")
+            logger.error("Speech detection failed: \(error.logCode, privacy: .public) \(error, privacy: .private)")
             return nil
         }
     }
@@ -37,7 +37,7 @@ actor SpeechDetector {
                 logger.notice("Speech detection model loaded in \(secondsSince(started), privacy: .public)")
                 return manager
             } catch {
-                logger.error("Speech detection model not loaded: \(error, privacy: .public)")
+                logger.error("Speech detection model not loaded: \(error.logCode, privacy: .public) \(error, privacy: .private)")
                 return nil
             }
         }

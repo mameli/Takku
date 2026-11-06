@@ -1,5 +1,14 @@
 import Foundation
 
+extension Error {
+    /// What a log may say of an error without quoting it: "NSCocoaErrorDomain 260". The text of an
+    /// error holds file names (a note's), hosts and paths, and the log goes in a file made for a public issue.
+    public var logCode: String {
+        let error = self as NSError
+        return "\(error.domain) \(error.code)"
+    }
+}
+
 /// What *Report a problem…* says about Takku and the Mac: filled in the GitHub bug form
 /// (`.github/ISSUE_TEMPLATE/bug_report.yml`, fields by id) and written at the top of the report
 /// file, above the logs. In English, like the issues. Nothing that names the user, the Meetings
@@ -41,7 +50,8 @@ public struct ProblemReport: Equatable, Sendable {
     /// to be attached to a public issue. A path hides the rest of its line, which may be the note's name.
     public static func redacted(logs: String) -> String {
         logs.replacing(/https?:\/\/[^\s"'<>)]+/, with: "<address>")
-            .replacing(/\/Users\/[^\n]*/, with: "<path>")
+            .replacing(/file:\/\/[^\s"'<>)]*/, with: "<path>")
+            .replacing(/\/(?:Users|Volumes|private|var|tmp|Library)\/[^\n]*/, with: "<path>")
     }
 
     public func text(logs: String) -> String {

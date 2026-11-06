@@ -207,7 +207,7 @@ actor MeetingTranscription {
                 logger.notice("Speakers told apart in \(secondsSince(stage), privacy: .public): \(turns.count) turns")
             } catch {
                 speakersProblem = error.localizedDescription
-                logger.error("Speakers not told apart after \(secondsSince(stage), privacy: .public): \(error, privacy: .public)")
+                logger.error("Speakers not told apart after \(secondsSince(stage), privacy: .public): \(error.logCode, privacy: .public) \(error, privacy: .private)")
             }
         }
         let url = directory.appending(path: Transcript.recordingCopyFileName)
@@ -428,7 +428,7 @@ actor MeetingTranscription {
         } catch {
             let problem = "\(url.lastPathComponent): \(error.localizedDescription)"
             cacheProblems.append(problem)
-            logger.warning("Cache not saved, result kept in memory: \(problem, privacy: .public)")
+            logger.warning("Cache not saved, result kept in memory: \(problem, privacy: .private)")
         }
     }
 
@@ -494,7 +494,7 @@ actor MeetingTranscription {
             return (measured, nil)
         } catch {
             let problem = "\(cacheURL.lastPathComponent): \(error.localizedDescription)"
-            logger.warning("Cache not saved, measures kept in memory: \(problem, privacy: .public)")
+            logger.warning("Cache not saved, measures kept in memory: \(problem, privacy: .private)")
             return (measured, problem)
         }
     }

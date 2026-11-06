@@ -126,7 +126,7 @@ final class HookRunner {
             try TakkuFolder.ensureFolder(TakkuFolder.hooksFolder)
             try Hook.trimmedLog(existing + entry).write(to: logURL, atomically: true, encoding: .utf8)
         } catch {
-            logger.error("Hook log not written: \(error, privacy: .public)")
+            logger.error("Hook log not written: \(error.logCode, privacy: .public) \(error, privacy: .private)")
         }
     }
 

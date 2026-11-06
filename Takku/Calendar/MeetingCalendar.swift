@@ -16,7 +16,7 @@ enum MeetingCalendar {
         do {
             return try await EKEventStore().requestFullAccessToEvents()
         } catch {
-            logger.error("Calendar access request failed: \(error, privacy: .public)")
+            logger.error("Calendar access request failed: \(error.logCode, privacy: .public) \(error, privacy: .private)")
             return false
         }
     }

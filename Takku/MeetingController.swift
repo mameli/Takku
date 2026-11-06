@@ -230,7 +230,7 @@ final class MeetingController {
         do {
             try Marks.save(marks, inFolder: currentDirectory)
         } catch {
-            logger.error("Mark not saved: \(error, privacy: .public)")
+            logger.error("Mark not saved: \(error.logCode, privacy: .public) \(error, privacy: .private)")
             recordingError = error.localizedDescription
         }
     }
@@ -279,7 +279,7 @@ final class MeetingController {
                     flash(\.isShowingScreenshot)
                 }
             } catch {
-                logger.error("Screenshot not taken: \(error, privacy: .public)")
+                logger.error("Screenshot not taken: \(error.logCode, privacy: .public) \(error, privacy: .private)")
                 if self.currentTakkuID == takkuID {
                     recordingError = String(localized: "Screenshot not taken: \(error.localizedDescription)")
                     flash(\.isShowingMark)
@@ -338,7 +338,7 @@ final class MeetingController {
                 Task { await transcription.segmentClosed(segment, in: directory) }
             }
         } catch {
-            logger.error("Starting the recording failed: \(error, privacy: .public)")
+            logger.error("Starting the recording failed: \(error.logCode, privacy: .public) \(error, privacy: .private)")
             recordingError = error.localizedDescription
             return
         }
@@ -368,7 +368,7 @@ final class MeetingController {
             do {
                 try await transcriber.prepare(model)
             } catch {
-                logger.error("Preparing the model failed: \(error, privacy: .public)")
+                logger.error("Preparing the model failed: \(error.logCode, privacy: .public) \(error, privacy: .private)")
             }
         }
     }
@@ -389,10 +389,10 @@ final class MeetingController {
             lastRecordingDirectory = stopped.directory
             if !stopped.errors.isEmpty {
                 recordingError = String(localized: "Incomplete recording: \(stopped.errors.joined(separator: "; "))")
-                logger.error("\(self.recordingError!, privacy: .public)")
+                logger.error("\(self.recordingError!, privacy: .private)")
             }
         } catch {
-            logger.error("Closing the recording failed: \(error, privacy: .public)")
+            logger.error("Closing the recording failed: \(error.logCode, privacy: .public) \(error, privacy: .private)")
             recordingError = error.localizedDescription
         }
         let captures = currentTakkuID.flatMap { pendingScreenshots.removeValue(forKey: $0) } ?? []
@@ -452,7 +452,7 @@ final class MeetingController {
             } catch is CancellationError {
                 return
             } catch {
-                logger.error("Voices not recognised: \(error, privacy: .public)")
+                logger.error("Voices not recognised: \(error.logCode, privacy: .public) \(error, privacy: .private)")
                 draft.error = String(localized: "Voices not recognised: \(error.localizedDescription)")
                 return
             }
@@ -471,7 +471,7 @@ final class MeetingController {
             try VoiceStorage.save(library)
             return nil
         } catch {
-            logger.error("Voices not remembered: \(error, privacy: .public)")
+            logger.error("Voices not remembered: \(error.logCode, privacy: .public) \(error, privacy: .private)")
             return String(localized: "Names saved, but voices not remembered: \(error.localizedDescription)")
         }
     }
@@ -613,7 +613,7 @@ final class MeetingController {
         do {
             try FileManager.default.createDirectory(at: folder.url, withIntermediateDirectories: true)
         } catch {
-            logger.error("Requests folder not created: \(error, privacy: .public)")
+            logger.error("Requests folder not created: \(error.logCode, privacy: .public) \(error, privacy: .private)")
             return
         }
         folder.removeStaleAnswers()
@@ -763,12 +763,12 @@ final class MeetingController {
                     guard let note = try vault.findMeetingNote(takkuID: currentTakkuID, expected: url) else { return }
                     try vault.update(note) { $0.replaceParticipants(with: event?.participants ?? []) }
                 } catch {
-                    logger.error("Writing the event's participants failed: \(error, privacy: .public)")
+                    logger.error("Writing the event's participants failed: \(error.logCode, privacy: .public) \(error, privacy: .private)")
                     self?.recordingError = error.localizedDescription
                 }
             }
         } catch {
-            logger.error("Switching the calendar event failed: \(error, privacy: .public)")
+            logger.error("Switching the calendar event failed: \(error.logCode, privacy: .public) \(error, privacy: .private)")
             recordingError = error.localizedDescription
         }
     }

@@ -81,7 +81,7 @@ extension UpdateChecker: SPUUpdaterDelegate {
 
     nonisolated func updater(_ updater: SPUUpdater, didAbortWithError error: any Error) {
         // Offline or rate-limited: nothing to show, tried again tomorrow.
-        logger.notice("Update check failed: \(error.localizedDescription, privacy: .public)")
+        logger.notice("Update check failed: \(error.logCode, privacy: .public) \(error.localizedDescription, privacy: .private)")
     }
 
     nonisolated func updater(
