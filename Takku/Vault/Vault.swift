@@ -372,7 +372,7 @@ struct Vault {
     // MARK: - Private
 
     private static func takkuID(of url: URL) -> UUID? {
-        (try? String(contentsOf: url, encoding: .utf8)).flatMap { MeetingNote(content: $0).takkuID }
+        MeetingNote.takkuID(ofFileAt: url)
     }
 
     private static func byTakkuID(_ urls: [URL]) -> [UUID: [URL]] {

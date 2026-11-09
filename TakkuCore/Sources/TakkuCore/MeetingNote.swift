@@ -85,6 +85,12 @@ public struct MeetingNote: Equatable, Sendable {
         return markdown.value(TakkuKey.takkuID.rawValue).flatMap(UUID.init(uuidString:))
     }
 
+    /// The frontmatter `takku_id` of the note or Transcript at `url`, read without the rest of the
+    /// file; `nil` if it is missing or the file cannot be read.
+    public static func takkuID(ofFileAt url: URL) -> UUID? {
+        MarkdownLines.frontmatter(ofFileAt: url)?.value(TakkuKey.takkuID.rawValue).flatMap(UUID.init(uuidString:))
+    }
+
     /// The Transcript file named by Takku's frontmatter link, without its extension. Used to
     /// disambiguate Sync copies that have the same `takku_id`.
     public var transcriptName: String? {

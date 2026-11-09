@@ -244,6 +244,46 @@ struct MeetingNoteTests {
         #expect(MeetingNote(content: "takku_id: \(id)\n").takkuID == nil)
     }
 
+    @Test("the takku_id of a file is read from its frontmatter alone, with the same answer as reading the whole file")
+    func readsTakkuIDOfAFile() throws {
+        let folder = FileManager.default.temporaryDirectory.appending(path: "takku-frontmatter-\(UUID().uuidString)", directoryHint: .isDirectory)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        var written = 0
+        func file(_ content: Data) throws -> URL {
+            written += 1
+            let url = folder.appending(path: "\(written).md")
+            try content.write(to: url)
+            return url
+        }
+        let id = "6F1C2A00-0000-4000-8000-000000000001"
+        let body = String(repeating: "**Speaker 1** [00:12:34]\nWords said in the meeting, with the id takku_id: 0 among them.\n\n", count: 700)
+        // The first piece read ends inside an "è", and the frontmatter goes on well past it.
+        let longFrontmatter = "---\ntitle: \(String(repeating: "è", count: 600))\nparticipants:\n"
+            + String(repeating: "  - Mario Rossi\n", count: 400) + "takku_id: \(id)\n---\n"
+
+        for content in [
+            "---\ntakku_id: \(id)\nmeeting: \"[[Note]]\"\n---\n" + body,
+            longFrontmatter + body,
+            "\u{FEFF}---\r\ntakku_id: \(id)\r\n---\r\n" + body,
+            "---\ntakku_id: \(id)\n---",
+            "---\ntitle: x\n---\ntakku_id: \(id)\n" + body,
+            "takku_id: \(id)\n" + body,
+            "---\ntakku_id: \(id)\n" + body,
+            "",
+        ] {
+            let whole = MeetingNote(content: content).takkuID
+            #expect(MeetingNote.takkuID(ofFileAt: try file(Data(content.utf8))) == whole, "\(content.prefix(40))")
+        }
+        #expect(MeetingNote(content: longFrontmatter).takkuID == UUID(uuidString: id))
+
+        // Read whole, a file with text that is not UTF-8 after the frontmatter had no id at all.
+        let notUTF8 = Data("---\ntakku_id: \(id)\n---\n".utf8) + Data([0xFF, 0xFE, 0x00]) + Data(body.utf8)
+        #expect(MeetingNote.takkuID(ofFileAt: try file(notUTF8)) == UUID(uuidString: id))
+        #expect(MeetingNote.takkuID(ofFileAt: folder.appending(path: "missing.md")) == nil)
+        #expect(MeetingNote.takkuID(ofFileAt: folder) == nil)
+    }
+
     @Test("personal notes are the whole body outside the managed section, without the heading")
     func personalNotes() {
         let note = MeetingNote(content: """
