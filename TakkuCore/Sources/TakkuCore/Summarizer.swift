@@ -2,11 +2,14 @@ import Foundation
 
 /// Writes the Summary with a Provider: in one request if the Transcript fits in the model's
 /// context, otherwise summarising in blocks and merging the partial summaries. A full-text Template
-/// is rewritten in blocks of about 10 minutes, joined in order.
+/// is rewritten in blocks of about 10 minutes, joined in order. A request that fails for a passing
+/// reason is sent again (`ChatClient.retrying`): in blocks, the last one failing no longer throws
+/// away those already written.
 public struct Summarizer: Sendable {
     private let client: ChatClient
     private let maxContextTokens: Int
     private let log: SummaryLog.Recorder?
+    private let retryWaits: [Duration]
     private let onProgress: @Sendable (Progress) -> Void
 
     /// The request being written, so the app can show meaningful Processing progress.
@@ -21,13 +24,15 @@ public struct Summarizer: Sendable {
     /// With `log`, every request and reply is also copied there. A context below the minimum is
     /// raised to it, as a mistake in the Profile, unless `isReportedContext`: then it is what the
     /// model really has (Apple Intelligence says so itself), and going past it would fail.
+    /// `retryWaits`: the pauses before a request is sent again, none to send each once.
     public init(
         client: ChatClient, maxContextTokens: Int, isReportedContext: Bool = false, log: SummaryLog.Recorder? = nil,
-        onProgress: (@Sendable (Progress) -> Void)? = nil
+        retryWaits: [Duration] = ChatClient.retryWaits, onProgress: (@Sendable (Progress) -> Void)? = nil
     ) {
         self.client = client
         self.maxContextTokens = isReportedContext ? maxContextTokens : max(maxContextTokens, Self.minimumContextTokens)
         self.log = log
+        self.retryWaits = retryWaits
         self.onProgress = onProgress ?? { _ in }
     }
 
@@ -101,7 +106,8 @@ public struct Summarizer: Sendable {
         return replies
     }
 
+    /// Every attempt is in the Summary log, the failed ones too: they are recorded inside the retry.
     private func client(_ kind: SummaryLog.Call.Kind) -> ChatClient {
-        log.map { client.recording(into: $0, as: kind) } ?? client
+        (log.map { client.recording(into: $0, as: kind) } ?? client).retrying(after: retryWaits)
     }
 }

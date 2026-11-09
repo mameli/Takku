@@ -120,6 +120,60 @@ public struct ChatClient: Sendable {
         return client
     }
 
+    /// The pauses before a request that failed for a passing reason is sent again: twice more.
+    public static let retryWaits: [Duration] = [.seconds(5), .seconds(20)]
+    /// A provider asking to wait longer than this is not waited for.
+    static let longestRetryWait: Duration = .seconds(60)
+
+    /// The same client, sending a request again after each of `waits` when it failed for a reason
+    /// that passes by itself: the connection missing or lost, the provider busy or over its rate
+    /// (408, 429, 5xx). The seconds the provider asks for in `Retry-After` are waited when they
+    /// are more than the pause, unless they are over a minute: then its error is the answer, as
+    /// it is once the pauses are used up. Not sent again: a timeout, which already took minutes,
+    /// and what the request itself causes (400, 401). Agent CLIs and Apple Intelligence fail with
+    /// errors of their own, so they are never run twice. Cancelling the task ends the wait.
+    public func retrying(
+        after waits: [Duration] = ChatClient.retryWaits,
+        sleep: @escaping @Sendable (Duration) async throws -> Void = { try await Task.sleep(for: $0) }
+    ) -> ChatClient {
+        var client = self
+        let transport = self.transport
+        client.transport = { request in
+            var pauses = waits[...]
+            while true {
+                let wait: Duration
+                do {
+                    let (data, response) = try await transport(request)
+                    guard Self.passesByItself(status: response.statusCode), let pause = pauses.popFirst(),
+                          case let asked = Self.retryAfter(response) ?? .zero, asked <= Self.longestRetryWait
+                    else { return (data, response) }
+                    wait = max(pause, asked)
+                } catch let error as URLError where Self.passingErrors.contains(error.code) {
+                    guard let pause = pauses.popFirst() else { throw error }
+                    wait = pause
+                }
+                try await sleep(wait)
+            }
+        }
+        return client
+    }
+
+    private static func passesByItself(status: Int) -> Bool {
+        status == 408 || status == 429 || (500..<600).contains(status)
+    }
+
+    private static let passingErrors: Set<URLError.Code> = [
+        .notConnectedToInternet, .networkConnectionLost, .cannotFindHost, .dnsLookupFailed, .cannotConnectToHost,
+    ]
+
+    /// The seconds a provider asks to wait in `Retry-After`; its other form, a date, is not read.
+    private static func retryAfter(_ response: HTTPURLResponse) -> Duration? {
+        guard let seconds = response.value(forHTTPHeaderField: "Retry-After").flatMap({ Double($0.trimmingCharacters(in: .whitespaces)) }),
+              seconds >= 0
+        else { return nil }
+        return .seconds(min(seconds, 86_400))
+    }
+
     public func complete(_ messages: [ChatMessage]) async throws -> String {
         let extra = try ExtraParameters.parse(extraParameters ?? "", api: api)
         var request = URLRequest(url: baseURL.appending(path: api == .responses ? "responses" : "chat/completions"))

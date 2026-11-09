@@ -49,7 +49,7 @@ Dropped: Room capture mode (microphone only, for in-person meetings). Takku is f
    5. writes the Transcript file;
    6. rewrites the Managed section and Takku's frontmatter keys;
    7. notifies "Summary ready" (click → opens the note in Obsidian).
-5. If a step fails: the Managed section shows `⚠️ Summary not generated: <reason>`. The Meeting stays in "Recent meetings" with **Regenerate Summary** and, while the audio exists, **Reprocess Recording…**. No fallback to another Provider. If the Meeting already had a successful result, a failed Retry leaves the previous Meeting note and Transcript unchanged instead; the new error is visible in the menu and notification.
+5. If a step fails: the Managed section shows `⚠️ Summary not generated: <reason>`. The Meeting stays in "Recent meetings" with **Regenerate Summary** and, while the audio exists, **Reprocess Recording…**. No fallback to another Provider. A request for the Summary that fails for a reason that passes by itself is sent again first, after 5 and then 20 seconds: no connection or a lost one (not a timeout, which already took up to 15 minutes), or a Provider answering 408, 429 or 5xx; the seconds it asks for in `Retry-After` are waited when they are more than the pause, and over a minute its error is taken as the answer. In blocks this keeps the partial summaries already written. Every attempt is in the Summary log. Not for the title, *Test connection*, the agent CLIs or Apple Intelligence. If the Meeting already had a successful result, a failed Retry leaves the previous Meeting note and Transcript unchanged instead; the new error is visible in the menu and notification.
 
 ## Audio capture
 
