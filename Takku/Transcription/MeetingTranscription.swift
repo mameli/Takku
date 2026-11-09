@@ -151,9 +151,6 @@ actor MeetingTranscription {
         let started = ContinuousClock.now
         onPhase(.transcribing(part: 0, total: recording.segments.count))
         let alreadyStarted = recording.segments.filter { pending[$0.fileName] != nil }.count
-        for segment in recording.segments {
-            startIfNeeded(segment, in: directory, ignoringCache: ignoringCache)
-        }
         logger.notice("""
             Finishing the Transcript: \(recording.segments.count) Segments, \(alreadyStarted) started while recording, \
             model \(self.model.id, privacy: .public), languages \(self.languages, privacy: .public)
@@ -162,6 +159,12 @@ actor MeetingTranscription {
         var failed: [String] = []
         for (index, segment) in recording.segments.enumerated() {
             onPhase(.transcribing(part: index + 1, total: recording.segments.count))
+            // A Segment holds its decoded audio (19 MB for 5 minutes) until the transcriber, which
+            // serves one at a time, gets to it: started all together, an import of 6 hours kept
+            // 1.4 GB waiting. Only this one and the next: the next is decoded while this one is transcribed.
+            for upcoming in recording.segments[index...].prefix(2) {
+                startIfNeeded(upcoming, in: directory, ignoringCache: ignoringCache)
+            }
             do {
                 bySegment[segment.fileName] = try await pending[segment.fileName]!.value
             } catch {
@@ -448,30 +451,40 @@ actor MeetingTranscription {
         return cached
     }
 
-    /// Every Segment cached without current levels (Me only) or signal, measured on its audio (in
-    /// parallel) and saved. A Segment without Utterances needs neither.
+    /// Every Segment cached without current levels (Me only) or signal, measured on its audio and
+    /// saved, `measuredAtOnce` in parallel: each holds its decoded audio meanwhile. A Segment
+    /// without Utterances needs neither.
     private nonisolated static func measuringMissing(
         _ recording: Recording, _ bySegment: [String: CachedSegment], in directory: URL, speechDetector: SpeechDetector
     ) async -> (segments: [String: CachedSegment], cacheProblems: [String]) {
         await withTaskGroup(of: (String, CachedSegment, String?).self) { group in
+            var measured = bySegment
+            var problems: [String] = []
+            func keep(_ result: (String, CachedSegment, String?)) {
+                measured[result.0] = result.1
+                if let problem = result.2 { problems.append(problem) }
+            }
+            var running = 0
             for segment in recording.segments {
                 guard let cached = bySegment[segment.fileName], !cached.utterances.isEmpty,
                       cached.currentSignal == nil || (segment.track == .me && cached.currentLevels == nil)
                 else { continue }
+                if running == measuredAtOnce, let result = await group.next() {
+                    keep(result)
+                    running -= 1
+                }
                 group.addTask {
                     let (measured, problem) = await withMeasures(cached, segment, in: directory, speechDetector: speechDetector)
                     return (segment.fileName, measured, problem)
                 }
+                running += 1
             }
-            var measured = bySegment
-            var problems: [String] = []
-            for await (fileName, cached, problem) in group {
-                measured[fileName] = cached
-                if let problem { problems.append(problem) }
-            }
+            for await result in group { keep(result) }
             return (measured, problems)
         }
     }
+
+    private static let measuredAtOnce = 4
 
     /// The Segment's cache with the peak level of each Me Utterance and the signal measured on the
     /// audio, and saved. It decodes the audio, so it runs off the actor. A failed save keeps what was measured.
