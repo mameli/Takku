@@ -4,6 +4,12 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
+## 1.19.3 (2026-11-11)
+
+- **A busy provider no longer costs you the summary**: when your Summary Profile answers that it is overloaded (429, 5xx) or the connection drops, Takku asks again after 5 and then 20 seconds, waiting longer if the provider asks for it. In a long meeting summarised in blocks, one block that fails no longer throws away the ones already written. A wrong key, no credit or a timeout still fail right away.
+- **Less memory at the end of a long meeting**: the Segments are transcribed one after the other instead of all being decoded at once, so a Reprocess or an import of hours of audio no longer fills the memory.
+- **A faster notes folder**: Takku finds a meeting's note by reading only the top of each file, not the whole file.
+
 ## 1.19.2 (2026-11-06)
 
 - **What a meeting says stays text in your note**: a summary is written from what other people said, and an import can carry a video's description, so neither can now make Obsidian do anything by itself. Remote images become links, HTML is shown as text (except a few plain tags such as `<br>` and `<b>`) and Dataview blocks and inline queries do not run. The images of your notes folder, such as Screenshots, stay as they are.
