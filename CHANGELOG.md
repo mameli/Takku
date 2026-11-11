@@ -4,7 +4,7 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
-## Unreleased
+## 1.19.4 (2026-11-11)
 
 - **Notifications you turned off can be found again**: macOS asks only once whether Takku may show notifications, so after *Don't Allow* nothing told you why "Summary ready", the call suggestions and the warnings while recording never came. Now *Settings → General* says so and opens Takku's page in System Settings → Notifications. A new Mac is asked in the welcome window, with the microphone and the system audio, instead of at the first launch before anything is explained.
 
