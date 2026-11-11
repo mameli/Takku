@@ -352,4 +352,27 @@ struct ChatClientTests {
             try await client.complete(messages)
         }
     }
+
+    @Test("a server on this Mac that does not answer is named by its port, with the address, and Takku does not install it", arguments: [
+        ("http://localhost:11434/v1", "localhost:11434", "Ollama is not open"),
+        ("http://127.0.0.1:1234/v1", "127.0.0.1:1234", "LM Studio's server is not running"),
+        ("http://127.0.0.1:8080/v1", "127.0.0.1:8080", "(llama.cpp, Ollama or LM Studio) is not running"),
+    ])
+    func localServerNotRunning(baseURL: String, address: String, says: String) async throws {
+        let client = ChatClient(baseURL: URL(string: baseURL)!, apiKey: nil, model: "m") { _ in throw URLError(.cannotConnectToHost) }
+
+        let failure = await #expect(throws: ChatClient.Failure.self) { try await client.complete(messages) }
+        #expect(failure == .localServerNotRunning(address: address, port: URL(string: baseURL)!.port))
+        let text = try #require(failure?.errorDescription)
+        #expect(text.contains("Nothing answers at \(address)"))
+        #expect(text.contains(says))
+        #expect(text.contains("then try again"))
+    }
+
+    @Test("a remote provider that cannot be reached keeps the system's error")
+    func remoteNotReachable() async {
+        let client = ChatClient(baseURL: URL(string: "https://api.mistral.ai/v1")!, apiKey: nil, model: "m") { _ in throw URLError(.cannotConnectToHost) }
+
+        await #expect(throws: URLError.self) { try await client.complete(messages) }
+    }
 }

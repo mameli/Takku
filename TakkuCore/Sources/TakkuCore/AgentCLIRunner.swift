@@ -12,6 +12,8 @@ extension AgentCLI {
         case invalidModel(AgentCLI, String)
         /// The agent's own message, as it wrote it.
         case failed(AgentCLI, String)
+        /// The CLI refused an option Takku runs it with, in its own words.
+        case unknownOption(AgentCLI, String)
 
         public var errorDescription: String? {
             switch self {
@@ -34,6 +36,8 @@ extension AgentCLI {
                 String(localized: "\"\(model)\" is not a model name for \(cli.name): choose one in its Profile in Settings → Summary.")
             case .failed(let cli, let reason):
                 String(localized: "\(cli.name): \(reason)")
+            case .unknownOption(let cli, let reason):
+                String(localized: "\(cli.name) does not know an option Takku uses (\(reason)): update \(cli.name) and Takku, then try again.")
             }
         }
     }
@@ -143,6 +147,7 @@ extension AgentCLI {
                 log("\(cli.name) failed: \(outcome.failure ?? "exit \(result.status)")")
                 let signIn = ["login", "log in", "sign in", "signed in", "authenticat", "no api key"].contains { reason.localizedCaseInsensitiveContains($0) }
                 if signIn { throw Failure.notSignedIn(cli) }
+                if AgentCLI.isUnknownOption(reason) { throw Failure.unknownOption(cli, reason) }
                 if outcome.failure != nil || result.status != 0 { throw Failure.failed(cli, reason) }
             }
             guard let reply = outcome.reply?.trimmingCharacters(in: .whitespacesAndNewlines), !reply.isEmpty else {

@@ -12989,6 +12989,122 @@
           }
         }
       }
+    },
+    "Nothing answers at %@: Ollama is not open. Ollama is a separate app that Takku does not install: get it from ollama.com, open it, then try again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nessuno risponde a %@: Ollama non è aperto. Ollama è un'app a parte che Takku non installa: scaricala da ollama.com, aprila, poi riprova."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unter %@ antwortet nichts: Ollama ist nicht geöffnet. Ollama ist eine eigene App, die Takku nicht installiert: Lade sie von ollama.com, öffne sie und versuche es dann erneut."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nada responde en %@: Ollama no está abierto. Ollama es una app aparte que Takku no instala: descárgala de ollama.com, ábrela y vuelve a intentarlo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rien ne répond à %@ : Ollama n’est pas ouvert. Ollama est une app distincte que Takku n’installe pas : téléchargez-la sur ollama.com, ouvrez-la, puis réessayez."
+          }
+        }
+      }
+    },
+    "Nothing answers at %@: LM Studio's server is not running. Start it in LM Studio's Developer tab, then try again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nessuno risponde a %@: il server di LM Studio non è avviato. Avvialo nella scheda Developer di LM Studio, poi riprova."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unter %@ antwortet nichts: Der Server von LM Studio läuft nicht. Starte ihn im Tab „Developer“ von LM Studio und versuche es dann erneut."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nada responde en %@: el servidor de LM Studio no está en marcha. Inícialo en la pestaña Developer de LM Studio y vuelve a intentarlo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rien ne répond à %@ : le serveur de LM Studio n’est pas lancé. Démarrez-le dans l’onglet Developer de LM Studio, puis réessayez."
+          }
+        }
+      }
+    },
+    "Nothing answers at %@: the server on this Mac (llama.cpp, Ollama or LM Studio) is not running. Takku does not install it: start it, then try again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nessuno risponde a %@: il server su questo Mac (llama.cpp, Ollama o LM Studio) non è avviato. Takku non lo installa: avvialo, poi riprova."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unter %@ antwortet nichts: Der Server auf diesem Mac (llama.cpp, Ollama oder LM Studio) läuft nicht. Takku installiert ihn nicht: Starte ihn und versuche es dann erneut."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nada responde en %@: el servidor de este Mac (llama.cpp, Ollama o LM Studio) no está en marcha. Takku no lo instala: inícialo y vuelve a intentarlo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rien ne répond à %@ : le serveur de ce Mac (llama.cpp, Ollama ou LM Studio) n’est pas lancé. Takku ne l’installe pas : démarrez-le, puis réessayez."
+          }
+        }
+      }
+    },
+    "%@ does not know an option Takku uses (%@): update %@ and Takku, then try again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ non conosce un'opzione che Takku usa (%2$@): aggiorna %3$@ e Takku, poi riprova."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ kennt eine Option nicht, die Takku verwendet (%2$@): Aktualisiere %3$@ und Takku und versuche es dann erneut."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ no conoce una opción que usa Takku (%2$@): actualiza %3$@ y Takku y vuelve a intentarlo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ ne connaît pas une option utilisée par Takku (%2$@) : mettez à jour %3$@ et Takku, puis réessayez."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

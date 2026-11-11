@@ -31,6 +31,10 @@ public struct ChatClient: Sendable {
         case responseFailed(message: String)
         /// Takku Credit answered 402: the balance is used up.
         case noCredit
+        /// Nothing answers at a server's address on this Mac (`host:port`): it is not running, or
+        /// not installed, since Takku does not install it (ADR 0004). The program is named by its
+        /// default port, the only thing that tells them apart.
+        case localServerNotRunning(address: String, port: Int?)
 
         public var errorDescription: String? {
             switch self {
@@ -47,6 +51,12 @@ public struct ChatClient: Sendable {
                 String(localized: "The provider could not complete the response: \(message)")
             case .noCredit:
                 String(localized: "Your Takku Credit is used up. Add credit in Settings → Summary Profiles, then Retry the Meeting.")
+            case .localServerNotRunning(let address, 11434):
+                String(localized: "Nothing answers at \(address): Ollama is not open. Ollama is a separate app that Takku does not install: get it from ollama.com, open it, then try again.")
+            case .localServerNotRunning(let address, 1234):
+                String(localized: "Nothing answers at \(address): LM Studio's server is not running. Start it in LM Studio's Developer tab, then try again.")
+            case .localServerNotRunning(let address, _):
+                String(localized: "Nothing answers at \(address): the server on this Mac (llama.cpp, Ollama or LM Studio) is not running. Takku does not install it: start it, then try again.")
             }
         }
 
@@ -194,7 +204,14 @@ public struct ChatClient: Sendable {
         }
         request.httpBody = try ExtraParameters.applying(extra, to: body)
 
-        let (data, response) = try await transport(request)
+        let (data, response): (Data, HTTPURLResponse)
+        do {
+            (data, response) = try await transport(request)
+        } catch let error as URLError where error.code == .cannotConnectToHost {
+            // Refused: on this Mac that means no server, which the system's message does not say.
+            guard let host = baseURL.host(), ProviderProfile.loopbackHosts.contains(host.lowercased()) else { throw error }
+            throw Failure.localServerNotRunning(address: host + (baseURL.port.map { ":\($0)" } ?? ""), port: baseURL.port)
+        }
         guard (200..<300).contains(response.statusCode) else {
             if response.statusCode == 402, baseURL.host()?.lowercased() == TakkuCredit.host { throw Failure.noCredit }
             let refused = [400, 422].contains(response.statusCode)

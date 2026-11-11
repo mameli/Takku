@@ -93,11 +93,43 @@ struct AgentCLITests {
 
     @Test("a run that exits with an error and no events gives the last line it printed")
     func exitWithoutEvents() async throws {
-        let fake = try FakeCLI(.codex, [.init(pattern: "exec*", script: "echo 'Il rilascio slitta' >&2\necho 'error: unexpected argument --ephemeral' >&2\nexit 2")])
+        let fake = try FakeCLI(.codex, [.init(pattern: "exec*", script: "echo 'Il rilascio slitta' >&2\necho 'error: the model is overloaded' >&2\nexit 2")])
 
-        await #expect(throws: AgentCLI.Failure.failed(.codex, "error: unexpected argument --ephemeral")) {
+        await #expect(throws: AgentCLI.Failure.failed(.codex, "error: the model is overloaded")) {
             try await fake.runner().client(for: AgentCLI.codex.profile()).complete(Self.meeting)
         }
+    }
+
+    @Test("the usage line and the hint to --help after the error are not the reason", arguments: [
+        "error: the model is overloaded\n\nUsage: copilot [OPTIONS] [COMMAND]\n\nFor more information, try '--help'.",
+        "error: the model is overloaded\nTry 'copilot --help' for more information.",
+    ])
+    func helpHintIsNotTheReason(printed: String) async throws {
+        let fake = try FakeCLI(.copilot, [.init(pattern: "*", script: "printf '%s\\n' \(Self.shellQuoted(printed)) >&2\nexit 1")])
+
+        await #expect(throws: AgentCLI.Failure.failed(.copilot, "error: the model is overloaded")) {
+            try await fake.runner().client(for: AgentCLI.copilot.profile()).complete(Self.meeting)
+        }
+    }
+
+    @Test("an option the CLI does not know says to update it and Takku, with the CLI's own line", arguments: [
+        "error: unexpected argument '--no-custom-instructions' found\n\nUsage: copilot [OPTIONS] [COMMAND]\n\nFor more information, try '--help'.",
+        "error: unknown option '--no-custom-instructions'\nTry 'copilot --help' for more information.",
+    ])
+    func unknownOption(printed: String) async throws {
+        let fake = try FakeCLI(.copilot, [.init(pattern: "*", script: "printf '%s\\n' \(Self.shellQuoted(printed)) >&2\nexit 1")])
+        let reason = String(printed.prefix { $0 != "\n" })
+
+        let failure = await #expect(throws: AgentCLI.Failure.self) {
+            try await fake.runner().client(for: AgentCLI.copilot.profile()).complete(Self.meeting)
+        }
+        #expect(failure == .unknownOption(.copilot, reason))
+        #expect(failure?.errorDescription == "GitHub Copilot does not know an option Takku uses (\(reason)): update GitHub Copilot and Takku, then try again.")
+    }
+
+    /// `text` as one single-quoted shell word.
+    static func shellQuoted(_ text: String) -> String {
+        "'" + text.replacingOccurrences(of: "'", with: #"'\''"#) + "'"
     }
 
     @Test("a run that fails for the sign-in says the CLI is not signed in")

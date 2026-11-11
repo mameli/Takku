@@ -382,10 +382,22 @@ public enum AgentCLI: String, CaseIterable, Sendable {
         return outcome
     }
 
-    /// What it prints before an event, or instead of any: the first line says why.
+    /// What it prints before an event, or instead of any: the line that says why, the first for Pi
+    /// and the last for the others. A usage line and a hint to `--help` follow the error and say
+    /// nothing about it ("For more information, try '--help'.", "Try 'copilot --help' for more
+    /// information."), so they are left out.
     func reason(inPrinted text: String) -> String? {
-        let lines = text.split(separator: "\n").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+        let lines = text.split(separator: "\n").map { $0.trimmingCharacters(in: .whitespaces) }.filter {
+            !$0.isEmpty && !$0.lowercased().hasPrefix("usage:") && !$0.contains("--help")
+        }
         return (self == .pi ? lines.first : lines.last)
+    }
+
+    /// Whether the CLI refused one of the options Takku runs it with: it is older than Takku, or
+    /// changed under it (ADR 0017).
+    static func isUnknownOption(_ reason: String) -> Bool {
+        ["unexpected argument", "unknown option", "unknown argument", "unrecognized option", "unrecognized argument"]
+            .contains { reason.localizedCaseInsensitiveContains($0) }
     }
 
     /// Exits with 0 also when the provider failed, after its own retries: the last message says so.

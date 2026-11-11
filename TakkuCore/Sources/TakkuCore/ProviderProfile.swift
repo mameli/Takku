@@ -110,7 +110,7 @@ public struct ProviderProfile: Codable, Identifiable, Equatable, Hashable, Senda
 
     /// Plain HTTP only towards this Mac: to any other machine, even on the local network,
     /// the key and the Transcript would travel readable.
-    private static let loopbackHosts: Set<String> = ["localhost", "127.0.0.1", "::1", "[::1]"]
+    static let loopbackHosts: Set<String> = ["localhost", "127.0.0.1", "::1", "[::1]"]
 
     /// The base URL to call, if it is usable.
     public func validatedBaseURL() throws -> URL {

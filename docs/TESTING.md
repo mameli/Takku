@@ -103,6 +103,7 @@ Before starting: Takku running from the menu bar (notebook icon), Vault and a Su
 - [x] **Quit during Processing**: stop a Meeting and quit Takku right away → at the next launch Processing resumes by itself.
 - [x] **Italian interface**: `defaults write app.takku.takku AppleLanguages -array it`, restart Takku → menu, Settings and notifications in Italian (`defaults delete app.takku.takku AppleLanguages` to go back).
 - [x] **Wrong key**: in Settings replace the key with a random one → *Test connection* shows the provider's error; then put the right one back.
+- [ ] **Local server not running**: with nothing listening on 11434, *Test connection* on the ready-made *Ollama* Profile → "Nothing answers at localhost:11434: Ollama is not open…" naming ollama.com; a Profile on `http://127.0.0.1:8080/v1` with no llama-server → the message naming llama.cpp, Ollama or LM Studio. In Italian too.
 
 ## v2
 
