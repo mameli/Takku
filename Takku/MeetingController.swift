@@ -87,7 +87,6 @@ final class MeetingController {
         AppSettings.registerDefaults()
         models.keepPreviousDefault()
         AppSettings.saveMeetingLanguagesIfNeeded()
-        AppSettings.addReadyMadeProfilesIfNeeded()
         #if DEBUG
         let hasTestIsolation = !Self.isAutomatedTest || Self.hasAutomatedTestIsolation
         #else
@@ -102,12 +101,14 @@ final class MeetingController {
         KeyboardShortcuts.onKeyDown(for: .startStopMeeting) { [weak self] in self?.toggle() }
         KeyboardShortcuts.onKeyDown(for: .markMoment) { [weak self] in self?.mark() }
         KeyboardShortcuts.onKeyDown(for: .takeScreenshot) { [weak self] in self?.takeScreenshot() }
-        Notifications.shared.onAction = { [weak self] action in
+        Notifications.shared.onAction = { [weak self] action, meeting in
             guard let self else { return }
             // A button on an old notification does nothing when its action no longer makes sense.
             switch action {
             case .startMeeting: if !self.isInProgress { Task { await self.start() } }
             case .stopMeeting: if self.isInProgress { self.stop() }
+            case .nameSpeakers: if let meeting { self.nameSpeakers(of: meeting) }
+            case .regenerateSummary: if let meeting { self.regenerateSummary(of: meeting) }
             }
         }
         callDetector.start { [weak self] in
@@ -417,6 +418,25 @@ final class MeetingController {
     }
 
     /// Opens the naming window only when both the Meeting note and a Transcript with Speakers exist.
+    /// Set by the menu bar icon, the one view always on screen: notifications open windows with it.
+    var openWindow: ((String) -> Void)?
+
+    /// *Name speakers…*, from a notification: the Meeting may be gone from *Recent meetings* by then.
+    func nameSpeakers(of takkuID: UUID) {
+        let meeting = processor.recent.first { $0.id == takkuID }
+            ?? MeetingProcessor.RecentMeeting(id: takkuID, title: String(localized: "Meeting"), status: .completed, failureReason: nil)
+        guard meeting.status.canRetry, prepareSpeakerNaming(for: meeting) else { return }
+        NSApplication.shared.activate()
+        openWindow?(SpeakerNamesView.windowID)
+    }
+
+    /// *Regenerate Summary*, as in the menu: from the Transcript, with the Template and the Profile
+    /// chosen now, so a Profile fixed after the failure is the one used.
+    func regenerateSummary(of takkuID: UUID) {
+        guard processor.recent.first(where: { $0.id == takkuID })?.status.canRetry ?? true else { return }
+        _ = processor.retry(takkuID, templateName: templateName, profile: AppSettings.activeProviderProfile, mode: .summary)
+    }
+
     func prepareSpeakerNaming(for meeting: MeetingProcessor.RecentMeeting) -> Bool {
         guard let context = processor.speakerNamingContext(meeting.id) else { return false }
         speakerNaming?.stop()

@@ -52,10 +52,15 @@ struct TakkuApp: App {
 
 private struct MenuBarLabel: View {
     let controller: MeetingController
+    @Environment(\.openWindow) private var openWindow
 
     // While recording only the red dot: narrow, so it does not end up behind the notch.
     // The duration is in the menu.
     var body: some View {
+        icon.onAppear { [openWindow] in controller.openWindow = { openWindow(id: $0) } }
+    }
+
+    @ViewBuilder private var icon: some View {
         if controller.isShowingScreenshot {
             Image(nsImage: .screenshotIndicator)
         } else if controller.isShowingMark {
@@ -163,6 +168,15 @@ private struct MeetingMenu: View {
 
         if !controller.processor.recent.isEmpty {
             Divider()
+            // The last Meeting's actions on the first level: naming the Speakers or regenerating the
+            // Summary is done right after it, and three levels down nobody found them.
+            if let latest = controller.processor.recent.first, latest.status.canRetry {
+                Section {
+                    MeetingActions(controller: controller, meeting: latest)
+                } header: {
+                    Text(verbatim: RecentMeetingsMenu.label(latest))
+                }
+            }
             RecentMeetingsMenu(controller: controller)
         }
 
@@ -265,42 +279,14 @@ private struct CalendarEventMenu: View {
 /// The last five Meetings: open their files, name Speakers and choose how to process them again.
 private struct RecentMeetingsMenu: View {
     let controller: MeetingController
-    @Environment(\.openWindow) private var openWindow
     /// The *Show all* item names the Editor chosen in Settings.
     @AppStorage(AppSettings.editorKey) private var editor = ""
 
     var body: some View {
         Menu("Recent meetings") {
             ForEach(controller.processor.recent) { meeting in
-                Menu(label(meeting)) {
-                    if let failureReason = meeting.failureReason {
-                        ErrorMenuText(failureReason)
-                    }
-                    Button("Open note") { controller.processor.openNote(meeting.id) }
-                    Button("Open Transcript") { controller.processor.openTranscript(meeting.id) }
-                    // Only for a concluded Meeting: one being recorded or queued is left alone.
-                    // Regeneration always reads the current Transcript; only full Processing can replace it.
-                    if meeting.status.canRetry {
-                        if Vault.configured != nil {
-                            Button("Name speakers…") {
-                                if controller.prepareSpeakerNaming(for: meeting) {
-                                    NSApplication.shared.activate()
-                                    openWindow(id: SpeakerNamesView.windowID)
-                                }
-                            }
-                            Button("Regenerate Summary") {
-                                controller.processor.retry(
-                                    meeting.id, templateName: controller.templateName,
-                                    profile: AppSettings.activeProviderProfile, mode: .summary
-                                )
-                            }
-                        }
-                        if controller.processor.hasRecording(meeting.id) {
-                            Button("Reprocess Recording…") { controller.confirmReprocessing(meeting.id) }
-                        }
-                    } else if meeting.status != .recording {
-                        Button("Stop processing") { controller.processor.stop(meeting.id) }
-                    }
+                Menu(Self.label(meeting)) {
+                    MeetingActions(controller: controller, meeting: meeting)
                 }
             }
             if let vault = Vault.configured {
@@ -311,12 +297,50 @@ private struct RecentMeetingsMenu: View {
         }
     }
 
-    private func label(_ meeting: MeetingProcessor.RecentMeeting) -> String {
+    static func label(_ meeting: MeetingProcessor.RecentMeeting) -> String {
         switch meeting.status {
         case .recording: "⏺ \(meeting.title)"
         case .queued, .processing, .regenerating: "⏳ \(meeting.title)"
         case .completed: meeting.title
         case .failed: "⚠️ \(meeting.title)"
+        }
+    }
+}
+
+/// What can be done with one Meeting: open its files, name Speakers, process it again.
+private struct MeetingActions: View {
+    let controller: MeetingController
+    let meeting: MeetingProcessor.RecentMeeting
+    @Environment(\.openWindow) private var openWindow
+
+    var body: some View {
+        if let failureReason = meeting.failureReason {
+            ErrorMenuText(failureReason)
+        }
+        Button("Open note") { controller.processor.openNote(meeting.id) }
+        Button("Open Transcript") { controller.processor.openTranscript(meeting.id) }
+        // Only for a concluded Meeting: one being recorded or queued is left alone.
+        // Regeneration always reads the current Transcript; only full Processing can replace it.
+        if meeting.status.canRetry {
+            if Vault.configured != nil {
+                Button("Name speakers…") {
+                    if controller.prepareSpeakerNaming(for: meeting) {
+                        NSApplication.shared.activate()
+                        openWindow(id: SpeakerNamesView.windowID)
+                    }
+                }
+                Button("Regenerate Summary") {
+                    controller.processor.retry(
+                        meeting.id, templateName: controller.templateName,
+                        profile: AppSettings.activeProviderProfile, mode: .summary
+                    )
+                }
+            }
+            if controller.processor.hasRecording(meeting.id) {
+                Button("Reprocess Recording…") { controller.confirmReprocessing(meeting.id) }
+            }
+        } else if meeting.status != .recording {
+            Button("Stop processing") { controller.processor.stop(meeting.id) }
         }
     }
 }

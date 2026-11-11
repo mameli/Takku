@@ -280,24 +280,30 @@ private struct SummaryTab: View {
         }
     }
 
-    /// + and − under the list, as in the Mac's own lists. The + offers Takku Credit to those who
-    /// had Profiles before it existed, or deleted it, Apple Intelligence on a Mac that has it, and
-    /// the coding agents' CLIs not added yet: ready-made ones come only once. The CLIs are offered
-    /// even when not installed: their editor says what is missing.
+    /// + and − under the list, as in the Mac's own lists. The + offers Takku Credit while there is
+    /// no Takku Credit Profile, Apple Intelligence on a Mac that has it, the coding agents' CLIs and
+    /// the examples (Ollama, Mistral, TensorX, OpenRouter) not added yet. The CLIs are offered even
+    /// when not installed: their editor says what is missing.
     private var addAndDelete: some View {
         HStack(spacing: 12) {
             let offersCredit = !profiles.contains(where: \.isTakkuCredit)
             let offersAppleIntelligence = AppleIntelligenceModel.isAvailable && !profiles.contains(where: \.isAppleIntelligence)
             let offeredCLIs = AgentCLI.allCases.filter { cli in !profiles.contains { $0.agentCLI == cli } }
-            if !offersCredit && !offersAppleIntelligence && offeredCLIs.isEmpty {
+            let offeredExamples = ProviderProfile.examples().filter { example in !profiles.contains { $0.hasSameAddress(as: example) } }
+            if !offersCredit && !offersAppleIntelligence && offeredCLIs.isEmpty && offeredExamples.isEmpty {
                 IconButton(title: "Add Profile", systemImage: "plus", action: addProfile)
             } else {
                 Menu {
                     Button("New Profile", action: addProfile)
                     if offersCredit { Button("Takku Credit", action: addTakkuCredit) }
                     if offersAppleIntelligence { Button(action: addAppleIntelligence) { Text(verbatim: AppleIntelligence.name) } }
+                    if !offeredCLIs.isEmpty { Divider() }
                     ForEach(offeredCLIs, id: \.self) { cli in
                         Button { addAgentCLI(cli) } label: { Text(verbatim: cli.name) }
+                    }
+                    if !offeredExamples.isEmpty { Divider() }
+                    ForEach(offeredExamples, id: \.baseURL) { example in
+                        Button { addExample(example) } label: { Text(verbatim: example.name) }
                     }
                 } label: {
                     RowIcon(systemImage: "plus").accessibilityLabel(Text("Add Profile"))
@@ -345,6 +351,12 @@ private struct SummaryTab: View {
 
     private func addAppleIntelligence() {
         let profile = AppleIntelligence.profile(contextTokens: AppleIntelligenceModel.contextTokens)
+        profiles.append(profile)
+        selectedProfileID = profile.id
+    }
+
+    /// Not made active: it needs Ollama running, or an API key.
+    private func addExample(_ profile: ProviderProfile) {
         profiles.append(profile)
         selectedProfileID = profile.id
     }

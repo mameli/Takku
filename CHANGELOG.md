@@ -6,6 +6,8 @@ Takku was called Steno up to 0.2.1.
 
 ## Unreleased
 
+- **What to do next, where you are**: "Summary ready" now says how many speakers have no name and offers *Name speakers…*; "Processing failed" offers *Regenerate Summary*, to click once the Profile is fixed. The menu shows your last meeting with its actions on the first level, so naming the speakers or regenerating no longer means three submenus down. The *Recognise voices* setting says where you name the speakers.
+- **No more inactive Profiles to start with**: a new Mac no longer finds Ollama, Mistral, TensorX, OpenRouter and Takku Credit in the Summary list, unused. You start with the one you choose in the welcome window; the others are in the + menu, added when you pick them.
 - **Your coding agent in one click**: if Codex, Claude Code or GitHub Copilot is installed and signed in on your Mac, the welcome window's Summary step finds it and offers *Use <agent>*: the Summaries go through the plan you already pay for, with nothing to set up. A GitHub Copilot Profile now also says when Copilot is not signed in, before the first Summary fails.
 - **Errors that say what to do**: a Summary Profile for a server on your Mac that is not running no longer says only "Could not connect to the server". It says nothing answers at its address, that Takku does not install it, and what to open: Ollama (from ollama.com) on its usual port, LM Studio's server, or llama.cpp. An agent CLI that fails now shows its own error instead of the hint to `--help` printed after it, and when it does not know an option Takku uses, it tells you to update it and Takku.
 

@@ -74,17 +74,26 @@ struct ProviderProfileTests {
         #expect(try ExtraParameters.parse(#"{"input": []}"#).count == 1)
     }
 
-    @Test("the ready-made Profiles: Takku Credit first, Ollama on this Mac, then Mistral, TensorX and OpenRouter over https")
-    func readyMade() throws {
-        let profiles = ProviderProfile.readyMade()
-        #expect(profiles.map(\.name) == ["Takku Credit", "Ollama", "Mistral", "TensorX", "OpenRouter"])
-        #expect(profiles.map(\.runsOnThisMac) == [false, true, false, false, false])
-        #expect(profiles.map(\.isTakkuCredit) == [true, false, false, false, false])
+    @Test("the + menu's examples: Ollama on this Mac, then Mistral, TensorX and OpenRouter over https, without Takku Credit")
+    func examples() throws {
+        let profiles = ProviderProfile.examples()
+        #expect(profiles.map(\.name) == ["Ollama", "Mistral", "TensorX", "OpenRouter"])
+        #expect(profiles.map(\.runsOnThisMac) == [true, false, false, false])
+        #expect(profiles.map(\.isTakkuCredit) == [false, false, false, false])
         for profile in profiles {
             #expect(try profile.validatedBaseURL().scheme == (profile.runsOnThisMac ? "http" : "https"))
             #expect(!profile.model.isEmpty)
             #expect(profile.maxContextTokens >= ProviderProfile.defaultMaxContextTokens)
         }
-        #expect(Set(profiles.map(\.id)).isDisjoint(with: ProviderProfile.readyMade().map(\.id)))
+        #expect(Set(profiles.map(\.id)).isDisjoint(with: ProviderProfile.examples().map(\.id)))
+    }
+
+    @Test("a Profile with the example's address, renamed or with a slash or capitals more, is the same provider")
+    func sameAddress() {
+        let mistral = ProviderProfile.examples()[1]
+        var mine = ProviderProfile(name: "Mistral EU", baseURL: " https://API.mistral.ai/v1/ ", model: "m", maxContextTokens: 32_000)
+        #expect(mine.hasSameAddress(as: mistral))
+        mine.baseURL = "https://api.mistral.ai/v2"
+        #expect(!mine.hasSameAddress(as: mistral))
     }
 }

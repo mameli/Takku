@@ -675,9 +675,11 @@ final class MeetingProcessor {
         let localTranscript = Self.directory(for: takkuID).appending(path: Transcript.recordingCopyFileName)
         let opened = record.noteURL
             ?? (FileManager.default.fileExists(atPath: localTranscript.path(percentEncoded: false)) ? localTranscript : nil)
+        let speakers = transcriptSpeakers(record)
         Notifications.shared.processingFinished(
-            noteName: noteName, note: opened, hasVault: Vault.configured != nil,
-            hasSummary: record.summaryProfile != nil, problems: problems, warnings: warnings, rebuild: rebuild
+            meeting: takkuID, noteName: noteName, note: opened, hasVault: Vault.configured != nil,
+            hasSummary: record.summaryProfile != nil, problems: problems, warnings: warnings, rebuild: rebuild,
+            unnamedSpeakers: problems.isEmpty ? speakers ?? 0 : 0, canRegenerate: !problems.isEmpty && speakers != nil
         )
         record.reprocessing = nil
         record.statusBeforeRetry = nil
@@ -948,6 +950,17 @@ final class MeetingProcessor {
 
     /// The Vault and the Meeting's note in it, also after the user renamed or moved it; `nil`
     /// without a Vault or without the note.
+    /// For the notification at the end: `nil` without the note and its Transcript in the Vault,
+    /// otherwise how many of the Transcript's Speakers the note does not name.
+    private func transcriptSpeakers(_ record: ProcessingRecord) -> Int? {
+        guard let (vault, noteURL) = try? noteInVault(record.takkuID),
+              let transcriptURL = try? vault.findTranscript(takkuID: record.takkuID, expectedNote: noteURL),
+              let transcriptFile = try? String(contentsOf: transcriptURL, encoding: .utf8)
+        else { return nil }
+        let names = (try? vault.meetingNote(at: noteURL))?.speakerNames ?? [:]
+        return Transcript.parse(vaultFile: transcriptFile).transcript.unnamedSpeakers(names: names).count
+    }
+
     private func noteInVault(_ takkuID: UUID) throws -> (vault: Vault, note: URL)? {
         guard let vault = Vault.configured,
               let note = try vault.findMeetingNote(takkuID: takkuID, expected: record(takkuID)?.noteURL)

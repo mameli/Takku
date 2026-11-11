@@ -68,6 +68,11 @@ public struct Transcript: Sendable {
     /// Starts the text of a paragraph a Mark falls in.
     public static let markSymbol = "⭐"
 
+    /// The Speakers that speak in it and have no name among `names` (the Meeting note's), by number.
+    public func unnamedSpeakers(names: [Int: String]) -> [Int] {
+        Set(paragraphs.compactMap(\.speaker)).subtracting(names.keys).sorted()
+    }
+
     public let paragraphs: [Paragraph]
     /// In time order. Only in the Transcript file: `markdown`, which the Summary reads, leaves them out.
     public let screenshots: [Screenshot]

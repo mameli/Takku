@@ -9033,34 +9033,6 @@
         }
       }
     },
-    "Remembers the voices of Speakers you name (on this Mac only) to suggest their names in future meetings while the audio is kept. A voice is biometric data: turn this on only with participants' consent.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Memorizza la voce degli Speaker a cui dai un nome (solo su questo Mac) per suggerirne i nomi nelle riunioni future finché l'audio è conservato. La voce è un dato biometrico: attivalo solo con il consenso dei partecipanti."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Speichert die Stimmen benannter Sprecher (nur auf diesem Mac), um ihre Namen in künftigen Besprechungen vorzuschlagen, solange das Audio aufbewahrt wird. Eine Stimme ist ein biometrisches Datum: Aktiviere dies nur mit Einwilligung der Teilnehmer."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Recuerda las voces de los hablantes a los que pongas nombre (solo en este Mac) para sugerir sus nombres en futuras reuniones mientras se conserve el audio. La voz es un dato biométrico: actívalo solo con el consentimiento de los participantes."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mémorise sur ce Mac uniquement les voix des intervenants que vous nommez afin de suggérer leurs noms lors des prochaines réunions tant que l’audio est conservé. Une voix est une donnée biométrique : n’activez cette option qu’avec le consentement des participants."
-          }
-        }
-      }
-    },
     "Where the notes go, and what macOS asks once.": {
       "localizations": {
         "it": {
@@ -13158,6 +13130,62 @@
           "stringUnit": {
             "state": "translated",
             "value": "Trouvé sur ce Mac, connecté : les résumés passent par votre abonnement, sans rien à payer ici."
+          }
+        }
+      }
+    },
+    "Speakers without a name: %lld": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speaker senza nome: %lld"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprecher ohne Namen: %lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hablantes sin nombre: %lld"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intervenants sans nom : %lld"
+          }
+        }
+      }
+    },
+    "Name the Speakers with Name speakers…, from the menu or the \"Summary ready\" notification: Takku remembers their voices, on this Mac only, and in the next meetings, while the audio is kept, fills in the names of the voices it recognises. A voice is biometric data: turn this on only with participants' consent.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dai un nome agli Speaker con Assegna nomi agli Speaker…, dal menu o dalla notifica \"Riepilogo pronto\": Takku ricorda le loro voci, solo su questo Mac, e nelle riunioni successive, finché l'audio è conservato, compila i nomi delle voci che riconosce. La voce è un dato biometrico: attivalo solo con il consenso dei partecipanti."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Benenne die Sprecher mit „Sprecher benennen…“, im Menü oder in der Mitteilung „Zusammenfassung bereit“: Takku merkt sich ihre Stimmen, nur auf diesem Mac, und trägt in den nächsten Besprechungen, solange das Audio aufbewahrt wird, die Namen der erkannten Stimmen ein. Eine Stimme ist ein biometrisches Datum: Aktiviere dies nur mit Einwilligung der Teilnehmer."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pon nombre a los hablantes con Asignar nombres a los hablantes…, desde el menú o la notificación «Resumen listo»: Takku recuerda sus voces, solo en este Mac, y en las siguientes reuniones, mientras se conserve el audio, rellena los nombres de las voces que reconoce. La voz es un dato biométrico: actívalo solo con el consentimiento de los participantes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nommez les intervenants avec Nommer les intervenants…, depuis le menu ou la notification « Résumé prêt » : Takku retient leurs voix, sur ce Mac uniquement, et lors des réunions suivantes, tant que l’audio est conservé, remplit les noms des voix qu’il reconnaît. Une voix est une donnée biométrique : activez cette option uniquement avec le consentement des participants."
           }
         }
       }

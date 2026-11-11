@@ -82,18 +82,14 @@ struct SummarySetup: View {
                     Button("Use Apple Intelligence", action: useAppleIntelligence)
                         .buttonStyle(PaperButtonStyle(isPrimary: false))
                 }
-                Button("Ollama or LM Studio…") {
-                    openProfiles(AppSettings.summaryProfiles.first { $0.runsOnThisMac && !$0.isAppleIntelligence }?.id)
-                }
+                Button("Ollama or LM Studio…") { openProfiles(localServerProfile()) }
                 .buttonStyle(PaperButtonStyle(isPrimary: false))
             } else {
                 Text("Ollama or LM Studio, with a model on your Mac. Nothing leaves this Mac; quality and speed depend on the model your Mac can run.")
                     .font(Paper.serif(12.5)).foregroundStyle(Paper.text)
                     .fixedSize(horizontal: false, vertical: true)
                 Spacer(minLength: 4)
-                Button("Set up in Settings…") {
-                    openProfiles(AppSettings.summaryProfiles.first { $0.runsOnThisMac }?.id)
-                }
+                Button("Set up in Settings…") { openProfiles(localServerProfile()) }
                 .buttonStyle(PaperButtonStyle(isPrimary: false))
             }
         }
@@ -356,6 +352,17 @@ struct SummarySetup: View {
         }()
         AppSettings.summaryProfiles = profiles
         activeProfileID = profile.id.uuidString
+    }
+
+    /// The Profile of a server on this Mac, the Ollama example added when there is none, not active:
+    /// Ollama may not be installed, and its editor is where that shows.
+    private func localServerProfile() -> UUID {
+        var profiles = AppSettings.summaryProfiles
+        if let local = profiles.first(where: { $0.runsOnThisMac && !$0.isAppleIntelligence }) { return local.id }
+        let ollama = ProviderProfile.examples()[0]
+        profiles.append(ollama)
+        AppSettings.summaryProfiles = profiles
+        return ollama.id
     }
 
     private func openProfiles(_ profile: UUID?) {

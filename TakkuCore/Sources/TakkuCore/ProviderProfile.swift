@@ -53,12 +53,12 @@ public struct ProviderProfile: Codable, Identifiable, Equatable, Hashable, Senda
         extraParameters = try container.decodeIfPresent(String.self, forKey: .extraParameters)
     }
 
-    /// The Profiles a new user finds in Settings, ready once the API key is in (Ollama needs none):
-    /// Takku Credit first, which needs nothing but the key from its email, then a model on this Mac,
-    /// then three remote providers. New identifiers at every call.
-    public static func readyMade() -> [ProviderProfile] {
+    /// The Profiles the + menu in Settings offers, ready once the API key is in (Ollama needs none):
+    /// a model on this Mac, then three remote providers. Not added by themselves: up to 1.19.4 a new
+    /// user found them all in the list, inactive, and took the Ollama one for something Takku had
+    /// installed. Takku Credit has its own item. New identifiers at every call.
+    public static func examples() -> [ProviderProfile] {
         [
-            takkuCredit(),
             ProviderProfile(
                 name: "Ollama", baseURL: "http://localhost:11434/v1", model: "hf.co/ggml-org/gemma-4-E4B-it-GGUF:Q4_0",
                 maxContextTokens: defaultMaxContextTokens
@@ -122,6 +122,14 @@ public struct ProviderProfile: Codable, Identifiable, Equatable, Hashable, Senda
             throw URLError.insecure(baseURL)
         }
         return url
+    }
+
+    /// Whether `other` reaches the same provider: the same address, whatever the name.
+    public func hasSameAddress(as other: ProviderProfile) -> Bool {
+        let normalized = { (profile: ProviderProfile) in
+            profile.baseURL.trimmingCharacters(in: .whitespaces).lowercased().trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        }
+        return normalized(self) == normalized(other)
     }
 
     /// Whether the provider is a server on this Mac (llama.cpp, Ollama, LM Studio).

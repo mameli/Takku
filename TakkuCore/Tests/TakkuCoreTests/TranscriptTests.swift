@@ -173,6 +173,23 @@ struct TranscriptTests {
         ])
     }
 
+    @Test("the Speakers without a name are those that speak and are not named in the note, by number")
+    func unnamedSpeakers() {
+        let transcript = Transcript(utterances: [
+            Utterance(track: .others, start: 0, end: 2, text: "Ciao.", speaker: 3),
+            Utterance(track: .me, start: 5, end: 7, text: "Ciao a tutti."),
+            Utterance(track: .others, start: 9, end: 11, text: "Partiamo.", speaker: 1),
+            Utterance(track: .others, start: 12, end: 13, text: "Ok.", speaker: 2),
+            Utterance(track: .others, start: 15, end: 16, text: "Bene.", speaker: 1),
+            Utterance(track: .others, start: 20, end: 21, text: "Senza voce."),
+        ])
+
+        #expect(transcript.unnamedSpeakers(names: [:]) == [1, 2, 3])
+        #expect(transcript.unnamedSpeakers(names: [2: "Mario Rossi", 7: "Luca"]) == [1, 3])
+        #expect(transcript.unnamedSpeakers(names: [1: "A", 2: "B", 3: "C"]).isEmpty)
+        #expect(Transcript(utterances: [Utterance(track: .me, start: 0, end: 1, text: "Solo io.")]).unnamedSpeakers(names: [:]).isEmpty)
+    }
+
     @Test("a time with more digits than any Recording has is read as text, not as a time")
     func absurdTime() {
         let file = "---\ntakku_id: 1\n---\n**[00:05] Me:** hello\n**[99999999999999999999999:00:00] Speaker 1:** edited\n"
