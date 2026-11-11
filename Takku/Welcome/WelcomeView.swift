@@ -685,7 +685,7 @@ enum WelcomeRender {
                         } else if page == .summary {
                             SummarySetup(previewPacks: [5, 10, 20].map { price in
                                 TakkuCredit.Pack(priceEuros: Decimal(price), url: TakkuCredit.buyURL.appending(path: "\(price)"), isRecommended: price == 10)
-                            }, previewStep: t == 0 ? .closed : .buying)
+                            }, previewStep: t == 0 ? .closed : .buying, previewAgents: [.codex, .copilot])
                         } else {
                             TranscriptionSetup(model: ModelState(isPreparing: true), isModelReady: false, progress: "Downloading transcription model… 34%", retry: {})
                         }

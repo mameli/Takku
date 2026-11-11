@@ -695,18 +695,63 @@ struct AgentCLITests {
 
     // MARK: - Sign-in
 
-    @Test("a signed-out CLI says so before any run; Copilot cannot tell")
-    func signedOut() async throws {
+    @Test("a signed-out CLI says so before any run; Copilot by no one signed in its settings file", arguments: [
+        nil, #"{"loggedInUsers":[],"firstLaunchAt":"2026-11-11"}"#, "not JSON",
+    ])
+    func signedOut(copilotConfig: String?) async throws {
         let codex = try FakeCLI(.codex, [.init(pattern: "login status", script: "echo 'Not logged in' >&2\nexit 1")])
         let claude = try FakeCLI(.claude, [.init(pattern: "auth status", script: FakeCLI.prints(#"{"loggedIn":false,"authMethod":"none"}"#, exit: 1))])
         let openCode = try FakeCLI(.opencode, [.init(pattern: "auth list --standalone*", script: FakeCLI.prints("[]"))])
         let copilot = try FakeCLI(.copilot, [])
+        let home = try Self.home(copilotConfig: copilotConfig)
 
         #expect(await codex.runner().unavailability() == .notSignedIn(.codex))
         #expect(await claude.runner().unavailability() == .notSignedIn(.claude))
         #expect(await openCode.runner().unavailability() == .notSignedIn(.opencode))
-        #expect(await copilot.runner().unavailability() == nil)
+        #expect(await copilot.runner(environment: ["PATH": "/usr/bin:/bin", "HOME": home.path]).unavailability() == .notSignedIn(.copilot))
         #expect(copilot.calls.isEmpty)
+    }
+
+    /// A home folder whose `.copilot/config.json` is `copilotConfig`, none when `nil`.
+    static func home(copilotConfig: String?) throws -> URL {
+        let home = FileManager.default.temporaryDirectory.appending(path: "takku-home-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: home.appending(path: ".copilot"), withIntermediateDirectories: true)
+        try copilotConfig.map { try $0.write(to: home.appending(path: ".copilot/config.json"), atomically: true, encoding: .utf8) }
+        return home
+    }
+
+    static let signedInCopilot = """
+        // User settings belong in settings.json.
+        {
+          "loggedInUsers": [{"host": "https://github.com", "login": "mariorossi"}],
+          "lastLoggedInUser": {"host": "https://github.com", "login": "mariorossi"}
+        }
+        """
+
+    @Test("Copilot with someone signed in its settings file has no problem, also with COPILOT_HOME")
+    func copilotSignedIn() async throws {
+        let copilot = try FakeCLI(.copilot, [])
+        let home = try Self.home(copilotConfig: Self.signedInCopilot)
+
+        #expect(await copilot.runner(environment: ["PATH": "/usr/bin:/bin", "HOME": home.path]).unavailability() == nil)
+        let elsewhere = ["PATH": "/usr/bin:/bin", "HOME": "/nonexistent", "COPILOT_HOME": home.appending(path: ".copilot").path]
+        #expect(await copilot.runner(environment: elsewhere).unavailability() == nil)
+        #expect(copilot.calls.isEmpty)
+    }
+
+    @Test("ready for one click: installed, signed in, and with a model of its own, in the + menu's order")
+    func ready() async throws {
+        let codex = try FakeCLI(.codex, [.init(pattern: "login status", script: "echo 'Logged in using ChatGPT'")])
+        let claude = try FakeCLI(.claude, [.init(pattern: "auth status", script: FakeCLI.prints(#"{"loggedIn":false}"#, exit: 1))])
+        let copilot = try FakeCLI(.copilot, [])
+        let openCode = try FakeCLI(.opencode, [.init(pattern: "auth list --standalone*", script: FakeCLI.prints(#"[{"id":"openrouter"}]"#))])
+        let pi = try FakeCLI(.pi, [])
+        let environment = ["PATH": "/usr/bin:/bin", "HOME": try Self.home(copilotConfig: Self.signedInCopilot).path]
+        let missing = AgentCLI.Runner(.claude, locate: { nil })
+
+        let runners = [pi, openCode, copilot, claude, codex].map { $0.runner(environment: environment) }
+        #expect(await AgentCLI.ready(among: runners) == [.codex, .copilot])
+        #expect(await AgentCLI.ready(among: [missing]) == [])
     }
 
     @Test("a signed-in CLI has no problem")

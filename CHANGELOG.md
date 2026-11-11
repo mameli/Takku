@@ -6,6 +6,7 @@ Takku was called Steno up to 0.2.1.
 
 ## Unreleased
 
+- **Your coding agent in one click**: if Codex, Claude Code or GitHub Copilot is installed and signed in on your Mac, the welcome window's Summary step finds it and offers *Use <agent>*: the Summaries go through the plan you already pay for, with nothing to set up. A GitHub Copilot Profile now also says when Copilot is not signed in, before the first Summary fails.
 - **Errors that say what to do**: a Summary Profile for a server on your Mac that is not running no longer says only "Could not connect to the server". It says nothing answers at its address, that Takku does not install it, and what to open: Ollama (from ollama.com) on its usual port, LM Studio's server, or llama.cpp. An agent CLI that fails now shows its own error instead of the hint to `--help` printed after it, and when it does not know an option Takku uses, it tells you to update it and Takku.
 
 ## 1.19.4 (2026-11-11)

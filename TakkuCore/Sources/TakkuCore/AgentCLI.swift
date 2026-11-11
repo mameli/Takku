@@ -319,16 +319,38 @@ public enum AgentCLI: String, CaseIterable, Sendable {
     /// Copilot's empty home needs to know who is signed in (its token stays in the Keychain):
     /// without it Copilot runs on the free tier. Only that is copied from the user's settings.
     func prepare(scratch: URL, environment: [String: String]) {
-        guard self == .copilot else { return }
+        guard self == .copilot, let account = Self.copilotAccount(environment: environment),
+              let data = try? JSONSerialization.data(withJSONObject: account)
+        else { return }
+        try? data.write(to: scratch.appending(path: "home/config.json"))
+    }
+
+    /// Who is signed in to Copilot, from its settings file: `loggedInUsers` and `lastLoggedInUser`,
+    /// `nil` when no one is. Copilot has no command that says it, and a run without this has no
+    /// sign-in whatever the Keychain holds.
+    static func copilotAccount(environment: [String: String]) -> [String: Any]? {
         let home = environment["COPILOT_HOME"].map { URL(filePath: $0) }
             ?? URL(filePath: environment["HOME"] ?? NSHomeDirectory()).appending(path: ".copilot")
-        guard let text = try? String(contentsOf: home.appending(path: "config.json"), encoding: .utf8) else { return }
+        guard let text = try? String(contentsOf: home.appending(path: "config.json"), encoding: .utf8) else { return nil }
         // The file opens with // comments.
         let json = text.split(separator: "\n").filter { !$0.trimmingCharacters(in: .whitespaces).hasPrefix("//") }.joined(separator: "\n")
-        guard let config = (try? JSONSerialization.jsonObject(with: Data(json.utf8))) as? [String: Any] else { return }
-        let account = config.filter { ["loggedInUsers", "lastLoggedInUser"].contains($0.key) }
-        guard !account.isEmpty, let data = try? JSONSerialization.data(withJSONObject: account) else { return }
-        try? data.write(to: scratch.appending(path: "home/config.json"))
+        guard let config = (try? JSONSerialization.jsonObject(with: Data(json.utf8))) as? [String: Any],
+              let users = config["loggedInUsers"] as? [Any], !users.isEmpty
+        else { return nil }
+        return config.filter { ["loggedInUsers", "lastLoggedInUser"].contains($0.key) }
+    }
+
+    /// The agents that can write the Summary with one click, in the order of `allCases`: installed,
+    /// signed in as far as can be told without a run, and with a model of their own (OpenCode and
+    /// Pi need one chosen in the Profile). Checked all at once.
+    public static func ready(among runners: [Runner]) async -> [AgentCLI] {
+        let found = await withTaskGroup(of: AgentCLI?.self) { group in
+            for runner in runners where runner.cli.hasDefaultModel {
+                group.addTask { await runner.unavailability() == nil ? runner.cli : nil }
+            }
+            return await group.reduce(into: Set<AgentCLI>()) { if let cli = $1 { $0.insert(cli) } }
+        }
+        return allCases.filter(found.contains)
     }
 
     /// The variables no run gets: with an API key the CLI bills per token instead of using the plan
@@ -509,8 +531,8 @@ public enum AgentCLI: String, CaseIterable, Sendable {
 
     // MARK: - Sign-in and sessions
 
-    /// The arguments that tell whether the CLI is signed in; Copilot and Pi have none (a signed-out
-    /// run's error says so; Pi signs in per provider).
+    /// The arguments that tell whether the CLI is signed in; Copilot and Pi have none (Copilot's
+    /// settings file says it, see `copilotAccount`; Pi signs in per provider).
     var signInCheckArguments: [String]? {
         switch self {
         case .codex: ["login", "status"]

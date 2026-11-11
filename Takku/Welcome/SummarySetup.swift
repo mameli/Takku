@@ -5,7 +5,8 @@ import TakkuCore
 /// Who writes the Summary: a model on this Mac, or an external one, which gets only the text.
 /// Takku Credit is done here, start to end: a pack bought from the gateway's list, the key from
 /// the email pasted, checked and made the Profile for Summaries, without going through Settings.
-/// The packs show only once asked for: a free app does not open with a price list.
+/// The packs show only once asked for: a free app does not open with a price list. A coding agent
+/// already installed and signed in on this Mac is offered first, with one click: its plan is paid.
 struct SummarySetup: View {
     /// How much of Takku Credit is open.
     enum CreditStep {
@@ -19,6 +20,7 @@ struct SummarySetup: View {
 
     /// Shown in place of the gateway's answer by `-renderWelcome`, which runs no task.
     private let previewPacks: [TakkuCredit.Pack]?
+    private let previewAgents: [AgentCLI]?
 
     @Environment(\.openSettings) private var openSettings
     @AppStorage(AppSettings.activeProviderProfileKey) private var activeProfileID = ""
@@ -30,11 +32,15 @@ struct SummarySetup: View {
     @State private var problem: String?
     @State private var balance: TakkuCredit.Balance?
     @State private var step: CreditStep
+    /// The coding agents ready for one click (`AgentCLI.ready`), `nil` while looking.
+    @State private var readyAgents: [AgentCLI]?
 
-    init(previewPacks: [TakkuCredit.Pack]? = nil, previewStep: CreditStep = .closed) {
+    init(previewPacks: [TakkuCredit.Pack]? = nil, previewStep: CreditStep = .closed, previewAgents: [AgentCLI]? = nil) {
         self.previewPacks = previewPacks
+        self.previewAgents = previewAgents
         _packs = State(initialValue: previewPacks)
         _step = State(initialValue: previewStep)
+        _readyAgents = State(initialValue: previewAgents)
     }
 
     /// Meetings of about 30 minutes per euro of a pack, VAT included: as on takku.app/credit (5 € ≈ 120 meetings).
@@ -104,6 +110,7 @@ struct SummarySetup: View {
             Text("It gets only the text of the Transcript and your notes, never the audio.")
                 .font(Paper.serif(12.5)).foregroundStyle(Paper.text)
                 .fixedSize(horizontal: false, vertical: true)
+            agents
             takkuCredit
             HStack(spacing: 4) {
                 Text("Mistral, OpenRouter or another provider?").font(Paper.serif(12)).foregroundStyle(Paper.graphite)
@@ -114,6 +121,35 @@ struct SummarySetup: View {
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .topLeading)
         .card(810)
+    }
+
+    /// Only when one is found: someone without a coding agent is not told about them here.
+    @ViewBuilder private var agents: some View {
+        if let readyAgents, !readyAgents.isEmpty {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Found on this Mac, signed in: the Summaries go through your plan, with nothing to pay here.")
+                    .font(Paper.serif(12)).foregroundStyle(Paper.text)
+                    .fixedSize(horizontal: false, vertical: true)
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 8) { agentButtons(readyAgents) }
+                    VStack(alignment: .leading, spacing: 6) { agentButtons(readyAgents) }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder private func agentButtons(_ agents: [AgentCLI]) -> some View {
+        ForEach(agents, id: \.self) { cli in
+            if active?.agentCLI == cli {
+                HStack(spacing: 6) {
+                    HandStatus(isDone: true)
+                    Text(verbatim: cli.name).font(Paper.serif(12.5)).foregroundStyle(Paper.green)
+                }
+            } else {
+                Button("Use \(cli.name)") { use(cli) }
+                    .buttonStyle(PaperButtonStyle(isPrimary: false))
+            }
+        }
     }
 
     private var takkuCredit: some View {
@@ -260,14 +296,13 @@ struct SummarySetup: View {
     // MARK: Actions
 
     private func load() async {
-        if let previewPacks {
-            packs = previewPacks
-            return
-        }
+        if previewPacks != nil || previewAgents != nil { return }
+        async let agents = AgentCLI.ready(among: AgentCLI.allCases.map { AgentCLI.Runner($0) })
         packs = (try? await TakkuCredit.packs(transport: TakkuCredit.transport)) ?? []
         if let profile = active, profile.isTakkuCredit, let key = Keychain.apiKey(for: profile.id) {
             balance = try? await TakkuCredit.balance(apiKey: key, transport: TakkuCredit.transport)
         }
+        readyAgents = await agents
     }
 
     /// Checks the key with the gateway, then makes Takku Credit the Profile for Summaries, with the
@@ -306,6 +341,18 @@ struct SummarySetup: View {
             let model = AppleIntelligence.profile(contextTokens: AppleIntelligenceModel.contextTokens)
             profiles.append(model)
             return model
+        }()
+        AppSettings.summaryProfiles = profiles
+        activeProfileID = profile.id.uuidString
+    }
+
+    /// Makes the agent's Profile the one for Summaries, adding it if there is none yet.
+    private func use(_ cli: AgentCLI) {
+        var profiles = AppSettings.summaryProfiles
+        let profile = profiles.first { $0.agentCLI == cli } ?? {
+            let new = cli.profile()
+            profiles.append(new)
+            return new
         }()
         AppSettings.summaryProfiles = profiles
         activeProfileID = profile.id.uuidString

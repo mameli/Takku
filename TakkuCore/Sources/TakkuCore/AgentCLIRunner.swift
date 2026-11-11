@@ -78,6 +78,7 @@ extension AgentCLI {
         /// Why the CLI cannot be used now, `nil` when it can as far as can be told without a run.
         public func unavailability() async -> Failure? {
             guard let executable = await locate() else { return .notInstalled(cli) }
+            if cli == .copilot { return AgentCLI.copilotAccount(environment: environment) == nil ? .notSignedIn(cli) : nil }
             guard let check = cli.signInCheckArguments,
                   let result = try? await runAside(executable, check, timeout: .seconds(30)), result.ending == .exited
             else { return nil }

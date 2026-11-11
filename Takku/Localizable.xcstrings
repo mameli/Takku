@@ -13105,6 +13105,62 @@
           }
         }
       }
+    },
+    "Use %@": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usa %@"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ verwenden"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usar %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utiliser %@"
+          }
+        }
+      }
+    },
+    "Found on this Mac, signed in: the Summaries go through your plan, with nothing to pay here.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trovato su questo Mac, con l'accesso fatto: i Riepiloghi passano dal tuo abbonamento, senza nulla da pagare qui."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auf diesem Mac gefunden und angemeldet: Die Zusammenfassungen laufen über dein Abo, hier zahlst du nichts."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Encontrado en este Mac, con la sesión iniciada: los resúmenes pasan por tu plan, sin nada que pagar aquí."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trouvé sur ce Mac, connecté : les résumés passent par votre abonnement, sans rien à payer ici."
+          }
+        }
+      }
     }
   },
   "version": "1.0"
