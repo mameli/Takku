@@ -4,6 +4,10 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
+## Unreleased
+
+- **Notifications you turned off can be found again**: macOS asks only once whether Takku may show notifications, so after *Don't Allow* nothing told you why "Summary ready", the call suggestions and the warnings while recording never came. Now *Settings → General* says so and opens Takku's page in System Settings → Notifications. A new Mac is asked in the welcome window, with the microphone and the system audio, instead of at the first launch before anything is explained.
+
 ## 1.19.3 (2026-11-11)
 
 - **A busy provider no longer costs you the summary**: when your Summary Profile answers that it is overloaded (429, 5xx) or the connection drops, Takku asks again after 5 and then 20 seconds, waiting longer if the provider asks for it. In a long meeting summarised in blocks, one block that fails no longer throws away the ones already written. A wrong key, no credit or a timeout still fail right away.

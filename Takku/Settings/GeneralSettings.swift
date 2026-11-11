@@ -2,6 +2,7 @@ import AppKit
 import KeyboardShortcuts
 import ServiceManagement
 import SwiftUI
+import TakkuCore
 
 /// Icon, name and version at the top of Settings.
 struct AppIdentity: View {
@@ -90,6 +91,35 @@ struct SuggestCallsToggle: View {
             Text("A notification when a call app or a browser uses the microphone for a while, and another when it stops. Dictation apps are ignored. Takku never starts or stops by itself.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
+        }
+    }
+}
+
+/// Shown only when Takku's notifications do not reach the user: "Summary ready", the call
+/// suggestions above and the warnings while recording would go unseen. macOS asks only once, so
+/// once answered the button opens System Settings → Notifications instead. The tab reads `access`
+/// each time it comes to the front: it changes in System Settings.
+struct NotificationsRow: View {
+    @Binding var access: NotificationAccess?
+
+    var body: some View {
+        switch access {
+        case .notAsked:
+            HStack {
+                Text("Takku has not asked yet to show notifications.")
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Button("Allow Notifications") { Task { access = await Notifications.requestAccess() } }
+            }
+        case .off:
+            HStack {
+                Text("Takku can't show notifications. Allow them in System Settings → Notifications.")
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Button("Open Notifications") { Notifications.openSystemSettings() }
+            }
+        case .allowed, nil:
+            EmptyView()
         }
     }
 }

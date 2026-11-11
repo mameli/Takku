@@ -108,10 +108,12 @@ struct WelcomeView: View {
         .onReceive(NotificationCenter.default.publisher(for: .screenshotWithoutMeeting)) { _ in
             replay(at: MarkAndCaptureScene.screenshotAt)
         }
-        // Back from System Settings, where the microphone may have just been allowed.
+        // Back from System Settings, where the microphone or the notifications may have just been allowed.
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             permissions.microphone = AVCaptureDevice.authorizationStatus(for: .audio)
+            Task { permissions.notifications = await Notifications.access() }
         }
+        .task { permissions.notifications = await Notifications.access() }
         // While Takku waits in the list: this process would not see the switch turned on.
         .task(id: permissions.screenRecording == .waiting) {
             while permissions.screenRecording == .waiting, !Task.isCancelled {
@@ -404,6 +406,8 @@ struct PermissionsState {
     var systemAudio = WelcomeView.heardSystemAudioBeforeRelaunch
     var isTestingSystemAudio = false
     var screenRecording = CGPreflightScreenCaptureAccess() ? ScreenRecording.on : .off
+    /// Read asynchronously: `nil` until then, shown as not asked.
+    var notifications: NotificationAccess?
 }
 
 /// Screen Recording as this window knows it: allowed only from the launch after the switch is on.
@@ -476,7 +480,8 @@ struct PermissionsSetup: View {
                 }
             }
 
-            SetupRow(seed: 650, isDone: audioDone, title: "Microphone and system audio", detail: audioDetail) {
+            // The notifications here too, not in a card of their own: four cards do not fit the window.
+            SetupRow(seed: 650, isDone: audioDone, title: "Microphone, system audio and notifications", detail: audioDetail) {
                 // One button, for what is missing; the test runs by itself after it.
                 if state.isTestingSystemAudio {
                     ProgressView().controlSize(.small)
@@ -488,8 +493,15 @@ struct PermissionsSetup: View {
                         Self.showDragCard(.screenRecording, list: String(localized: "System Audio Recording Only"))
                     }
                     .buttonStyle(PaperButtonStyle())
-                } else if audioDone != true {
+                } else if !isAudioAllowed {
                     Button("Allow") { allowAudio() }
+                        .buttonStyle(PaperButtonStyle())
+                } else if state.notifications == .off {
+                    Button("Open Notifications") { Notifications.openSystemSettings() }
+                        .buttonStyle(PaperButtonStyle())
+                } else if state.notifications != .allowed {
+                    // The audio was allowed before, by an earlier Takku or another build.
+                    Button("Allow") { Task { state.notifications = await Notifications.requestAccess() } }
                         .buttonStyle(PaperButtonStyle())
                 }
             }
@@ -519,9 +531,12 @@ struct PermissionsSetup: View {
         }
     }
 
+    private var isAudioAllowed: Bool { state.microphone == .authorized && state.systemAudio == true }
+
     private var audioDone: Bool? {
-        if state.microphone == .authorized && state.systemAudio == true { return true }
-        if state.microphone == .denied || state.microphone == .restricted || state.systemAudio == false { return false }
+        if isAudioAllowed && state.notifications == .allowed { return true }
+        if state.microphone == .denied || state.microphone == .restricted || state.systemAudio == false
+            || state.notifications == .off { return false }
         return nil
     }
 
@@ -530,8 +545,10 @@ struct PermissionsSetup: View {
             Text("Takku did not hear its test sound. If you chose Don't Allow, add Takku to System Audio Recording Only, then Test again.")
         } else if state.microphone == .denied || state.microphone == .restricted {
             Text("The microphone is not allowed: turn Takku on in System Settings.")
+        } else if state.notifications == .off {
+            Text("Notifications are off: turn Takku on in System Settings → Notifications. Without them you miss when a summary is ready and the warnings while recording.")
         } else {
-            Text("Takku records your voice and the call. macOS asks once for each: choose Allow.")
+            Text("Takku records your voice and the call, and tells you when a summary is ready. macOS asks once for each: choose Allow.")
         }
     }
 
@@ -553,6 +570,7 @@ struct PermissionsSetup: View {
             await AudioPermissions.bringBack(window)
             // Once the system audio prompt is answered, which can be after `request()`.
             await testSystemAudio()
+            state.notifications = await Notifications.requestAccess()
         }
     }
 

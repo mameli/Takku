@@ -109,17 +109,27 @@ private struct FittingContent: ViewModifier {
 }
 
 private struct GeneralTab: View {
+    @State private var notifications: NotificationAccess?
+
     var body: some View {
         Form {
             Section {
                 LaunchAtLoginToggle()
                 CalendarToggle()
                 SuggestCallsToggle()
+                if let notifications, notifications != .allowed {
+                    NotificationsRow(access: $notifications)
+                }
             }
 
             ShortcutsSection()
         }
         .formStyle(.grouped)
+        // Notifications can be turned on or off in System Settings while this window is open or closed.
+        .task { notifications = await Notifications.access() }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            Task { notifications = await Notifications.access() }
+        }
     }
 }
 

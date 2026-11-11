@@ -1,5 +1,6 @@
 import AppKit
 import os
+import TakkuCore
 @preconcurrency import UserNotifications
 
 private let logger = Logger(subsystem: "app.takku.takku", category: "notifications")
@@ -19,7 +20,8 @@ final class Notifications: NSObject, UNUserNotificationCenterDelegate {
     /// Called when the user chooses a notification's action; set by `MeetingController`.
     var onAction: (Action) -> Void = { _ in }
 
-    /// Asks for permission once, at app launch.
+    /// Sets up the delegate and the buttons. The permission is not asked here: the welcome window
+    /// asks for it next to the other permissions, and Settings while it was never asked.
     func configure() {
         let center = UNUserNotificationCenter.current()
         center.delegate = self
@@ -35,14 +37,34 @@ final class Notifications: NSObject, UNUserNotificationCenterDelegate {
                 intentIdentifiers: []
             ),
         ])
-        Task {
-            do {
-                let granted = try await center.requestAuthorization(options: [.alert, .sound])
-                logger.info("Notification permission requested: granted \(granted, privacy: .public)")
-            } catch {
-                logger.error("Notification permission request failed: \(error.logCode, privacy: .public) \(error, privacy: .private)")
-            }
+    }
+
+    /// Read each time it is shown: it changes in System Settings while Takku is running.
+    static func access() async -> NotificationAccess {
+        let settings = await UNUserNotificationCenter.current().notificationSettings()
+        return NotificationAccess(
+            isDetermined: settings.authorizationStatus != .notDetermined,
+            isAuthorized: [.authorized, .provisional].contains(settings.authorizationStatus),
+            showsAlerts: settings.alertStyle != .none
+        )
+    }
+
+    /// Shows macOS's prompt when it was never answered; afterwards macOS shows nothing, and only
+    /// System Settings can change the answer.
+    static func requestAccess() async -> NotificationAccess {
+        do {
+            let granted = try await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound])
+            logger.info("Notification permission requested: granted \(granted, privacy: .public)")
+        } catch {
+            logger.error("Notification permission request failed: \(error.logCode, privacy: .public) \(error, privacy: .private)")
         }
+        return await access()
+    }
+
+    /// System Settings → Notifications, at Takku's own page.
+    static func openSystemSettings() {
+        let id = Bundle.main.bundleIdentifier ?? "app.takku.takku"
+        NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.Notifications-Settings.extension?id=\(id)")!)
     }
 
     /// The permission is read at every notification, not once at launch: it can be turned on in

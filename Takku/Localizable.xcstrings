@@ -3591,34 +3591,6 @@
         }
       }
     },
-    "Microphone and system audio": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Microfono e audio di sistema"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mikrofon und Systemton"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Micrófono y audio del sistema"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Microphone et audio système"
-          }
-        }
-      }
-    },
     "Mistral, OpenRouter or another provider?": {
       "localizations": {
         "it": {
@@ -10461,34 +10433,6 @@
         }
       }
     },
-    "Takku records your voice and the call. macOS asks once for each: choose Allow.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Takku registra la tua voce e la chiamata. macOS chiede una volta per ciascuna: scegli Consenti."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Takku nimmt deine Stimme und den Anruf auf. macOS fragt für beides einmalig nach: Wähle „Erlauben“."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Takku graba tu voz y la llamada. macOS pide permiso una vez para cada una: elige Permitir."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Takku enregistre votre voix et l’appel. macOS demande l’autorisation une fois pour chacun : choisissez Autoriser."
-          }
-        }
-      }
-    },
     "Open System Settings": {
       "localizations": {
         "it": {
@@ -12846,6 +12790,202 @@
           "stringUnit": {
             "state": "translated",
             "value": "Usa %@."
+          }
+        }
+      }
+    },
+    "Allow Notifications": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consenti notifiche"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mitteilungen erlauben"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permitir notificaciones"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autoriser les notifications"
+          }
+        }
+      }
+    },
+    "Open Notifications": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apri Notifiche"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mitteilungen öffnen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir Notificaciones"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrir Notifications"
+          }
+        }
+      }
+    },
+    "Notifications are off: turn Takku on in System Settings → Notifications. Without them you miss when a summary is ready and the warnings while recording.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le notifiche sono disattivate: attiva Takku in Impostazioni di Sistema → Notifiche. Senza, non sai quando un riepilogo è pronto e perdi gli avvisi durante la registrazione."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mitteilungen sind aus: Aktiviere Takku in Systemeinstellungen → Mitteilungen. Ohne sie verpasst du, wann eine Zusammenfassung bereit ist, und die Warnungen während der Aufnahme."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las notificaciones están desactivadas: activa Takku en Ajustes del Sistema → Notificaciones. Sin ellas no sabrás cuándo un resumen está listo ni verás los avisos durante la grabación."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les notifications sont désactivées : activez Takku dans Réglages Système → Notifications. Sans elles, vous ne saurez pas quand un résumé est prêt et manquerez les avertissements pendant l’enregistrement."
+          }
+        }
+      }
+    },
+    "Microphone, system audio and notifications": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Microfono, audio di sistema e notifiche"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mikrofon, Systemaudio und Mitteilungen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Micrófono, audio del sistema y notificaciones"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Microphone, audio système et notifications"
+          }
+        }
+      }
+    },
+    "Takku records your voice and the call, and tells you when a summary is ready. macOS asks once for each: choose Allow.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku registra la tua voce e la chiamata, e ti avvisa quando un riepilogo è pronto. macOS chiede una volta per ciascuna: scegli Consenti."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku nimmt deine Stimme und den Anruf auf und sagt dir, wenn eine Zusammenfassung bereit ist. macOS fragt für jedes einmalig nach: Wähle „Erlauben“."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku graba tu voz y la llamada, y te avisa cuando un resumen está listo. macOS pide permiso una vez para cada una: elige Permitir."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku enregistre votre voix et l’appel, et vous prévient quand un résumé est prêt. macOS demande l’autorisation une fois pour chacun : choisissez Autoriser."
+          }
+        }
+      }
+    },
+    "Takku can't show notifications. Allow them in System Settings → Notifications.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku non può mostrare notifiche. Consentile in Impostazioni di Sistema → Notifiche."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku kann keine Mitteilungen zeigen. Erlaube sie in Systemeinstellungen → Mitteilungen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku no puede mostrar notificaciones. Permítelas en Ajustes del Sistema → Notificaciones."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku ne peut pas afficher de notifications. Autorisez-les dans Réglages Système → Notifications."
+          }
+        }
+      }
+    },
+    "Takku has not asked yet to show notifications.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku non ha ancora chiesto di mostrare le notifiche."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku hat noch nicht gefragt, ob es Mitteilungen zeigen darf."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku aún no ha pedido mostrar notificaciones."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takku n’a pas encore demandé à afficher des notifications."
           }
         }
       }
