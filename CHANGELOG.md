@@ -4,7 +4,7 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
-## Unreleased
+## 1.19.5 (2026-11-11)
 
 - **What to do next, where you are**: "Summary ready" now says how many speakers have no name and offers *Name speakers…*; "Processing failed" offers *Regenerate Summary*, to click once the Profile is fixed. The menu shows your last meeting with its actions on the first level, so naming the speakers or regenerating no longer means three submenus down. The *Recognise voices* setting says where you name the speakers.
 - **No more inactive Profiles to start with**: a new Mac no longer finds Ollama, Mistral, TensorX, OpenRouter and Takku Credit in the Summary list, unused. You start with the one you choose in the welcome window; the others are in the + menu, added when you pick them.
