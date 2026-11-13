@@ -4,7 +4,7 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
-## Unreleased
+## 1.20.1 (2026-11-13)
 
 - **A pasted API key just works**: in *Settings → Summary*, pressing *Test connection* or *Use for Summaries* right after pasting a key saves it to the Keychain first, trimming stray spaces and line breaks. Before, the test ran without the new key unless you pressed Return or *Save key*.
 - **Clearer names in the menu**: the Summary Profile that writes no summary is now called *Transcript only*. `takku import --profile` accepts both `transcript` and `"Transcript only"`.
