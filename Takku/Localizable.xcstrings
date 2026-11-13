@@ -8893,34 +8893,6 @@
         }
       }
     },
-    "Very fast and accurate; on short replies it can switch language.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Molto veloce e preciso; sulle risposte brevi può cambiare lingua."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sehr schnell und genau; bei kurzen Antworten kann die Sprache wechseln."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Muy rápido y preciso; en respuestas cortas puede cambiar de idioma."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Très rapide et précis ; sur les réponses courtes, il peut changer de langue."
-          }
-        }
-      }
-    },
     "Vocabulary": {
       "localizations": {
         "it": {
@@ -13186,6 +13158,454 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nommez les intervenants avec Nommer les intervenants…, depuis le menu ou la notification « Résumé prêt » : Takku retient leurs voix, sur ce Mac uniquement, et lors des réunions suivantes, tant que l’audio est conservé, remplit les noms des voix qu’il reconnaît. Une voix est une donnée biométrique : activez cette option uniquement avec le consentement des participants."
+          }
+        }
+      }
+    },
+    "English only: drops fillers, false starts and repeats.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo inglese: toglie intercalari, false partenze e ripetizioni."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nur Englisch: lässt Füllwörter, Neuansätze und Wiederholungen weg."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo inglés: quita muletillas, arranques en falso y repeticiones."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anglais uniquement : retire les hésitations, faux départs et répétitions."
+          }
+        }
+      }
+    },
+    "English only: the fastest, nearly as accurate as Parakeet Ultra in English.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo inglese: il più veloce, in inglese preciso quasi quanto Parakeet Ultra."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nur Englisch: am schnellsten, auf Englisch fast so genau wie Parakeet Ultra."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo inglés: el más rápido, en inglés casi tan preciso como Parakeet Ultra."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anglais uniquement : le plus rapide, presque aussi précis que Parakeet Ultra en anglais."
+          }
+        }
+      }
+    },
+    "English only: word for word, fillers and repeats included.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo inglese: parola per parola, intercalari e ripetizioni compresi."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nur Englisch: Wort für Wort, mit Füllwörtern und Wiederholungen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo inglés: palabra por palabra, con muletillas y repeticiones."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anglais uniquement : mot pour mot, hésitations et répétitions comprises."
+          }
+        }
+      }
+    },
+    "Less accurate than Large v3 Turbo, and slower.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meno preciso di Large v3 Turbo, e più lento."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ungenauer als Large v3 Turbo und langsamer."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menos preciso que Large v3 Turbo, y más lento."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moins précis que Large v3 Turbo, et plus lent."
+          }
+        }
+      }
+    },
+    "Light, on the graphics card; less accurate than Parakeet in Italian.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leggero, sulla scheda grafica; in italiano meno preciso di Parakeet."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kompakt, auf der Grafikkarte; auf Italienisch ungenauer als Parakeet."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ligero, en la tarjeta gráfica; en italiano menos preciso que Parakeet."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Léger, sur la carte graphique ; en italien moins précis que Parakeet."
+          }
+        }
+      }
+    },
+    "Meetings in another language come out wrong: tick only English in Meeting languages, or use another model.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le riunioni in un'altra lingua vengono trascritte male: spunta solo l'inglese in Lingue delle riunioni, o usa un altro modello."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Besprechungen in einer anderen Sprache werden falsch transkribiert: Wähle unter Besprechungssprachen nur Englisch oder nutze ein anderes Modell."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las reuniones en otro idioma salen mal: marca solo inglés en Idiomas de las reuniones o usa otro modelo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les réunions dans une autre langue sont mal transcrites : cochez seulement l’anglais dans Langues des réunions, ou utilisez un autre modèle."
+          }
+        }
+      }
+    },
+    "Other models": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Altri modelli"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weitere Modelle"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otros modelos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autres modèles"
+          }
+        }
+      }
+    },
+    "The lightest: a third of the download, a little less accurate and slower.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il più leggero: un terzo del download, un po' meno preciso e più lento."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Am kompaktesten: ein Drittel des Downloads, etwas ungenauer und langsamer."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El más ligero: un tercio de la descarga, algo menos preciso y más lento."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le plus léger : un tiers du téléchargement, un peu moins précis et plus lent."
+          }
+        }
+      }
+    },
+    "The original Large v3: accurate, several times slower than Turbo.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il Large v3 originale: preciso, molto più lento di Turbo."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das ursprüngliche Large v3: genau, um ein Vielfaches langsamer als Turbo."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El Large v3 original: preciso, varias veces más lento que Turbo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le Large v3 d’origine : précis, plusieurs fois plus lent que Turbo."
+          }
+        }
+      }
+    },
+    "The previous generation of Whisper.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La generazione precedente di Whisper."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die vorige Whisper-Generation."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La generación anterior de Whisper."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La génération précédente de Whisper."
+          }
+        }
+      }
+    },
+    "The smallest; to try things out, not for meetings.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il più piccolo; per fare prove, non per le riunioni."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das kleinste; zum Ausprobieren, nicht für Meetings."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El más pequeño; para hacer pruebas, no para reuniones."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le plus petit ; pour essayer, pas pour les réunions."
+          }
+        }
+      }
+    },
+    "Uncompressed: much more memory, slow to prepare.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non compresso: molta più memoria, lento da preparare."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unkomprimiert: viel mehr Speicher, langsam vorzubereiten."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin comprimir: mucha más memoria, lento de preparar."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non compressé : beaucoup plus de mémoire, long à préparer."
+          }
+        }
+      }
+    },
+    "Very light; many mistakes.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Molto leggero; molti errori."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sehr kompakt; viele Fehler."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muy ligero; muchos errores."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Très léger ; beaucoup d’erreurs."
+          }
+        }
+      }
+    },
+    "What Parakeet Ultra was trained from: as fast, less accurate.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il modello da cui è nato Parakeet Ultra: veloce uguale, meno preciso."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Modell, aus dem Parakeet Ultra trainiert wurde: genauso schnell, ungenauer."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El modelo del que se entrenó Parakeet Ultra: igual de rápido, menos preciso."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le modèle d’où vient Parakeet Ultra : aussi rapide, moins précis."
+          }
+        }
+      }
+    },
+    "Lighter, larger or English only, for other needs.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Più leggeri, più grandi o solo inglese, per altre esigenze."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kompakter, größer oder nur Englisch, für andere Bedürfnisse."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Más ligeros, más grandes o solo inglés, para otras necesidades."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plus légers, plus gros ou anglais uniquement, pour d’autres besoins."
+          }
+        }
+      }
+    },
+    "Parakeet Ultra and Whisper Large v3 Turbo suit most meetings; these are for other needs.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parakeet Ultra e Whisper Large v3 Turbo vanno bene per la maggior parte delle riunioni; questi sono per altre esigenze."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parakeet Ultra und Whisper Large v3 Turbo passen für die meisten Besprechungen; diese sind für andere Bedürfnisse."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parakeet Ultra y Whisper Large v3 Turbo sirven para la mayoría de las reuniones; estos son para otras necesidades."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parakeet Ultra et Whisper Large v3 Turbo conviennent à la plupart des réunions ; ceux-ci sont pour d’autres besoins."
           }
         }
       }

@@ -6,13 +6,14 @@ import os
 
 private let logger = Logger(subsystem: "app.takku.takku", category: "transcription")
 
-/// A speech recognition model Takku offers. All are multilingual (Italian and English).
+/// A speech recognition model Takku offers: multilingual (Italian and English) unless
+/// `isEnglishOnly`.
 struct TranscriptionModel: Identifiable, Hashable, Sendable {
     enum Engine: Sendable {
         /// OpenAI Whisper through WhisperKit: `id` is the folder in argmaxinc/whisperkit-coreml.
         case whisper
         /// NVIDIA Parakeet TDT v3, or a model derived from it, through FluidAudio: `id` is the
-        /// folder FluidAudio downloads it into.
+        /// folder FluidAudio downloads it into (its repo's `folderName`).
         case parakeet(AsrModelVersion)
     }
 
@@ -21,35 +22,91 @@ struct TranscriptionModel: Identifiable, Hashable, Sendable {
     let name: String
     let downloadMB: Int
     let note: LocalizedStringResource
+    /// Shown first in Settings; the others are under *Other models*.
+    var isFeatured = false
+    /// Transcribes English only: a Meeting in another language comes out wrong.
+    var isEnglishOnly = false
 
+    /// The four offered first (the most accurate, the one always in the Meeting language, the
+    /// lightest, the English one), then every other model that loads by its name alone.
     static let all = [
         TranscriptionModel(
             id: "parakeet-ultra", engine: .parakeet(.ultra), name: "Parakeet Ultra",
-            downloadMB: 632, note: "Recommended: the most accurate, and fast; on short replies it can switch language."
+            downloadMB: 632, note: "Recommended: the most accurate, and fast; on short replies it can switch language.",
+            isFeatured: true
         ),
         TranscriptionModel(
-            id: "openai_whisper-large-v3-v20240930_turbo_632MB", engine: .whisper, name: "Large v3 Turbo",
-            downloadMB: 646, note: "Fast and accurate; always in the Meeting language."
+            id: "openai_whisper-large-v3-v20240930_turbo_632MB", engine: .whisper, name: "Whisper Large v3 Turbo",
+            downloadMB: 646, note: "Fast and accurate; always in the Meeting language.",
+            isFeatured: true
         ),
         TranscriptionModel(
-            id: "openai_whisper-large-v3-v20240930_turbo", engine: .whisper, name: "Large v3 Turbo (full)",
-            downloadMB: 1_638, note: "Slightly more accurate; more memory, slower to prepare."
+            id: "parakeet-redux", engine: .parakeet(.redux), name: "Parakeet Redux",
+            downloadMB: 220, note: "The lightest: a third of the download, a little less accurate and slower.",
+            isFeatured: true
         ),
         TranscriptionModel(
-            id: "openai_whisper-small_216MB", engine: .whisper, name: "Small",
-            downloadMB: 217, note: "Light and fast; more mistakes, especially in Italian."
+            id: "phonon-2", engine: .parakeet(.phonon2), name: "Phonon-2",
+            downloadMB: 360, note: "English only: the fastest, nearly as accurate as Parakeet Ultra in English.",
+            isFeatured: true, isEnglishOnly: true
         ),
         TranscriptionModel(
             id: "parakeet-tdt-0.6b-v3", engine: .parakeet(.v3), name: "Parakeet v3",
-            downloadMB: 490, note: "Very fast and accurate; on short replies it can switch language."
+            downloadMB: 490, note: "What Parakeet Ultra was trained from: as fast, less accurate."
+        ),
+        TranscriptionModel(
+            id: "openai_whisper-large-v3-v20240930_turbo", engine: .whisper, name: "Whisper Large v3 Turbo (full)",
+            downloadMB: 1_638, note: "Slightly more accurate; more memory, slower to prepare."
+        ),
+        TranscriptionModel(
+            id: "openai_whisper-large-v3_947MB", engine: .whisper, name: "Whisper Large v3",
+            downloadMB: 948, note: "The original Large v3: accurate, several times slower than Turbo."
+        ),
+        TranscriptionModel(
+            id: "openai_whisper-large-v3", engine: .whisper, name: "Whisper Large v3 (full)",
+            downloadMB: 3_090, note: "Uncompressed: much more memory, slow to prepare."
+        ),
+        TranscriptionModel(
+            id: "openai_whisper-large-v2_949MB", engine: .whisper, name: "Whisper Large v2",
+            downloadMB: 952, note: "The previous generation of Whisper."
+        ),
+        TranscriptionModel(
+            id: "openai_whisper-medium", engine: .whisper, name: "Whisper Medium",
+            downloadMB: 1_529, note: "Less accurate than Large v3 Turbo, and slower."
+        ),
+        TranscriptionModel(
+            id: "openai_whisper-small_216MB", engine: .whisper, name: "Whisper Small",
+            downloadMB: 217, note: "Light and fast; more mistakes, especially in Italian."
+        ),
+        TranscriptionModel(
+            id: "openai_whisper-base", engine: .whisper, name: "Whisper Base",
+            downloadMB: 146, note: "Very light; many mistakes."
+        ),
+        TranscriptionModel(
+            id: "openai_whisper-tiny", engine: .whisper, name: "Whisper Tiny",
+            downloadMB: 76, note: "The smallest; to try things out, not for meetings."
+        ),
+        TranscriptionModel(
+            id: "phonon-2.5", engine: .parakeet(.phonon25), name: "Phonon-2.5",
+            downloadMB: 290, note: "Light, on the graphics card; less accurate than Parakeet in Italian."
+        ),
+        TranscriptionModel(
+            id: "bark-3.0", engine: .parakeet(.bark3), name: "Bark 3.0",
+            downloadMB: 440, note: "English only: word for word, fillers and repeats included.",
+            isEnglishOnly: true
+        ),
+        TranscriptionModel(
+            id: "bark-3.0-clean", engine: .parakeet(.bark3Clean), name: "Bark 3.0 Clean",
+            downloadMB: 450, note: "English only: drops fillers, false starts and repeats.",
+            isEnglishOnly: true
         ),
     ]
 
     /// For a new install: Parakeet Ultra since 1.10.0.
-    static let `default` = all[0]
+    static let `default` = all.first { $0.id == "parakeet-ultra" }!
     /// The default up to 1.9.0, Large v3 Turbo: what made the Segment caches written before models
     /// could be chosen, and what a Mac that never chose one keeps (see `keepPreviousDefault`).
-    static let previousDefault = all[1]
+    static let previousDefault = all.first { $0.id == "openai_whisper-large-v3-v20240930_turbo_632MB" }!
 
     static func == (lhs: Self, rhs: Self) -> Bool { lhs.id == rhs.id }
     func hash(into hasher: inout Hasher) { hasher.combine(id) }
