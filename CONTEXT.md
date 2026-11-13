@@ -96,7 +96,7 @@ A local or remote service that performs a Role, chosen by the user: preferably l
 _Avoid_: backend, API, vendor
 
 **Provider profile** (`ProviderProfile`):
-A named configuration of a Provider (how to reach it: an endpoint and credentials, or a coding agent the user installed and signed in to on the Mac; the model and, for the Summary, how much the model reasons and any Extra parameters) that the user selects for a Role. For the Summary the user can also choose none (*Transcript* in the menu): the Meeting then gets only its Transcript, with no Summary and no Template.
+A named configuration of a Provider (how to reach it: an endpoint and credentials, or a coding agent the user installed and signed in to on the Mac; the model and, for the Summary, how much the model reasons and any Extra parameters) that the user selects for a Role. For the Summary the user can also choose none (*Transcript only* in the menu): the Meeting then gets only its Transcript, with no Summary and no Template.
 _Avoid_: preset, account
 
 **Extra parameters**:

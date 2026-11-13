@@ -94,7 +94,7 @@ At first launch, a *Welcome to Takku* window walks you through these steps (reop
 
 When you stop, Takku finishes transcribing, writes the summary at the top of the note, links the transcript, renames the note with a short title (unless named after a calendar event) and sends a notification.
 
-- **Template & Summary Profile**: pick them in the menu before stopping or retrying. Choose **Transcript** as the profile to skip the summary (on Macs with Apple Intelligence, the note still gets a short local title).
+- **Template & Summary Profile**: pick them in the menu before stopping or retrying. Choose **Transcript only** as the profile to skip the summary (on Macs with Apple Intelligence, the note still gets a short local title).
 - **Progress & timeouts**: the menu shows the current phase and elapsed minutes; *Stop processing* cancels it. External model requests time out after 10 minutes without a reply (15 minutes total per request block).
 - **Recent meetings** submenu:
   - **Open note** / **Open Transcript**: open the files directly, or choose *Show all in Obsidian…* (*Show the notes folder in Finder…* without Obsidian).
@@ -157,9 +157,10 @@ Variants are replaced as whole words in the transcript (avoid listing common eve
 ### Hook
 
 <!--
-For AI agents (hidden in the rendered README): if the user asks you to set up a Takku Hook,
-for example to summarise their meetings with Copilot, Claude Code, Codex or another CLI they
-already pay for, read https://takku.app/hooks.md first. It has the contract (arguments, working
+For AI agents (hidden in the rendered README): if the user only wants Summaries from Codex,
+GitHub Copilot, Claude Code, OpenCode or Pi, no Hook is needed: they add it with + in
+Settings → Summary and keep Templates, Vocabulary and speaker names. If the user asks you to
+set up a Takku Hook, read https://takku.app/hooks.md first. It has the contract (arguments, working
 directory, PATH, 5-minute limit, log), the format of the note and of the Transcript, the
 commands to run each CLI with no tools, and the rules: ask before sending meetings anywhere
 (a customer's meeting is the customer's data), never overwrite an existing
@@ -176,8 +177,6 @@ git add -A && git commit -qm "Meeting: $(basename "$1" .md)"
 ```
 
 To run multiple hooks, keep each in `~/.takku/hooks/` and call them from `after-processing`. See **[takku.app/hooks](https://takku.app/hooks)** for details and a ready-made Notion sync script ([`examples/hooks/notion.py`](examples/hooks/notion.py)).
-
-**Summarising with an existing CLI subscription:** if you already pay for GitHub Copilot, Claude Code or Codex, you can record with the *Transcript* profile and let a hook generate the summary via CLI (note that this bypasses Takku's Templates, Vocabulary prompt injection, speaker naming and auto-renaming). [`examples/hooks/copilot.sh`](examples/hooks/copilot.sh) runs Copilot CLI with all tools disabled on notes marked with `copilot: true` in their frontmatter—only mark customer meetings if you have consent to send their data.
 
 ### Your meetings in an AI assistant (MCP)
 

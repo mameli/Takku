@@ -50,7 +50,7 @@ public struct ChatClient: Sendable {
             case .responseFailed(let message):
                 String(localized: "The provider could not complete the response: \(message)")
             case .noCredit:
-                String(localized: "Your Takku Credit is used up. Add credit in Settings → Summary Profiles, then Retry the Meeting.")
+                String(localized: "Your Takku Credit is used up. Add credit in Settings → Summary, then choose Regenerate Summary.")
             case .localServerNotRunning(let address, 11434):
                 String(localized: "Nothing answers at \(address): Ollama is not open. Ollama is a separate app that Takku does not install: get it from ollama.com, open it, then try again.")
             case .localServerNotRunning(let address, 1234):

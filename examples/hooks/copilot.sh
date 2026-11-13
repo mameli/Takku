@@ -1,6 +1,6 @@
 #!/bin/sh
 # Takku Hook: writes a Summary with GitHub Copilot CLI, for meetings recorded without a Summary
-# Profile ("Transcript" in the menu), when your company allows Copilot but no other provider.
+# Profile ("Transcript only" in the menu), when your company allows Copilot but no other provider.
 #
 # Install it as ~/.takku/hooks/after-processing (see the README, "Hook"). Takku runs it with
 # the paths of the meeting note and of the Transcript; you can also run it yourself:

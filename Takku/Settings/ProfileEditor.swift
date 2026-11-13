@@ -76,8 +76,8 @@ struct ProfileEditor: View {
                 providerRows
             }
 
-            // The only place where the key is entered. It is saved only on Return or with the
-            // button, never while typing: a stray keystroke must not replace a working key.
+            // The only place where the key is entered. It is saved on Return, Save key, Test
+            // connection or Use for Summaries, never while typing: a stray keystroke must not replace a working key.
             if !profile.isAppleIntelligence && profile.agentCLI == nil { LabeledContent("API key") {
                 HStack {
                     PasteableTextField(
@@ -108,7 +108,7 @@ struct ProfileEditor: View {
                 if isActive {
                     Text("Used for Summaries").foregroundStyle(.green)
                 } else {
-                    Button("Use for Summaries", action: activate)
+                    Button("Use for Summaries") { if saveKeyIfNeeded(announce: true) { activate() } }
                 }
             }
             if let status {
@@ -121,7 +121,7 @@ struct ProfileEditor: View {
                 if profile.isAppleIntelligence || profile.agentCLI != nil {
                     Text("Changes are saved as you type.")
                 } else {
-                    Text("Changes are saved as you type. The key goes to the Keychain when you press Return or Save key.")
+                    Text("Changes are saved as you type. The key goes to the Keychain when you press Return, Save key or Test connection.")
                 }
             }
             .foregroundStyle(.secondary)
@@ -157,15 +157,15 @@ struct ProfileEditor: View {
         Group {
             switch cli {
             case .codex:
-                Text("Summaries written by the Codex CLI installed on this Mac, with the ChatGPT plan you signed in to it with: no key and no credit here. The Transcript and your notes go to OpenAI under your plan's terms. Each request is a run of codex exec that keeps nothing and uses none of your Codex settings.")
+                Text("Uses your ChatGPT plan through Codex, with no API key. The Transcript and your notes go to OpenAI under your plan's terms; each run has no tools, session or settings.")
             case .copilot:
-                Text("Summaries written by the GitHub Copilot CLI installed on this Mac, with the Copilot plan you signed in to it with: no key and no credit here. Each request costs premium requests of your plan, and the Transcript and your notes go to GitHub and its model providers under your plan's terms. Each run keeps nothing and uses none of your Copilot settings.")
+                Text("Uses your GitHub Copilot plan (counts toward premium requests), with no API key. The Transcript and your notes go to GitHub and its model providers; each run has no tools, session or settings.")
             case .claude:
-                Text("Summaries written by the Claude Code CLI installed on this Mac, with the Claude plan you signed in to it with: no key and no credit here. The Transcript and your notes go to Anthropic under your plan's terms. Each run keeps nothing and uses none of your Claude Code settings.")
+                Text("Uses your Claude plan through Claude Code, with no API key. The Transcript and your notes go to Anthropic under your plan's terms; each run has no tools, session or settings.")
             case .opencode:
-                Text("Summaries written by the OpenCode CLI installed on this Mac, with OpenCode Go or another plan you signed in to through it: no key and no credit here. The Transcript and your notes go to the model's provider under your plan's terms. Each run uses none of your OpenCode settings, and Takku deletes its session afterwards.")
+                Text("Uses the plan you signed in to in OpenCode, with no API key. The Transcript and your notes go to the model's provider; each run has no tools or settings, and Takku deletes its session afterwards.")
             case .pi:
-                Text("Summaries written by the Pi CLI installed on this Mac, with a plan you signed in to through it: no key and no credit here. The Transcript and your notes go to the model's provider under your plan's terms. Each run keeps nothing and uses none of your extensions, skills or instructions.")
+                Text("Uses the plan you signed in to in Pi, with no API key. The Transcript and your notes go to the model's provider; each run has no tools, session, extensions or skills.")
             }
         }
         .font(.caption)
@@ -394,15 +394,25 @@ struct ProfileEditor: View {
     }
 
     private func saveKey() {
-        guard !apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        _ = saveKeyIfNeeded(announce: true)
+    }
+
+    /// Saves a key typed in the field before testing or activating the Profile, so pasting a key
+    /// and pressing *Test connection* or *Use for Summaries* works without pressing *Save key* first.
+    @discardableResult
+    private func saveKeyIfNeeded(announce: Bool = false) -> Bool {
+        let trimmed = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return true }
         do {
-            try Keychain.setAPIKey(apiKey, for: profile.id)
+            try Keychain.setAPIKey(trimmed, for: profile.id)
             apiKey = ""
             refreshStoredKey()
-            status = String(localized: "Key saved in the Keychain.")
+            if announce { status = String(localized: "Key saved in the Keychain.") }
             Task { await readCredit() }
+            return true
         } catch {
             status = error.localizedDescription
+            return false
         }
     }
 
@@ -440,6 +450,7 @@ struct ProfileEditor: View {
     }
 
     private func test() async {
+        guard saveKeyIfNeeded() else { return }
         isTesting = true
         defer { isTesting = false }
         do {

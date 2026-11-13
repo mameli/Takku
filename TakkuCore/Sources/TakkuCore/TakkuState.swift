@@ -34,10 +34,14 @@ public struct TakkuState: Sendable {
         templates.first { $0 == name } ?? templates.first { $0.caseInsensitiveCompare(name) == .orderedSame }
     }
 
-    /// `--profile`: `transcript`, a Profile's id, or its name ignoring case; otherwise why not.
+    /// `--profile`: `transcript` (or `transcript only`), a Profile's id, or its name ignoring case; otherwise why not.
     public func profileChoice(_ text: String) -> Result<AppRequest.ProfileChoice, ChoiceError> {
         let trimmed = text.trimmingCharacters(in: .whitespaces)
-        if trimmed.caseInsensitiveCompare("transcript") == .orderedSame { return .success(.transcript) }
+        if trimmed.caseInsensitiveCompare("transcript") == .orderedSame
+            || trimmed.caseInsensitiveCompare("transcript only") == .orderedSame
+        {
+            return .success(.transcript)
+        }
         if let id = UUID(uuidString: trimmed), profiles.contains(where: { $0.id == id }) { return .success(.profile(id)) }
         let named = profiles.filter { $0.displayName.trimmingCharacters(in: .whitespaces).caseInsensitiveCompare(trimmed) == .orderedSame }
         switch named.count {

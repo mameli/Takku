@@ -197,11 +197,11 @@ struct AppCommandTests {
 
         let json = run(["import", "a.m4a", "b.mp4", "--json", "--profile", "transcript"], folders, app: app)
         let objects = try #require(try JSONSerialization.jsonObject(with: Data(json.output.utf8)) as? [[String: Any]])
-        let noWait = run(["import", "a.m4a", "--no-wait"], folders, app: app)
+        let noWait = run(["import", "a.m4a", "--no-wait", "--profile", "Transcript only"], folders, app: app)
 
         #expect(objects.count == 2, "\(json.error) \(json.output)")
         #expect(objects.allSatisfy { $0["status"] as? String == "completed" && $0["summary"] as? String == "### Punti\n- Tutto bene" }, "\(json.output)")
-        #expect(received.all.prefix(2).allSatisfy { $0.profile == .transcript && $0.template == nil })
+        #expect(received.all.prefix(3).allSatisfy { $0.profile == .transcript && $0.template == nil })
         #expect(noWait.output == received.all[2].meetingID.uuidString + "\n")
     }
 

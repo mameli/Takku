@@ -62,7 +62,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ tiene la finestra che stai guardando, sotto il suo punto nel Riepilogo."
+            "value": "%@ salva la finestra che stai guardando, sotto il suo punto nel Riepilogo."
           }
         },
         "de": {
@@ -90,7 +90,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ segna un momento: prende una stella e il Riepilogo gli dà priorità."
+            "value": "%@ segna un momento: aggiunge una stella e il Riepilogo gli dà priorità."
           }
         },
         "de": {
@@ -734,7 +734,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le lingue dei tuoi meeting, e il modello che li trascrive su questo Mac."
+            "value": "Le lingue delle tue riunioni, e il modello che le trascrive su questo Mac."
           }
         },
         "de": {
@@ -902,7 +902,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cosa fa Takku, e cosa preparare prima del primo meeting."
+            "value": "Cosa fa Takku, e cosa configurare prima della prima riunione."
           }
         },
         "de": {
@@ -1294,7 +1294,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Consentito: la scorciatoia per gli screenshot funziona durante un meeting."
+            "value": "Consentito: la scorciatoia per gli screenshot funziona durante una riunione."
           }
         },
         "de": {
@@ -1630,7 +1630,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Prima del primo meeting"
+            "value": "Prima della prima riunione"
           }
         },
         "de": {
@@ -1817,34 +1817,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Impossible de lire l’audio de %@."
-          }
-        }
-      }
-    },
-    "Changes are saved as you type. The key goes to the Keychain when you press Return or Save key.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Le modifiche si salvano mentre scrivi. La chiave va nel Portachiavi quando premi Invio o Salva chiave."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Änderungen werden beim Tippen gespeichert. Der Schlüssel wird im Schlüsselbund gesichert, wenn du den Zeilenschalter oder „Schlüssel sichern“ drückst."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Los cambios se guardan mientras escribes. La clave se guarda en el Llavero al pulsar Intro o Guardar clave."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les modifications sont enregistrées à la frappe. La clé est enregistrée dans le Trousseau lorsque vous appuyez sur Retour ou sur Enregistrer la clé."
           }
         }
       }
@@ -2781,7 +2753,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Per gli screenshot durante un meeting. macOS lo applica quando Takku si riapre."
+            "value": "Per gli screenshot durante una riunione. macOS lo applica quando Takku si riapre."
           }
         },
         "de": {
@@ -3090,7 +3062,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Importa audio: un memo vocale, una lezione, un meeting di persona o un video diventano una nota come le altre."
+            "value": "Importa audio: un memo vocale, una lezione, una riunione di persona o un video diventano una nota come le altre."
           }
         },
         "de": {
@@ -5249,7 +5221,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Takku vive nella barra dei menu. %@ avvia e ferma un meeting, da qualsiasi app."
+            "value": "Takku vive nella barra dei menu. %@ avvia e ferma una riunione, da qualsiasi app."
           }
         },
         "de": {
@@ -5305,7 +5277,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Takku ricostruirà il Transcript dall'audio, con il Vocabolario e i nomi degli speaker attuali, riusando la trascrizione già salvata dove è ancora valida. Se l'elaborazione riesce, le modifiche che hai fatto al Transcript attuale saranno sostituite."
+            "value": "Takku ricostruirà la Trascrizione dall'audio, con il Vocabolario e i nomi degli Speaker attuali, riusando la trascrizione già salvata dove è ancora valida. Se l'elaborazione riesce, le modifiche che hai fatto alla Trascrizione attuale saranno sostituite."
           }
         },
         "de": {
@@ -5333,7 +5305,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "I Template sono file Markdown scritti da te: appunti per una lezione, un 1to1, i meeting del tuo team."
+            "value": "I Template sono file Markdown scritti da te: appunti per una lezione, un 1:1, le riunioni del tuo team."
           }
         },
         "de": {
@@ -5613,7 +5585,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Transcript non trovato."
+            "value": "Trascrizione non trovata."
           }
         },
         "de": {
@@ -5893,7 +5865,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "In ~/.takku/vocabulary.md, uno per riga: `- Scaleway = scale uai | il nostro cloud provider europeo`. Il Summary li usa; le varianti che elenchi vengono corrette nel Transcript."
+            "value": "In ~/.takku/vocabulary.md, uno per riga: `- Scaleway = scale uai | il nostro cloud provider europeo`. Il Riepilogo li usa; le varianti che elenchi vengono corrette nella Trascrizione."
           }
         },
         "de": {
@@ -6258,7 +6230,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Apri Transcript"
+            "value": "Apri Trascrizione"
           }
         },
         "de": {
@@ -6931,7 +6903,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "takku_id %@ duplicato. Takku non può scegliere in sicurezza tra: %@. Correggi le note duplicate o i link al Transcript nella cartella delle note."
+            "value": "takku_id %@ duplicato. Takku non può scegliere in sicurezza tra: %@. Correggi le note duplicate o i link alla Trascrizione nella cartella delle note."
           }
         },
         "de": {
@@ -6987,7 +6959,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Stato del Processing mancante in %@. Audio conservato."
+            "value": "Stato dell'elaborazione mancante in %@. Audio conservato."
           }
         },
         "de": {
@@ -7015,7 +6987,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Stato del Processing illeggibile in %@: %@ Audio conservato."
+            "value": "Stato dell'elaborazione illeggibile in %@: %@ Audio conservato."
           }
         },
         "de": {
@@ -7071,7 +7043,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Transcript ricostruito dall'audio. Segmenti trascritti di nuovo: %lld; dalla trascrizione salvata: %lld."
+            "value": "Trascrizione ricostruita dall'audio. Segmenti trascritti di nuovo: %lld; dalla trascrizione salvata: %lld."
           }
         },
         "de": {
@@ -7211,7 +7183,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lo stato del Processing appartiene a un'altra riunione in %@. Audio conservato."
+            "value": "Lo stato dell'elaborazione appartiene a un'altra riunione in %@. Audio conservato."
           }
         },
         "de": {
@@ -9285,62 +9257,6 @@
         }
       }
     },
-    "the address of the Profile \"%@\" changed since this Meeting: Retry to use the new one.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "l'indirizzo del Profilo \"%@\" è cambiato dopo questa riunione: premi Riprova per usare quello nuovo."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Die Adresse des Profils „%@“ hat sich seit diesem Meeting geändert: Versuche es erneut, um die neue zu verwenden."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "la dirección del perfil «%@» cambió después de esta reunión: vuelve a intentarlo para usar la nueva."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "l’adresse du profil « %@ » a changé depuis cette réunion : réessayez pour utiliser la nouvelle."
-          }
-        }
-      }
-    },
-    "the Profile \"%@\" was deleted: choose another one in the menu and Retry.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "il Profilo \"%@\" è stato eliminato: scegline un altro dal menu e premi Riprova."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Das Profil „%@“ wurde gelöscht: Wähle im Menü ein anderes aus und versuche es erneut."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "el perfil «%@» fue eliminado: elige otro en el menú y vuelve a intentarlo."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "le profil « %@ » a été supprimé : choisissez-en un autre dans le menu et réessayez."
-          }
-        }
-      }
-    },
     "there is no speech in the Recording.": {
       "localizations": {
         "it": {
@@ -9365,34 +9281,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "il n’y a aucune parole dans l’enregistrement."
-          }
-        }
-      }
-    },
-    "Your Takku Credit is used up. Add credit in Settings → Summary Profiles, then Retry the Meeting.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Il credito Takku Credit è finito. Aggiungi credito in Impostazioni → Profili per il Riepilogo, poi usa Riprova sulla riunione."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dein Takku-Credit-Guthaben ist aufgebraucht. Lade unter Einstellungen → Zusammenfassungsprofile Guthaben auf und versuche es erneut."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tu saldo de Takku Credit se ha agotado. Añade saldo en Ajustes → Perfiles de resumen y vuelve a intentarlo."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Votre crédit Takku Credit est épuisé. Ajoutez du crédit dans Réglages → Profils de résumé, puis réessayez."
           }
         }
       }
@@ -10970,7 +10858,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Registrazione non trovata: rigenera invece il Riepilogo dal Transcript attuale."
+            "value": "Registrazione non trovata: rigenera invece il Riepilogo dalla Trascrizione attuale."
           }
         },
         "de": {
@@ -11166,7 +11054,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nessuno Speaker trovato nel Transcript."
+            "value": "Nessuno Speaker trovato nella Trascrizione."
           }
         },
         "de": {
@@ -11810,7 +11698,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Il modello di Apple Intelligence, su questo Mac: gratis, e niente esce dal Mac. È un modello piccolo: le riunioni lunghe vengono riassunte in più parti e i Summary sono più brevi e meno precisi che con un modello grande."
+            "value": "Il modello di Apple Intelligence, su questo Mac: gratis, e niente esce dal Mac. È un modello piccolo: le riunioni lunghe vengono riassunte in più parti e i Riepiloghi sono più brevi e meno precisi che con un modello grande."
           }
         },
         "de": {
@@ -12025,118 +11913,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Votre forfait, via OpenCode"
-          }
-        }
-      }
-    },
-    "Summaries written by the Codex CLI installed on this Mac, with the ChatGPT plan you signed in to it with: no key and no credit here. The Transcript and your notes go to OpenAI under your plan's terms. Each request is a run of codex exec that keeps nothing and uses none of your Codex settings.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Riepiloghi scritti dalla CLI di Codex installata su questo Mac, con il piano ChatGPT con cui hai fatto l'accesso: niente chiave e niente credito qui. La Trascrizione e le tue note vanno a OpenAI alle condizioni del tuo piano. Ogni richiesta è un'esecuzione di codex exec che non conserva nulla e non usa nessuna delle tue impostazioni di Codex."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zusammenfassungen von der auf diesem Mac installierten Codex-CLI, mit dem ChatGPT-Abo, mit dem du dich dort angemeldet hast: kein Schlüssel und kein Guthaben hier. Das Transkript und deine Notizen gehen zu den Bedingungen deines Abos an OpenAI. Jede Anfrage ist ein Lauf von codex exec, der nichts behält und keine deiner Codex-Einstellungen verwendet."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Resúmenes escritos por la CLI de Codex instalada en este Mac, con el plan de ChatGPT con el que iniciaste sesión: sin clave ni saldo aquí. La transcripción y tus notas van a OpenAI según los términos de tu plan. Cada solicitud es una ejecución de codex exec que no guarda nada y no usa ninguno de tus ajustes de Codex."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Résumés écrits par la CLI Codex installée sur ce Mac, avec le forfait ChatGPT avec lequel vous vous y êtes connecté : ni clé ni crédit ici. La transcription et vos notes vont à OpenAI selon les conditions de votre forfait. Chaque requête est une exécution de codex exec qui ne garde rien et n’utilise aucun de vos réglages Codex."
-          }
-        }
-      }
-    },
-    "Summaries written by the GitHub Copilot CLI installed on this Mac, with the Copilot plan you signed in to it with: no key and no credit here. Each request costs premium requests of your plan, and the Transcript and your notes go to GitHub and its model providers under your plan's terms. Each run keeps nothing and uses none of your Copilot settings.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Riepiloghi scritti dalla CLI di GitHub Copilot installata su questo Mac, con il piano Copilot con cui hai fatto l'accesso: niente chiave e niente credito qui. Ogni richiesta consuma richieste premium del tuo piano, e la Trascrizione e le tue note vanno a GitHub e ai suoi fornitori di modelli alle condizioni del tuo piano. Ogni esecuzione non conserva nulla e non usa nessuna delle tue impostazioni di Copilot."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zusammenfassungen von der auf diesem Mac installierten GitHub-Copilot-CLI, mit dem Copilot-Abo, mit dem du dich dort angemeldet hast: kein Schlüssel und kein Guthaben hier. Jede Anfrage kostet Premium-Anfragen deines Abos, und das Transkript und deine Notizen gehen zu den Bedingungen deines Abos an GitHub und seine Modellanbieter. Jeder Lauf behält nichts und verwendet keine deiner Copilot-Einstellungen."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Resúmenes escritos por la CLI de GitHub Copilot instalada en este Mac, con el plan de Copilot con el que iniciaste sesión: sin clave ni saldo aquí. Cada solicitud consume solicitudes premium de tu plan, y la Transcripción y tus notas van a GitHub y a sus proveedores de modelos según los términos de tu plan. Cada ejecución no guarda nada y no usa ninguno de tus ajustes de Copilot."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Résumés écrits par la CLI GitHub Copilot installée sur ce Mac, avec le forfait Copilot avec lequel vous vous y êtes connecté : ni clé ni crédit ici. Chaque requête consomme des requêtes premium de votre forfait, et la Transcription et vos notes vont à GitHub et à ses fournisseurs de modèles selon les conditions de votre forfait. Chaque exécution ne garde rien et n’utilise aucun de vos réglages Copilot."
-          }
-        }
-      }
-    },
-    "Summaries written by the Claude Code CLI installed on this Mac, with the Claude plan you signed in to it with: no key and no credit here. The Transcript and your notes go to Anthropic under your plan's terms. Each run keeps nothing and uses none of your Claude Code settings.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Riepiloghi scritti dalla CLI di Claude Code installata su questo Mac, con il piano Claude con cui hai fatto l'accesso: niente chiave e niente credito qui. La Trascrizione e le tue note vanno ad Anthropic alle condizioni del tuo piano. Ogni esecuzione non conserva nulla e non usa nessuna delle tue impostazioni di Claude Code."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zusammenfassungen von der auf diesem Mac installierten Claude-Code-CLI, mit dem Claude-Abo, mit dem du dich dort angemeldet hast: kein Schlüssel und kein Guthaben hier. Das Transkript und deine Notizen gehen zu den Bedingungen deines Abos an Anthropic. Jeder Lauf behält nichts und verwendet keine deiner Claude-Code-Einstellungen."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Resúmenes escritos por la CLI de Claude Code instalada en este Mac, con el plan de Claude con el que iniciaste sesión: sin clave ni saldo aquí. La transcripción y tus notas van a Anthropic según los términos de tu plan. Cada ejecución no guarda nada y no usa ninguno de tus ajustes de Claude Code."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Résumés écrits par la CLI Claude Code installée sur ce Mac, avec le forfait Claude avec lequel vous vous y êtes connecté : ni clé ni crédit ici. La transcription et vos notes vont à Anthropic selon les conditions de votre forfait. Chaque exécution ne garde rien et n’utilise aucun de vos réglages Claude Code."
-          }
-        }
-      }
-    },
-    "Summaries written by the OpenCode CLI installed on this Mac, with OpenCode Go or another plan you signed in to through it: no key and no credit here. The Transcript and your notes go to the model's provider under your plan's terms. Each run uses none of your OpenCode settings, and Takku deletes its session afterwards.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Riepiloghi scritti dalla CLI di OpenCode installata su questo Mac, con OpenCode Go o un altro piano a cui hai fatto l'accesso tramite OpenCode: niente chiave e niente credito qui. La Trascrizione e le tue note vanno al fornitore del modello alle condizioni del tuo piano. Ogni esecuzione non usa nessuna delle tue impostazioni di OpenCode, e Takku ne elimina poi la sessione."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zusammenfassungen von der auf diesem Mac installierten OpenCode-CLI, mit OpenCode Go oder einem anderen Abo, bei dem du dich darüber angemeldet hast: kein Schlüssel und kein Guthaben hier. Das Transkript und deine Notizen gehen zu den Bedingungen deines Abos an den Anbieter des Modells. Jeder Lauf verwendet keine deiner OpenCode-Einstellungen, und Takku löscht danach seine Sitzung."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Resúmenes escritos por la CLI de OpenCode instalada en este Mac, con OpenCode Go u otro plan con el que iniciaste sesión a través de ella: sin clave ni saldo aquí. La transcripción y tus notas van al proveedor del modelo según los términos de tu plan. Cada ejecución no usa ninguno de tus ajustes de OpenCode, y Takku borra su sesión después."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Résumés écrits par la CLI OpenCode installée sur ce Mac, avec OpenCode Go ou un autre forfait auquel vous vous êtes connecté via OpenCode : ni clé ni crédit ici. La transcription et vos notes vont au fournisseur du modèle selon les conditions de votre forfait. Chaque exécution n’utilise aucun de vos réglages OpenCode, et Takku supprime ensuite sa session."
           }
         }
       }
@@ -12563,34 +12339,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Votre forfait, via Pi"
-          }
-        }
-      }
-    },
-    "Summaries written by the Pi CLI installed on this Mac, with a plan you signed in to through it: no key and no credit here. The Transcript and your notes go to the model's provider under your plan's terms. Each run keeps nothing and uses none of your extensions, skills or instructions.": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Riepiloghi scritti dalla CLI di Pi installata su questo Mac, con un piano a cui hai fatto l'accesso tramite Pi: niente chiave e niente credito qui. La Trascrizione e le tue note vanno al fornitore del modello alle condizioni del tuo piano. Ogni esecuzione non conserva nulla e non usa nessuna delle tue estensioni, skill o istruzioni."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zusammenfassungen von der auf diesem Mac installierten Pi-CLI, mit einem Abo, bei dem du dich darüber angemeldet hast: kein Schlüssel und kein Guthaben hier. Das Transkript und deine Notizen gehen zu den Bedingungen deines Abos an den Anbieter des Modells. Jeder Lauf behält nichts und verwendet keine deiner Erweiterungen, Skills oder Anweisungen."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Resúmenes escritos por la CLI de Pi instalada en este Mac, con un plan con el que iniciaste sesión a través de ella: sin clave ni saldo aquí. La transcripción y tus notas van al proveedor del modelo según los términos de tu plan. Cada ejecución no guarda nada y no usa ninguna de tus extensiones, skills o instrucciones."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Résumés écrits par la CLI Pi installée sur ce Mac, avec un forfait auquel vous vous êtes connecté via Pi : ni clé ni crédit ici. La transcription et vos notes vont au fournisseur du modèle selon les conditions de votre forfait. Chaque exécution ne garde rien et n’utilise aucune de vos extensions, skills ou instructions."
           }
         }
       }
@@ -13083,7 +12831,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Trovato su questo Mac, con l'accesso fatto: i Riepiloghi passano dal tuo abbonamento, senza nulla da pagare qui."
+            "value": "Già configurato su questo Mac: i Riepiloghi usano il tuo abbonamento, senza costi aggiuntivi."
           }
         },
         "de": {
@@ -13606,6 +13354,315 @@
           "stringUnit": {
             "state": "translated",
             "value": "Parakeet Ultra et Whisper Large v3 Turbo conviennent à la plupart des réunions ; ceux-ci sont pour d’autres besoins."
+          }
+        }
+      }
+    },
+    "Skip to setup": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vai alla configurazione"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Direkt einrichten"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ir a la configuración"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Passer à la configuration"
+          }
+        }
+      }
+    },
+    "Transcript only": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo Trascrizione"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nur Transkript"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo transcripción"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transcription seule"
+          }
+        }
+      }
+    },
+    "Changes are saved as you type. The key goes to the Keychain when you press Return, Save key or Test connection.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le modifiche si salvano mentre scrivi. La chiave viene salvata nel Portachiavi quando premi Invio, Salva chiave o Prova connessione."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Änderungen werden beim Tippen gespeichert. Der Schlüssel wird im Schlüsselbund gesichert, wenn du den Zeilenschalter, „Schlüssel sichern“ oder „Verbindung testen“ drückst."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los cambios se guardan mientras escribes. La clave se guarda en el Llavero al pulsar Intro, Guardar clave o Probar conexión."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les modifications sont enregistrées à la frappe. La clé est enregistrée dans le Trousseau lorsque vous appuyez sur Retour, Enregistrer la clé ou Tester la connexion."
+          }
+        }
+      }
+    },
+    "Uses your ChatGPT plan through Codex, with no API key. The Transcript and your notes go to OpenAI under your plan's terms; each run has no tools, session or settings.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usa il tuo piano ChatGPT tramite Codex, senza chiave API. La Trascrizione e le tue note vanno a OpenAI alle condizioni del tuo piano; ogni esecuzione avviene senza strumenti, sessioni o impostazioni."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nutzt deinen ChatGPT-Tarif über Codex, ohne API-Schlüssel. Transkript und Notizen gehen gemäß deinem Tarif an OpenAI; jeder Lauf startet ohne Werkzeuge, Sitzung oder Einstellungen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usa tu plan de ChatGPT mediante Codex, sin clave API. La transcripción y tus notas se envían a OpenAI según las condiciones de tu plan; cada ejecución se realiza sin herramientas, sesión ni ajustes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utilise votre forfait ChatGPT via Codex, sans clé API. La transcription et vos notes sont envoyées à OpenAI selon les conditions de votre forfait ; chaque exécution se fait sans outils, session ni réglages."
+          }
+        }
+      }
+    },
+    "Uses your GitHub Copilot plan (counts toward premium requests), with no API key. The Transcript and your notes go to GitHub and its model providers; each run has no tools, session or settings.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usa il tuo piano GitHub Copilot (consuma richieste premium), senza chiave API. La Trascrizione e le tue note vanno a GitHub e ai fornitori dei suoi modelli; ogni esecuzione avviene senza strumenti, sessioni o impostazioni."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nutzt deinen GitHub-Copilot-Tarif (zählt als Premium-Anfrage), ohne API-Schlüssel. Transkript und Notizen gehen an GitHub und seine Modellanbieter; jeder Lauf startet ohne Werkzeuge, Sitzung oder Einstellungen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usa tu plan de GitHub Copilot (consume solicitudes prémium), sin clave API. La transcripción y tus notas se envían a GitHub y a sus proveedores de modelos; cada ejecución se realiza sin herramientas, sesión ni ajustes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utilise votre forfait GitHub Copilot (décompté des requêtes premium), sans clé API. La transcription et vos notes sont envoyées à GitHub et à ses fournisseurs de modèles ; chaque exécution se fait sans outils, session ni réglages."
+          }
+        }
+      }
+    },
+    "Uses your Claude plan through Claude Code, with no API key. The Transcript and your notes go to Anthropic under your plan's terms; each run has no tools, session or settings.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usa il tuo piano Claude tramite Claude Code, senza chiave API. La Trascrizione e le tue note vanno ad Anthropic alle condizioni del tuo piano; ogni esecuzione avviene senza strumenti, sessioni o impostazioni."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nutzt deinen Claude-Tarif über Claude Code, ohne API-Schlüssel. Transkript und Notizen gehen gemäß deinem Tarif an Anthropic; jeder Lauf startet ohne Werkzeuge, Sitzung oder Einstellungen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usa tu plan de Claude mediante Claude Code, sin clave API. La transcripción y tus notas se envían a Anthropic según las condiciones de tu plan; cada ejecución se realiza sin herramientas, sesión ni ajustes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utilise votre forfait Claude via Claude Code, sans clé API. La transcription et vos notes sont envoyées à Anthropic selon les conditions de votre forfait ; chaque exécution se fait sans outils, session ni réglages."
+          }
+        }
+      }
+    },
+    "Uses the plan you signed in to in OpenCode, with no API key. The Transcript and your notes go to the model's provider; each run has no tools or settings, and Takku deletes its session afterwards.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usa il piano a cui hai effettuato l'accesso in OpenCode, senza chiave API. La Trascrizione e le tue note vanno al fornitore del modello; ogni esecuzione avviene senza strumenti o impostazioni, e Takku elimina subito dopo la sessione."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nutzt den Tarif, bei dem du in OpenCode angemeldet bist, ohne API-Schlüssel. Transkript und Notizen gehen an den Anbieter des Modells; jeder Lauf startet ohne Werkzeuge oder Einstellungen, und Takku löscht danach die Sitzung."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usa el plan con el que iniciaste sesión en OpenCode, sin clave API. La transcripción y tus notas se envían al proveedor del modelo; cada ejecución se realiza sin herramientas ni ajustes, y Takku elimina la sesión al terminar."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utilise le forfait auquel vous êtes connecté dans OpenCode, sans clé API. La transcription et vos notes sont envoyées au fournisseur du modèle ; chaque exécution se fait sans outils ni réglages, et Takku supprime ensuite la session."
+          }
+        }
+      }
+    },
+    "Uses the plan you signed in to in Pi, with no API key. The Transcript and your notes go to the model's provider; each run has no tools, session, extensions or skills.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usa il piano a cui hai effettuato l'accesso in Pi, senza chiave API. La Trascrizione e le tue note vanno al fornitore del modello; ogni esecuzione avviene senza strumenti, sessioni, estensioni o skill."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nutzt den Tarif, bei dem du in Pi angemeldet bist, ohne API-Schlüssel. Transkript und Notizen gehen an den Anbieter des Modells; jeder Lauf startet ohne Werkzeuge, Sitzung, Erweiterungen oder Skills."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usa el plan con el que iniciaste sesión en Pi, sin clave API. La transcripción y tus notas se envían al proveedor del modelo; cada ejecución se realiza sin herramientas, sesión, extensiones ni skills."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utilise le forfait auquel vous êtes connecté dans Pi, sans clé API. La transcription et vos notes sont envoyées au fournisseur du modèle ; chaque exécution se fait sans outils, session, extensions ni skills."
+          }
+        }
+      }
+    },
+    "Your Takku Credit is used up. Add credit in Settings → Summary, then choose Regenerate Summary.": {
+      "extractionState": "manual",
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il credito Takku Credit è esaurito. Aggiungi credito in Impostazioni → Riepilogo, poi scegli Rigenera Riepilogo."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dein Takku-Credit-Guthaben ist aufgebraucht. Lade unter Einstellungen → Zusammenfassung Guthaben auf und wähle dann „Zusammenfassung neu erstellen“."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu saldo de Takku Credit se ha agotado. Añade saldo en Ajustes → Resumen y luego elige Regenerar resumen."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre crédit Takku Credit est épuisé. Ajoutez du crédit dans Réglages → Résumé, puis choisissez Régénérer le résumé."
+          }
+        }
+      }
+    },
+    "the Profile \"%@\" was deleted: choose another one in the menu and Regenerate Summary.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "il Profilo \"%@\" è stato eliminato: scegline un altro dal menu e scegli Rigenera Riepilogo."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Profil „%@“ wurde gelöscht: Wähle im Menü ein anderes aus und wähle „Zusammenfassung neu erstellen“."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "el perfil «%@» fue eliminado: elige otro en el menú y selecciona Regenerar resumen."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "le profil « %@ » a été supprimé : choisissez-en un autre dans le menu et cliquez sur Régénérer le résumé."
+          }
+        }
+      }
+    },
+    "the address of the Profile \"%@\" changed since this Meeting: choose Regenerate Summary to use the new one.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "l'indirizzo del Profilo \"%@\" è cambiato dopo questa riunione: scegli Rigenera Riepilogo per usare quello nuovo."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Adresse des Profils „%@“ hat sich seit diesem Meeting geändert: Wähle „Zusammenfassung neu erstellen“, um die neue zu verwenden."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "la dirección del perfil «%@» cambió después de esta reunión: elige Regenerar resumen para usar la nueva."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "l’adresse du profil « %@ » a changé depuis cette réunion : choisissez Régénérer le résumé pour utiliser la nouvelle."
           }
         }
       }

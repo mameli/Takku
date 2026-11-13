@@ -4,6 +4,13 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
+## Unreleased
+
+- **A pasted API key just works**: in *Settings → Summary*, pressing *Test connection* or *Use for Summaries* right after pasting a key saves it to the Keychain first, trimming stray spaces and line breaks. Before, the test ran without the new key unless you pressed Return or *Save key*.
+- **Clearer names in the menu**: the Summary Profile that writes no summary is now called *Transcript only*. `takku import --profile` accepts both `transcript` and `"Transcript only"`.
+- **A shorter welcome tour**: each tour page has *Skip to setup*, which goes straight to the permissions, the transcription model and who writes the Summary. The model keeps downloading meanwhile.
+- **Shorter, plainer texts**: each coding agent's Profile now says in two lines whose plan it uses and that it runs with no tools, session or settings. Errors about a deleted Profile, a changed address or used-up Takku Credit point to *Settings → Summary* and *Regenerate Summary*, the names you see in the app. The Italian translation now says *Trascrizione*, *Riepilogo* and *riunione* everywhere.
+
 ## 1.20.0 (2026-11-13)
 
 - **More transcription models, the best ones first**: *Settings → Transcription* now offers four models first: Parakeet Ultra (recommended, the most accurate), Whisper Large v3 Turbo (always in the meeting language), the new **Parakeet Redux** (the lightest, about 220 MB) and the new **Phonon-2** (English only, the fastest). *Other models* opens every other model Takku can use: Whisper from Tiny to Large v3, Parakeet v3, Phonon-2.5, and Bark 3.0 for English, word for word or without fillers. If you pick an English-only model with another meeting language ticked, Takku tells you meetings in that language would come out wrong.

@@ -842,7 +842,7 @@ final class MeetingProcessor {
             isTestProfile = true
         }
         #endif
-        // No Profile chosen ("Transcript" in the menu): no Summary and no Template, only the Transcript,
+        // No Profile chosen ("Transcript only" in the menu): no Summary and no Template, only the Transcript,
         // with a title from Apple Intelligence when the Mac has it, so the note is not just "Meeting".
         guard let profile else {
             let title = wantsTitle ? await appleIntelligenceTitle(transcript, language: language, vocabulary: vocabulary) : nil
@@ -850,14 +850,14 @@ final class MeetingProcessor {
         }
         // A Profile deleted after the Meeting started has lost its key in the Keychain too.
         guard isTestProfile || AppSettings.summaryProfiles.contains(where: { $0.id == profile.id }) else {
-            return (.failed(reason: String(localized: "the Profile \"\(profile.displayName)\" was deleted: choose another one in the menu and Retry.")), nil, nil)
+            return (.failed(reason: String(localized: "the Profile \"\(profile.displayName)\" was deleted: choose another one in the menu and Regenerate Summary.")), nil, nil)
         }
         // The key is looked up by the Profile's id and sent to the address of the Meeting's copy of it: if the
         // Profile's address was edited since, or the copy on disk was, the key would go to the old one.
         guard isTestProfile || AppSettings.summaryProfiles.first(where: { $0.id == profile.id })?.baseURL.trimmingCharacters(in: .whitespaces)
             == profile.baseURL.trimmingCharacters(in: .whitespaces)
         else {
-            return (.failed(reason: String(localized: "the address of the Profile \"\(profile.displayName)\" changed since this Meeting: Retry to use the new one.")), nil, nil)
+            return (.failed(reason: String(localized: "the address of the Profile \"\(profile.displayName)\" changed since this Meeting: choose Regenerate Summary to use the new one.")), nil, nil)
         }
         guard !transcript.paragraphs.isEmpty else {
             return (.failed(reason: String(localized: "there is no speech in the Recording.")), nil, nil)

@@ -49,7 +49,7 @@ struct SummarySetup: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .top, spacing: 12) {
-                onThisMac.frame(width: 190)
+                onThisMac.frame(width: 208)
                 external
             }
             .fixedSize(horizontal: false, vertical: true)
@@ -154,9 +154,12 @@ struct SummarySetup: View {
                 if active?.isTakkuCredit == true { HandStatus(isDone: true) }
                 Text(verbatim: "Takku Credit").font(Paper.hand(17, bold: true)).foregroundStyle(Paper.ink)
             }
-            Text("A model hosted in the EU, and nothing is kept. No subscription, no account, and the credit never expires.")
-                .font(Paper.serif(12)).foregroundStyle(Paper.text)
-                .fixedSize(horizontal: false, vertical: true)
+            // Not while buying or pasting a key: with the packs below it, the page would run out of room.
+            if active?.isTakkuCredit == true || step == .closed {
+                Text("A model hosted in the EU, and nothing is kept. No subscription, no account, and the credit never expires.")
+                    .font(Paper.serif(12)).foregroundStyle(Paper.text)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             if active?.isTakkuCredit == true {
                 activeCredit
             } else {

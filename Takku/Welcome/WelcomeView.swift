@@ -333,24 +333,29 @@ struct WelcomeLayout<Scene: View, Setup: View>: View {
         .background(Paper.sheet)
     }
 
-    @ViewBuilder private var heading: some View {
-        if page == .welcome {
-            HStack(alignment: .center, spacing: 16) {
+    private var heading: some View {
+        HStack(alignment: page == .welcome ? .center : .firstTextBaseline, spacing: 16) {
+            if page == .welcome {
                 Image(nsImage: NSImage(named: "AppIcon") ?? NSApp.applicationIconImage)
                     .resizable()
                     .frame(width: 64, height: 64)
                     .accessibilityHidden(true)
                 Text(verbatim: "Takku").font(Paper.hand(44, bold: true)).foregroundStyle(Paper.ink)
                     .accessibilityAddTraits(.isHeader)
-            }
-        } else {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(page.title).font(Paper.hand(30, bold: true)).foregroundStyle(Paper.ink)
-                    .accessibilityAddTraits(.isHeader)
-                if let subtitle = page.subtitle {
-                    Text(subtitle).font(Paper.serif(14)).foregroundStyle(Paper.text)
-                        .fixedSize(horizontal: false, vertical: true)
+            } else {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(page.title).font(Paper.hand(30, bold: true)).foregroundStyle(Paper.ink)
+                        .accessibilityAddTraits(.isHeader)
+                    if let subtitle = page.subtitle {
+                        Text(subtitle).font(Paper.serif(14)).foregroundStyle(Paper.text)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                 }
+            }
+            Spacer(minLength: 0)
+            if page.rawValue < WelcomePage.permissions.rawValue {
+                Button("Skip to setup") { go(.permissions) }
+                    .buttonStyle(PaperButtonStyle(isPrimary: false))
             }
         }
     }
@@ -375,6 +380,7 @@ struct WelcomeLayout<Scene: View, Setup: View>: View {
                     ProgressView().controlSize(.mini)
                     Text(verbatim: modelProgress).font(Paper.hand(12)).foregroundStyle(Paper.graphite).lineLimit(1)
                 }
+                .layoutPriority(-1)
             }
             Spacer()
             if let previous = WelcomePage(rawValue: page.rawValue - 1) {

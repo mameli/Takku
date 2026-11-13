@@ -128,7 +128,7 @@ private struct MeetingMenu: View {
             }
         }
 
-        // With the "Transcript" Profile there is no Summary, so no Template to choose.
+        // With "Transcript only" there is no Summary, so no Template to choose.
         if !activeProfileID.isEmpty {
             Picker("Template", selection: Bindable(controller).templateName) {
                 ForEach(TakkuFolder.templateChoices(including: controller.templateName), id: \.self) { Text($0).tag($0) }
@@ -369,7 +369,7 @@ private struct ProviderProfileMenu: View {
 
     var body: some View {
         Picker("Summary Profile", selection: $activeID) {
-            Text("Transcript").tag("")
+            Text("Transcript only").tag("")
             ForEach(AppSettings.decodeProfiles(profilesData)) { Text($0.displayName).tag($0.id.uuidString) }
         }
     }
