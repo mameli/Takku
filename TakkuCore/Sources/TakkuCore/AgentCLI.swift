@@ -85,7 +85,7 @@ public enum AgentCLI: String, CaseIterable, Sendable {
     /// (2.1.282 maps haiku to Haiku 4.5): the latest full names, to update when models come out.
     var fixedModels: [Model]? {
         switch self {
-        case .claude: ["claude-fable-5-1", "claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"].map { Model($0) }
+        case .claude: ["claude-fable-5-2", "claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"].map { Model($0) }
         case .codex, .copilot, .opencode, .pi: nil
         }
     }

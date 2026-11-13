@@ -808,7 +808,7 @@ struct AgentCLITests {
     func fixedModels() async throws {
         let claude = try FakeCLI(.claude, [])
 
-        #expect(await claude.runner().models()?.map(\.name) == ["claude-fable-5-1", "claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"])
+        #expect(await claude.runner().models()?.map(\.name) == ["claude-fable-5-2", "claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"])
         #expect(claude.calls.isEmpty)
     }
 

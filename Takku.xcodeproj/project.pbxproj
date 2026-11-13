@@ -246,7 +246,7 @@
 			repositoryURL = "https://github.com/FluidInference/FluidAudio";
 			requirement = {
 				kind = upToNextMinorVersion;
-				minimumVersion = 0.17.7;
+				minimumVersion = 0.18.3;
 			};
 		};
 		A10000000000000000000029 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */ = {
