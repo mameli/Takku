@@ -4,6 +4,12 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
+## 1.20.0 (2026-11-13)
+
+- **More transcription models, the best ones first**: *Settings → Transcription* now offers four models first: Parakeet Ultra (recommended, the most accurate), Whisper Large v3 Turbo (always in the meeting language), the new **Parakeet Redux** (the lightest, about 220 MB) and the new **Phonon-2** (English only, the fastest). *Other models* opens every other model Takku can use: Whisper from Tiny to Large v3, Parakeet v3, Phonon-2.5, and Bark 3.0 for English, word for word or without fillers. If you pick an English-only model with another meeting language ticked, Takku tells you meetings in that language would come out wrong.
+- **Fewer missing words**: Parakeet now catches words that fell between two stretches of audio, and the first words of a long recording. A model download that gets interrupted picks up where it stopped instead of starting over.
+- **Claude Fable 5.2**: a Claude Code Summary Profile now lists Anthropic's newest model.
+
 ## 1.19.5 (2026-11-11)
 
 - **What to do next, where you are**: "Summary ready" now says how many speakers have no name and offers *Name speakers…*; "Processing failed" offers *Regenerate Summary*, to click once the Profile is fixed. The menu shows your last meeting with its actions on the first level, so naming the speakers or regenerating no longer means three submenus down. The *Recognise voices* setting says where you name the speakers.
