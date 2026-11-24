@@ -305,15 +305,17 @@ public struct SummaryPrompt: Sendable {
         """
 
     /// The Summary without the times the model cites (`[12:34]`, `[03:10] [07:45]`, `([1:02:45])`,
-    /// `[04:00-06:30]`, also in bold): they tie every point to the Transcript but are not meant to be read.
-    /// Checkboxes, wikilinks and Markdown links have no times in their brackets and stay.
+    /// `[04:00-06:30]`, also in bold or backticks): they tie every point to the Transcript but are
+    /// not meant to be read. Checkboxes, wikilinks and Markdown links have no times in their brackets and stay.
     public static func removingCitedTimes(_ summary: String) -> String {
         let time = #"\d{1,2}(?::\d{2}){1,2}"#
         let bracket = #"\[\#(time)(?:\s*[-–—,;]\s*\#(time))*\]"#
-        let run = #"\#(bracket)(?:[ \t]*[,;]?[ \t]*\#(bracket))*"#
+        let bareRun = #"\#(bracket)(?:[ \t]*[,;]?[ \t]*\#(bracket))*"#
+        let item = #"(?:`\#(bareRun)`|\#(bracket))"#
+        let run = #"\#(item)(?:[ \t]*[,;]?[ \t]*\#(item))*"#
         let citedTimes = try! Regex(#"[ \t]*(?:\(\#(run)\)|\*\*\#(run)\*\*|\#(run))"#)
-        // In bold at the start of a line, as the model sometimes opens a paragraph: the space after goes too.
-        let openingTimes = try! Regex(#"(?m)^([ \t]*(?:[-*] )?)\*\*\#(run)\*\*[ \t]*"#)
+        // In bold or backticks at the start of a line, as the model sometimes opens a paragraph: the space after goes too.
+        let openingTimes = try! Regex(#"(?m)^([ \t]*(?:[-*] )?)(?:\*\*\#(run)\*\*|`\#(bareRun)`)[ \t]*"#)
         return summary.replacing(openingTimes) { $0.output[1].substring ?? "" }.replacing(citedTimes, with: "")
     }
 

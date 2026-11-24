@@ -63,6 +63,8 @@ struct SummarizerTests {
             - Long discussion [04:00-06:30]
             - Meeting at 10:30 on Friday, see [[Budget 2026]] and [the offer](https://x.example/offer)
             - **[04:20]** Solved with a yearly plan **[04:30]**
+            - Backticked times `[05:04]` and several `[06:28]` `[07:30]`, or `[08:00] [09:00]`.
+            - `[09:30]` Opened with backticks, keep `DT2 Update` inline code (`[10:00]`).
 
             **[05:10]** A paragraph opened by its time.
 
@@ -83,6 +85,8 @@ struct SummarizerTests {
             - Long discussion
             - Meeting at 10:30 on Friday, see [[Budget 2026]] and [the offer](https://x.example/offer)
             - Solved with a yearly plan
+            - Backticked times and several, or.
+            - Opened with backticks, keep `DT2 Update` inline code.
 
             A paragraph opened by its time.
 
