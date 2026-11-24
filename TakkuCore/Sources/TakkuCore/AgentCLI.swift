@@ -72,7 +72,7 @@ public enum AgentCLI: String, CaseIterable, Sendable {
     // MARK: - Models
 
     /// A model the agent offers, and the reasoning levels it accepts (`nil` when not known).
-    public struct Model: Hashable, Sendable {
+    public struct Model: Codable, Hashable, Sendable {
         public var name: String
         public var reasoning: [ProviderProfile.ReasoningEffort]?
 
@@ -88,7 +88,7 @@ public enum AgentCLI: String, CaseIterable, Sendable {
 
     /// The models that need no run to list. Claude Code has no list, and its aliases lag behind
     /// (2.1.282 maps haiku to Haiku 4.5): the latest full names, to update when models come out.
-    var fixedModels: [Model]? {
+    public var fixedModels: [Model]? {
         switch self {
         case .claude: ["claude-fable-5-2", "claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"].map { Model($0) }
         case .codex, .copilot, .opencode, .pi, .antigravity: nil

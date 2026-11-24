@@ -60,10 +60,20 @@ struct ProfileEditor: View {
     @State private var cliProblem: String?
     /// Agent CLIs only: the models the agent offers, `nil` when they could not be read.
     @State private var agentModels: [AgentCLI.Model]?
+    /// Agent CLIs only: reading the model list for the first time (no cached list yet).
+    @State private var isLoadingModels = false
     /// Agent CLIs only: the model is typed (*Other…*) rather than chosen in the menu.
     @State private var typesModel = false
     /// Agent CLIs only: the executable Takku runs and its version, to tell two installs apart.
     @State private var cliInstall: (path: String, version: String?)?
+
+    init(profile: Binding<ProviderProfile>, isActive: Bool, activate: @escaping () -> Void) {
+        self._profile = profile
+        self.isActive = isActive
+        self.activate = activate
+        let cached = profile.wrappedValue.agentCLI.flatMap { $0.fixedModels ?? AppSettings.cachedModels(for: $0) }
+        self._agentModels = State(initialValue: cached)
+    }
 
     var body: some View {
         Section {
@@ -131,13 +141,13 @@ struct ProfileEditor: View {
             refreshStoredKey()
             extraParameters = profile.extraParameters ?? ""
             Task { await readCredit() }
-            Task { await checkAgentCLI() }
+            Task { await checkAgentCLI(refreshModels: true) }
         }
         // Back from the browser after paying: the new balance without pressing anything.
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             Task { await readCredit() }
             // Back from Terminal after the CLI's login.
-            Task { await checkAgentCLI() }
+            Task { await checkAgentCLI(refreshModels: false) }
         }
     }
 
@@ -177,16 +187,27 @@ struct ProfileEditor: View {
         if let groups = providerGroups {
             groupedModelMenu(cli, groups)
         } else {
-            Picker("Model", selection: modelChoice(cli)) {
-                if cli.hasDefaultModel {
-                    Text("\(cli.name)'s default model").tag(ModelChoice.agentDefault)
-                } else if profile.model.isEmpty && !typesModel {
-                    Text("Choose a model").tag(ModelChoice.unset)
+            let savedModel = profile.model.trimmingCharacters(in: .whitespaces)
+            LabeledContent("Model") {
+                HStack {
+                    Picker("", selection: modelChoice(cli)) {
+                        if cli.hasDefaultModel {
+                            Text("\(cli.name)'s default model").tag(ModelChoice.agentDefault)
+                        } else if profile.model.isEmpty && !typesModel {
+                            Text("Choose a model").tag(ModelChoice.unset)
+                        }
+                        if let agentModels {
+                            ForEach(agentModels, id: \.name) { model in
+                                Text(verbatim: model.name).tag(ModelChoice.named(model.name))
+                            }
+                        } else if isLoadingModels && !savedModel.isEmpty {
+                            Text(verbatim: savedModel).tag(ModelChoice.named(savedModel))
+                        }
+                        Text("Other…").tag(ModelChoice.other)
+                    }
+                    .labelsHidden()
+                    if isLoadingModels { ProgressView().controlSize(.small) }
                 }
-                ForEach(agentModels ?? [], id: \.name) { model in
-                    Text(verbatim: model.name).tag(ModelChoice.named(model.name))
-                }
-                Text("Other…").tag(ModelChoice.other)
             }
         }
         if modelChoice(cli).wrappedValue == .other {
@@ -276,6 +297,7 @@ struct ProfileEditor: View {
             let model = profile.model.trimmingCharacters(in: .whitespaces)
             if typesModel { return .other }
             if model.isEmpty { return cli.hasDefaultModel ? .agentDefault : .unset }
+            if agentModels == nil && isLoadingModels { return .named(model) }
             return agentModels?.contains { $0.name == model } == true ? .named(model) : .other
         } set: { choice in
             typesModel = choice == .other
@@ -437,19 +459,45 @@ struct ProfileEditor: View {
         }
     }
 
-    /// The agent's problem, read again when the user comes back from Terminal, and its models when
-    /// none are read yet or the problem changed (a list is a run of the CLI: Copilot's takes seconds).
-    private func checkAgentCLI() async {
+    /// The agent's problem, version and models in parallel so the list appears as soon as the CLI
+    /// answers. Cached models stay visible while refreshing; on returning from another app, the
+    /// list is fetched again only when empty or the problem changed (Copilot's takes seconds).
+    private func checkAgentCLI(refreshModels: Bool) async {
         guard let cli = profile.agentCLI else { return }
+        let showingLoading = agentModels == nil
+        if showingLoading { isLoadingModels = true }
+        defer { if showingLoading { isLoadingModels = false } }
         // Looked up again: the user may have installed it elsewhere meanwhile.
         let executable = await cli.executable(refresh: true)
+        guard let executable else {
+            cliProblem = AgentCLI.Failure.notInstalled(cli).localizedDescription
+            cliInstall = nil
+            agentModels = nil
+            return
+        }
         let runner = AgentCLI.Runner(cli)
-        let problem = await runner.unavailability()
+        let shouldFetchModels = cli.fixedModels == nil && (refreshModels || agentModels == nil)
+        async let problemTask = runner.unavailability()
+        async let versionTask = runner.version()
+        async let modelsTask: [AgentCLI.Model]? = shouldFetchModels ? runner.models() : nil
+
+        let problem = await problemTask
+        let version = await versionTask
         let changed = problem?.localizedDescription != cliProblem
         cliProblem = problem?.localizedDescription
-        let version = executable == nil ? nil : await runner.version()
-        cliInstall = executable.map { (path: ($0.path as NSString).abbreviatingWithTildeInPath, version: version) }
-        if problem != .notInstalled(cli) && (agentModels == nil || changed) { agentModels = await runner.models() }
+        cliInstall = (path: (executable.path as NSString).abbreviatingWithTildeInPath, version: version)
+
+        if let fixed = cli.fixedModels {
+            agentModels = fixed
+        } else if shouldFetchModels {
+            if let models = await modelsTask {
+                agentModels = models
+                AppSettings.saveCachedModels(models, for: cli)
+            }
+        } else if changed, let models = await runner.models() {
+            agentModels = models
+            AppSettings.saveCachedModels(models, for: cli)
+        }
     }
 
     private func test() async {

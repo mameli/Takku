@@ -271,6 +271,7 @@ private struct SummaryTab: View {
         }
         .formStyle(.grouped)
         .onAppear { addProfileIfRequested() }
+        .task { await warmAgentModels() }
         .onChange(of: request.opensNewProfile) { addProfileIfRequested() }
         .onChange(of: profiles) { AppSettings.summaryProfiles = profiles }
         .confirmationDialog("Delete the Takku Credit Profile?", isPresented: $confirmsCreditDeletion) {
@@ -373,6 +374,31 @@ private struct SummaryTab: View {
             confirmsCreditDeletion = true
         } else {
             deleteSelectedProfile()
+        }
+    }
+
+    /// Pre-warms the model cache for other agent Profiles in the list so switching to them opens
+    /// a filled Model menu right away.
+    private func warmAgentModels() async {
+        let toWarm = profiles.compactMap { profile -> AgentCLI? in
+            guard profile.id != selectedProfileID,
+                  let cli = profile.agentCLI,
+                  cli.fixedModels == nil,
+                  AppSettings.cachedModels(for: cli) == nil
+            else { return nil }
+            return cli
+        }
+        guard !toWarm.isEmpty else { return }
+        await withTaskGroup(of: (AgentCLI, [AgentCLI.Model]?).self) { group in
+            for cli in toWarm {
+                group.addTask {
+                    let models = await AgentCLI.Runner(cli).models()
+                    return (cli, models)
+                }
+            }
+            for await (cli, models) in group {
+                if let models { AppSettings.saveCachedModels(models, for: cli) }
+            }
         }
     }
 

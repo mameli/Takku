@@ -186,4 +186,21 @@ enum AppSettings {
         get { UserDefaults.standard.string(forKey: defaultTemplateKey) ?? Template.defaultName }
         set { UserDefaults.standard.set(newValue, forKey: defaultTemplateKey) }
     }
+
+    private static let agentModelsCacheKey = "agentModelsCache"
+
+    /// The last model list read from each agent CLI, so the Model menu opens filled while the CLI
+    /// is asked again in the background.
+    static func cachedModels(for cli: AgentCLI) -> [AgentCLI.Model]? {
+        let cache = UserDefaults.standard.data(forKey: agentModelsCacheKey)
+            .flatMap { try? JSONDecoder().decode([String: [AgentCLI.Model]].self, from: $0) } ?? [:]
+        return cache[cli.rawValue]
+    }
+
+    static func saveCachedModels(_ models: [AgentCLI.Model], for cli: AgentCLI) {
+        var cache = UserDefaults.standard.data(forKey: agentModelsCacheKey)
+            .flatMap { try? JSONDecoder().decode([String: [AgentCLI.Model]].self, from: $0) } ?? [:]
+        cache[cli.rawValue] = models
+        UserDefaults.standard.set(try? JSONEncoder().encode(cache), forKey: agentModelsCacheKey)
+    }
 }
