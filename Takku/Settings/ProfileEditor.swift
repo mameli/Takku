@@ -33,6 +33,7 @@ struct ProfileRow: View {
         case .claude: return String(localized: "Your Claude plan, through Claude Code")
         case .opencode: return String(localized: "Your plan, through OpenCode")
         case .pi: return String(localized: "Your plan, through Pi")
+        case .antigravity: return String(localized: "Your Google plan, through Antigravity")
         case nil: break
         }
         return profile.model.isEmpty ? String(localized: "To be configured") : profile.model
@@ -166,6 +167,8 @@ struct ProfileEditor: View {
                 Text("Uses the plan you signed in to in OpenCode, with no API key. The Transcript and your notes go to the model's provider; each run has no tools or settings, and Takku deletes its session afterwards.")
             case .pi:
                 Text("Uses the plan you signed in to in Pi, with no API key. The Transcript and your notes go to the model's provider; each run has no tools, session, extensions or skills.")
+            case .antigravity:
+                Text("Uses your Google plan through Antigravity, with no API key. The Transcript and your notes go to Google under your plan's terms; each run has no tools, session or settings.")
             }
         }
         .font(.caption)

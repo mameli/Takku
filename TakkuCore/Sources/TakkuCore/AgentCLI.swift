@@ -8,10 +8,10 @@ import Foundation
 /// it does not run on this Mac.
 ///
 /// A run has nothing of the user's coding setup and no tools: no session kept (OpenCode's is
-/// deleted after it), no settings, instructions, MCP servers, hooks, memories, plugins or skills,
-/// no API key from the environment, in an empty folder.
+/// deleted after it, Antigravity's goes with the home it ran in), no settings, instructions, MCP
+/// servers, hooks, memories, plugins or skills, no API key from the environment, in an empty folder.
 public enum AgentCLI: String, CaseIterable, Sendable {
-    case codex, copilot, claude, opencode, pi
+    case codex, copilot, claude, opencode, pi, antigravity
 
     public var name: String {
         switch self {
@@ -20,10 +20,11 @@ public enum AgentCLI: String, CaseIterable, Sendable {
         case .claude: "Claude Code"
         case .opencode: "OpenCode"
         case .pi: "Pi"
+        case .antigravity: "Antigravity"
         }
     }
 
-    var command: String { rawValue }
+    var command: String { self == .antigravity ? "agy" : rawValue }
 
     /// Not an address: it marks the Profile, and the transport never sends it anywhere.
     public var baseURL: String { "\(rawValue)://this-mac" }
@@ -36,6 +37,7 @@ public enum AgentCLI: String, CaseIterable, Sendable {
         case .claude: "curl -fsSL https://claude.ai/install.sh | bash"
         case .opencode: "curl -fsSL https://opencode.ai/install | bash"
         case .pi: "npm install -g @earendil-works/pi-coding-agent"
+        case .antigravity: "curl -fsSL https://antigravity.google/cli/install.sh | bash"
         }
     }
 
@@ -47,6 +49,8 @@ public enum AgentCLI: String, CaseIterable, Sendable {
         case .claude: "claude auth login"
         case .opencode: "opencode auth login"
         case .pi: "pi"
+        // It signs in when started with no arguments.
+        case .antigravity: "agy"
         }
     }
 
@@ -54,10 +58,11 @@ public enum AgentCLI: String, CaseIterable, Sendable {
     static let contextTokens = 128_000
 
     /// A new Profile: light on the plan and quick (Codex refuses no reasoning at all, Copilot's
-    /// own model refuses any level, OpenCode has none).
+    /// own model refuses any level, OpenCode has none, Antigravity's default model has no Off and
+    /// is at High unless told).
     public func profile() -> ProviderProfile {
         let reasoning: ProviderProfile.ReasoningEffort? = switch self {
-        case .codex: .low
+        case .codex, .antigravity: .low
         case .claude, .pi: .off
         case .copilot, .opencode: nil
         }
@@ -86,7 +91,7 @@ public enum AgentCLI: String, CaseIterable, Sendable {
     var fixedModels: [Model]? {
         switch self {
         case .claude: ["claude-fable-5-2", "claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"].map { Model($0) }
-        case .codex, .copilot, .opencode, .pi: nil
+        case .codex, .copilot, .opencode, .pi, .antigravity: nil
         }
     }
 
@@ -99,6 +104,7 @@ public enum AgentCLI: String, CaseIterable, Sendable {
         case .copilot: arguments(model: Self.noModel, reasoning: nil, folder: folder) + ["--log-level", "all"]
         case .opencode: ["models", "--standalone"]
         case .pi: ["--list-models", "--offline"]
+        case .antigravity: ["models"]
         case .claude: nil
         }
     }
@@ -151,9 +157,41 @@ public enum AgentCLI: String, CaseIterable, Sendable {
                 else { return nil }
                 return (model["id"] as? String).map { Model($0) }
             }
+        case .antigravity:
+            // `id<tab>display name`, one per line, one for each model and level (gemini-4-neon-high):
+            // the model once, with its levels. Orchestrators plan and hand the work to other models.
+            var models: [Model] = []
+            for line in String(decoding: data, as: UTF8.self).split(separator: "\n") {
+                guard let id = line.split(separator: "\t").first.map({ $0.trimmingCharacters(in: .whitespaces) }),
+                      line.contains("\t"), !id.isEmpty, !id.contains(" "), !id.contains("orchestrator")
+                else { continue }
+                let (name, level) = Self.antigravityLevel(in: id)
+                if let index = models.firstIndex(where: { $0.name == name }) {
+                    if let level { models[index].reasoning = (models[index].reasoning ?? []) + [level] }
+                } else {
+                    models.append(Model(name, reasoning: level.map { [$0] } ?? []))
+                }
+            }
+            let order = ProviderProfile.ReasoningEffort.allCases
+            return models.map { model in Model(model.name, reasoning: order.filter { (model.reasoning ?? []).contains($0) }) }
         case .claude:
             return []
         }
+    }
+
+    /// Antigravity names a model with its level (`gemini-3.8-flash-low`) and takes it without
+    /// (`gemini-3.8-flash` and `--effort low`): the name and the level Takku knows, `nil` without
+    /// one. xhigh and max, which Takku does not offer, stay part of the name.
+    static func antigravityLevel(in id: String) -> (name: String, level: ProviderProfile.ReasoningEffort?) {
+        for level in [ProviderProfile.ReasoningEffort.low, .medium, .high] where id.hasSuffix("-\(level.rawValue)") {
+            return (String(id.dropLast(level.rawValue.count + 1)), level)
+        }
+        return (id, nil)
+    }
+
+    /// Whether an Antigravity model's name has a level, any level: it then takes none apart.
+    static func antigravityNamesLevel(_ model: String) -> Bool {
+        ["low", "medium", "high", "xhigh", "max"].contains { model.hasSuffix("-\($0)") }
     }
 
     /// The reasoning levels the Profile editor offers with `model` (empty: the agent's default)
@@ -176,6 +214,13 @@ public enum AgentCLI: String, CaseIterable, Sendable {
                 return all.filter { level in known.allSatisfy { $0.contains(level) } }
             }
             return models?.first { $0.name == model }?.reasoning.map { levels in all.filter(levels.contains) } ?? all
+        case .antigravity:
+            // No Off. Its default model has Low, Medium and High; a level in the name leaves none.
+            let model = model.trimmingCharacters(in: .whitespaces)
+            let levels: [ProviderProfile.ReasoningEffort] = [.low, .medium, .high]
+            if model.isEmpty { return levels }
+            if Self.antigravityNamesLevel(model) { return [] }
+            return models?.first { $0.name == model }?.reasoning ?? levels
         }
     }
 
@@ -195,7 +240,7 @@ public enum AgentCLI: String, CaseIterable, Sendable {
         """
 
     /// Whether `systemPrompt` replaces the agent's own.
-    private var replacesSystemPrompt: Bool { self == .claude || self == .opencode || self == .pi }
+    private var replacesSystemPrompt: Bool { self == .claude || self == .opencode || self == .pi || self == .antigravity }
 
     /// What goes to the CLI's standard input: Takku's instructions and the request, after being
     /// told to answer with the text alone where the agent's system prompt stays.
@@ -215,6 +260,14 @@ public enum AgentCLI: String, CaseIterable, Sendable {
             \(prompt)
             </request>
             """
+    }
+
+    /// What the run reads from its standard input: the input as it is, or for Antigravity, which
+    /// reads a prompt from standard input only as JSON, one message.
+    func standardInput(_ input: String) -> Data {
+        guard self == .antigravity else { return Data(input.utf8) }
+        let message: [String: Any] = ["event": "user", "message": ["role": "user", "content": input]]
+        return ((try? JSONSerialization.data(withJSONObject: message)) ?? Data()) + Data("\n".utf8)
     }
 
     /// The arguments for one run in `folder`, empty, reading the prompt from standard input and
@@ -277,8 +330,35 @@ public enum AgentCLI: String, CaseIterable, Sendable {
             if !model.isEmpty { arguments += ["--model", model] }
             if let reasoning { arguments += ["--thinking", reasoning == .off ? "off" : reasoning.rawValue] }
             return arguments
+        case .antigravity:
+            // Its tools go with Takku's agent (see `prepare`); the denials only back that up: any
+            // tool left would ask, and a run that cannot ask is refused it.
+            var arguments = [
+                "--input-format", "stream-json", "--output-format", "stream-json", "--agent", Self.antigravityAgent,
+                "--disable-slash-commands", "--settings", Self.antigravitySettings,
+            ]
+            if !model.isEmpty { arguments += ["--model", model] }
+            // A level in the model's name and one given apart are refused together.
+            if let reasoning, reasoning != .off, !Self.antigravityNamesLevel(model) {
+                arguments += ["--effort", reasoning.rawValue]
+            }
+            // Print mode with no prompt of its own: it reads it from standard input.
+            arguments.append("-p=")
+            return arguments
         }
     }
+
+    /// Takku's agent for Antigravity's runs, which gives the model no tools and Takku's system prompt.
+    static let antigravityAgent = "takku"
+
+    static let antigravitySettings: String = {
+        let settings: [String: Any] = [
+            "toolPermission": "strict",
+            "permissions": ["deny": ["read_file(*)", "write_file(*)", "read_url(*)", "execute_url(*)", "command(*)", "mcp(*)"]],
+        ]
+        let data = (try? JSONSerialization.data(withJSONObject: settings, options: .sortedKeys)) ?? Data()
+        return String(decoding: data, as: UTF8.self)
+    }()
 
     /// The title of OpenCode's sessions of Takku's runs, which marks them for deletion.
     static let openCodeTitle = "Takku"
@@ -286,8 +366,14 @@ public enum AgentCLI: String, CaseIterable, Sendable {
     /// What the run needs in its environment, in `scratch`, deleted after it. Copilot keeps its
     /// setup in its home (its sign-in stays in the Keychain); OpenCode gets an agent of Takku's
     /// with every tool denied, no config of the user's, and keeps its sign-in database.
+    /// Antigravity has no folder of its own to move: it gets an empty home (see `prepare`), where
+    /// it keeps its conversation, so nothing of the user's `~/.gemini` and `~/.agents` is read
+    /// (rules, skills, hooks, MCP servers, plugins) and nothing is written there.
     func environment(scratch: URL) -> [String: String] {
         switch self {
+        case .antigravity:
+            // Its updater would otherwise start in the background, in a home about to go.
+            return ["HOME": scratch.appending(path: "home").path, "AGY_CLI_DISABLE_AUTO_UPDATE": "true"]
         case .codex, .claude:
             return [:]
         case .copilot:
@@ -318,11 +404,54 @@ public enum AgentCLI: String, CaseIterable, Sendable {
 
     /// Copilot's empty home needs to know who is signed in (its token stays in the Keychain):
     /// without it Copilot runs on the free tier. Only that is copied from the user's settings.
+    /// Antigravity's empty home gets the way to the user's Keychains, where its sign-in is (macOS
+    /// finds them from the home), and Takku's agent.
     func prepare(scratch: URL, environment: [String: String]) {
+        if self == .antigravity {
+            prepareAntigravity(home: scratch.appending(path: "home"), environment: environment)
+            prepareCommands(scratch: scratch)
+        }
         guard self == .copilot, let account = Self.copilotAccount(environment: environment),
               let data = try? JSONSerialization.data(withJSONObject: account)
         else { return }
         try? data.write(to: scratch.appending(path: "home/config.json"))
+    }
+
+    /// A folder put first on the run's PATH, `nil` when the CLI needs none. Antigravity, signed
+    /// out (its sign-in expired between the check and the run), opens a Google sign-in page in the
+    /// browser with `open`: there it finds one that does nothing, and the run fails as not signed in.
+    func commandsFolder(scratch: URL) -> URL? {
+        self == .antigravity ? scratch.appending(path: "bin") : nil
+    }
+
+    private func prepareCommands(scratch: URL) {
+        guard let folder = commandsFolder(scratch: scratch) else { return }
+        let open = folder.appending(path: "open")
+        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        try? "#!/bin/sh\nexit 0\n".write(to: open, atomically: true, encoding: .utf8)
+        try? FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: open.path)
+    }
+
+    private func prepareAntigravity(home: URL, environment: [String: String]) {
+        let fileManager = FileManager.default
+        let userHome = URL(filePath: environment["HOME"] ?? NSHomeDirectory())
+        let library = home.appending(path: "Library"), agents = home.appending(path: ".gemini/config/agents")
+        try? fileManager.createDirectory(at: library, withIntermediateDirectories: true)
+        try? fileManager.createSymbolicLink(at: library.appending(path: "Keychains"), withDestinationURL: userHome.appending(path: "Library/Keychains"))
+        try? fileManager.createDirectory(at: agents, withIntermediateDirectories: true)
+        // An empty tool list leaves the model none (but its own task list); the text replaces its system prompt.
+        let agent = """
+            ---
+            name: \(Self.antigravityAgent)
+            description: Writes text only
+            tools: []
+            mainAgent: true
+            subagent: false
+            ---
+            \(Self.systemPrompt)
+
+            """
+        try? agent.write(to: agents.appending(path: "\(Self.antigravityAgent).md"), atomically: true, encoding: .utf8)
     }
 
     /// Who is signed in to Copilot, from its settings file: `loggedInUsers` and `lastLoggedInUser`,
@@ -360,7 +489,8 @@ public enum AgentCLI: String, CaseIterable, Sendable {
         // Where the user moved an agent's sign-in: without it the CLI would be signed out.
         if ["CODEX_HOME", "PI_CODING_AGENT_DIR"].contains(variable) { return false }
         return variable.hasSuffix("_API_KEY") || variable.hasSuffix("_TOKEN")
-            || ["ANTHROPIC_", "CLAUDE", "OPENCODE_", "CODEX_", "COPILOT_", "PI_", "AWS_", "AZURE_OPENAI_"].contains { variable.hasPrefix($0) }
+            || ["ANTHROPIC_", "CLAUDE", "OPENCODE_", "CODEX_", "COPILOT_", "PI_", "AWS_", "AZURE_OPENAI_", "AGY_", "ANTIGRAVITY_", "GEMINI_"]
+                .contains { variable.hasPrefix($0) }
     }
 
     // MARK: - What a run ended with
@@ -379,6 +509,8 @@ public enum AgentCLI: String, CaseIterable, Sendable {
         var model: String?
         /// OpenCode's session, to delete.
         var session: String?
+        /// The steps of an Antigravity run that were tools, each reported more than once.
+        var toolSteps: Set<Int> = []
 
         /// What the run used, for the log; empty if the agent did not say.
         var usage: String {
@@ -390,8 +522,9 @@ public enum AgentCLI: String, CaseIterable, Sendable {
     func outcome(ofEvents data: Data) -> Outcome {
         var outcome = Outcome()
         for line in data.split(separator: UInt8(ascii: "\n")) {
+            // Antigravity names it `event`.
             guard let event = (try? JSONSerialization.jsonObject(with: Data(line))) as? [String: Any],
-                  let type = event["type"] as? String
+                  let type = event["type"] as? String ?? event["event"] as? String
             else { continue }
             switch self {
             case .codex: Self.readCodex(type, event, into: &outcome)
@@ -399,26 +532,31 @@ public enum AgentCLI: String, CaseIterable, Sendable {
             case .claude: Self.readClaude(type, event, into: &outcome)
             case .opencode: Self.readOpenCode(type, event, into: &outcome)
             case .pi: Self.readPi(type, event, into: &outcome)
+            case .antigravity: Self.readAntigravity(type, event, into: &outcome)
             }
         }
         return outcome
     }
 
     /// What it prints before an event, or instead of any: the line that says why, the first for Pi
-    /// and the last for the others. A usage line and a hint to `--help` follow the error and say
-    /// nothing about it ("For more information, try '--help'.", "Try 'copilot --help' for more
+    /// and Antigravity (which list their options after it) and the last for the others. A usage
+    /// line and a hint to `--help` follow the error and say nothing about it ("For more information, try '--help'.", "Try 'copilot --help' for more
     /// information."), so they are left out.
     func reason(inPrinted text: String) -> String? {
         let lines = text.split(separator: "\n").map { $0.trimmingCharacters(in: .whitespaces) }.filter {
             !$0.isEmpty && !$0.lowercased().hasPrefix("usage:") && !$0.contains("--help")
         }
-        return (self == .pi ? lines.first : lines.last)
+        return (self == .pi || self == .antigravity ? lines.first : lines.last)
     }
 
     /// Whether the CLI refused one of the options Takku runs it with: it is older than Takku, or
     /// changed under it (ADR 0017).
     static func isUnknownOption(_ reason: String) -> Bool {
-        ["unexpected argument", "unknown option", "unknown argument", "unrecognized option", "unrecognized argument"]
+        // Antigravity: "flags provided but not defined", and "unknown setting" for one in `--settings`.
+        [
+            "unexpected argument", "unknown option", "unknown argument", "unrecognized option", "unrecognized argument",
+            "provided but not defined", "unknown setting",
+        ]
             .contains { reason.localizedCaseInsensitiveContains($0) }
     }
 
@@ -439,6 +577,35 @@ public enum AgentCLI: String, CaseIterable, Sendable {
         if !text.isEmpty {
             outcome.reply = text
             outcome.failure = nil
+        }
+    }
+
+    /// The model only when the Profile names one; the reply and why it failed in the result, which
+    /// says `SUCCESS` also after a retry that worked.
+    private static func readAntigravity(_ type: String, _ event: [String: Any], into outcome: inout Outcome) {
+        switch type {
+        case "init":
+            outcome.model = (event["init"] as? [String: Any])?["model"] as? String
+        case "step_update":
+            guard let step = event["step_update"] as? [String: Any], step["step_type"] as? String == "tool",
+                  let index = step["step_index"] as? Int
+            else { return }
+            outcome.toolSteps.insert(index)
+            outcome.toolCalls = outcome.toolSteps.count
+        case "result":
+            guard let result = event["result"] as? [String: Any] else { return }
+            let usage = result["usage"] as? [String: Any]
+            outcome.inputTokens += usage?["input_tokens"] as? Int ?? 0
+            outcome.outputTokens += usage?["output_tokens"] as? Int ?? 0
+            if result["status"] as? String == "SUCCESS" {
+                outcome.reply = result["response"] as? String
+            } else {
+                // An unknown model's error goes on to list every model: its first line.
+                let error = (result["error"] as? String)?.split(separator: "\n").first.map(String.init)
+                outcome.failure = message(error) ?? result["status"] as? String ?? "error"
+            }
+        default:
+            return
         }
     }
 
@@ -539,19 +706,25 @@ public enum AgentCLI: String, CaseIterable, Sendable {
         case .claude: ["auth", "status"]
         // Standalone: with its state moved, the background service would clash with the user's.
         case .opencode: ["auth", "list", "--standalone", "--format", "json"]
+        // Signed out, it says so and ends; a run would wait a minute for a sign-in in the browser.
+        case .antigravity: ["models"]
         case .copilot, .pi: nil
         }
     }
 
     /// Whether the sign-in check says signed in. OpenCode lists the Providers signed in to without
-    /// checking them: none means none.
-    func isSignedIn(status: Int32, output: Data) -> Bool {
+    /// checking them: none means none. Antigravity's check fails also offline: only its request to
+    /// sign in, which it prints as an error, means signed out.
+    func isSignedIn(status: Int32, output: Data, errors: Data = Data()) -> Bool {
+        if self == .antigravity {
+            return status == 0 || !String(decoding: output + errors, as: UTF8.self).localizedCaseInsensitiveContains("sign in")
+        }
         guard status == 0 else { return false }
         let object = try? JSONSerialization.jsonObject(with: output)
         switch self {
         case .claude: return (object as? [String: Any])?["loggedIn"] as? Bool != false
         case .opencode: return (object as? [Any])?.isEmpty == false
-        case .codex, .copilot, .pi: return true
+        case .codex, .copilot, .pi, .antigravity: return true
         }
     }
 

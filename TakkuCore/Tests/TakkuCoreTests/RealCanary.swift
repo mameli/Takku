@@ -8,6 +8,7 @@ import TakkuCore
       .enabled(if: ProcessInfo.processInfo.environment["TAKKU_REAL_CLI"] != nil), arguments: [
     (AgentCLI.codex, "gpt-5.6-luna"), (.copilot, "claude-haiku-4.5"), (.claude, "claude-haiku-5-5"),
     (.opencode, "openrouter/~anthropic/claude-haiku-latest"), (.pi, "github-copilot/claude-haiku-4.5"),
+    (.antigravity, "gemini-3.8-flash"),
 ])
 func realCanary(cli: AgentCLI, model: String) async throws {
     let secret = "TAKKU-CANARY-\(UUID().uuidString.prefix(8))"

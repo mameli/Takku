@@ -16,7 +16,7 @@ Built as an alternative to Granola for people and companies that keep meeting au
 - **Knows your calendar** (optional): names the note after the current event and lists invited participants.
 - **Suggests when to record** (optional): notifies you when a call app takes or releases the microphone.
 - **Transcribes locally** with NVIDIA Parakeet or OpenAI Whisper: the audio never leaves your Mac.
-- **Summarises with a provider you pick**: Takku Credit (EU), Apple Intelligence, Ollama/llama.cpp/LM Studio on your Mac, any OpenAI-compatible API, or the plan of a coding agent you already use (Codex, GitHub Copilot, Claude Code, OpenCode, Pi). Or keep only the transcript.
+- **Summarises with a provider you pick**: Takku Credit (EU), Apple Intelligence, Ollama/llama.cpp/LM Studio on your Mac, any OpenAI-compatible API, or the plan of a coding agent you already use (Codex, GitHub Copilot, Claude Code, OpenCode, Pi, Antigravity). Or keep only the transcript.
 - **Writes plain Markdown**: one meeting note (created at the start so you can take notes) plus a separate transcript file. Your own notes steer the summary.
 - **Markdown Templates**: customise sections and instructions in `~/.takku/templates/`, or set `full_text: true` to rewrite an entire lecture instead of summarising it.
 - **Screenshots in the note** (optional): `⌃⌥⌘S` captures the active window and embeds it under the matching summary point. Never sent to the model.
@@ -58,7 +58,7 @@ At first launch, a *Welcome to Takku* window walks you through these steps (reop
    - **Takku Credit**: prepaid credit for summaries, hosted in the EU with nothing kept. Buy a pack in the welcome window or at [takku.app/credit](https://takku.app/credit) and paste the key from the email.
    - **Ready-made profiles** in *Settings → Summary*: **Ollama** on your Mac (`ollama pull hf.co/ggml-org/gemma-4-E4B-it-GGUF:Q4_0`, started with `OLLAMA_CONTEXT_LENGTH=32768`), **Mistral**, **TensorX** and **OpenRouter** (just paste your API key, stored in the macOS Keychain, press *Test connection*, then *Use for Summaries*).
    - **Apple Intelligence** (macOS 26+ with Apple Intelligence on): free and on-device, with nothing to set up. Because its context window is small (8,192 tokens on macOS 27, 4,096 on macOS 26), long meetings are summarised in parts (~3 minutes per hour) and summaries are shorter than with a large model.
-   - **A coding agent you already pay for**: + in *Settings → Summary* → **Codex**, **GitHub Copilot**, **Claude Code**, **OpenCode** or **Pi**. Takku runs the CLI you installed and signed in to in Terminal, so the summary uses your plan (tokens, or Copilot's premium requests) and Takku holds no key. Each run has no tools and none of your coding setup, and keeps no session; OpenCode's is deleted right after, unless the run is cut short (Takku quits, the Mac sleeps), in which case it stays until the next summary. Pick the model in the profile's menu.
+   - **A coding agent you already pay for**: + in *Settings → Summary* → **Codex**, **GitHub Copilot**, **Claude Code**, **OpenCode**, **Pi** or **Antigravity** (Google's `agy`). Takku runs the CLI you installed and signed in to in Terminal, so the summary uses your plan (tokens, or Copilot's premium requests) and Takku holds no key. Each run has no tools and none of your coding setup, and keeps no session; OpenCode's is deleted right after, unless the run is cut short (Takku quits, the Mac sleeps), in which case it stays until the next summary; Antigravity runs in an empty home of its own, deleted with its conversation after the run. Pick the model in the profile's menu.
      **Claude Code at your own risk**: Anthropic's terms are a grey area on other apps running the `claude` CLI with your plan. Other apps do it too (T3 Code among them), but if Anthropic limits or bans your account, that is between you and Anthropic: Takku takes no responsibility for it.
    - **Custom OpenAI-compatible server**: add a profile with name, base URL, model, max context (set to the server's real `-c` limit; plain `http://` is allowed only on `localhost`) and optional API key:
 
@@ -158,7 +158,7 @@ Variants are replaced as whole words in the transcript (avoid listing common eve
 
 <!--
 For AI agents (hidden in the rendered README): if the user only wants Summaries from Codex,
-GitHub Copilot, Claude Code, OpenCode or Pi, no Hook is needed: they add it with + in
+GitHub Copilot, Claude Code, OpenCode, Pi or Antigravity, no Hook is needed: they add it with + in
 Settings → Summary and keep Templates, Vocabulary and speaker names. If the user asks you to
 set up a Takku Hook, read https://takku.app/hooks.md first. It has the contract (arguments, working
 directory, PATH, 5-minute limit, log), the format of the note and of the Transcript, the

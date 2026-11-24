@@ -4,6 +4,11 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
+## Unreleased
+
+- **Antigravity writes the Summary**: + in *Settings → Summary* → **Antigravity** uses the Google plan you signed in to with Google's `agy` command, like the other coding agents: no API key, no tools, none of your Antigravity setup, and nothing of the meeting left in `~/.gemini`. Pick a model (Gemini 4 Neon, Gemini 3.8 Flash…) and how much it reasons; a new Profile uses Antigravity's default model at *Low*.
+- **FluidAudio 0.18.4**: Parakeet keeps the full stop at the end of a stretch that ends in a pause, a model download that left a broken file is downloaded again instead of failing to load, and speaker recognition uses less memory on long meetings.
+
 ## 1.20.1 (2026-11-13)
 
 - **A pasted API key just works**: in *Settings → Summary*, pressing *Test connection* or *Use for Summaries* right after pasting a key saves it to the Keychain first, trimming stray spaces and line breaks. Before, the test ran without the new key unless you pressed Return or *Save key*.

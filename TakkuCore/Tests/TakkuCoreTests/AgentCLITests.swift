@@ -242,7 +242,8 @@ struct AgentCLITests {
             "GITHUB_TOKEN": "ghp", "GH_TOKEN": "gho", "COPILOT_GITHUB_TOKEN": "ghc", "OPENROUTER_API_KEY": "sk-or",
             "GROQ_API_KEY": "gsk", "AWS_ACCESS_KEY_ID": "AKIA", "AWS_BEARER_TOKEN_BEDROCK": "bedrock",
             "GH_ENTERPRISE_TOKEN": "ghe", "CODEX_SANDBOX": "seatbelt", "COPILOT_MODEL": "gpt-6.1-sol",
-            "PI_SHARE_VIEWER_URL": "https://example.com",
+            "PI_SHARE_VIEWER_URL": "https://example.com", "GEMINI_API_KEY": "AIza", "AGY_ADC_AUTH": "true",
+            "ANTIGRAVITY_CONVERSATION_ID": "c0f47292",
             "OPENCODE_CONFIG": "/Users/x/.config/opencode/opencode.json",
         ]
         var profile = cli.profile()
@@ -255,7 +256,9 @@ struct AgentCLITests {
             #expect(run.environment[name] == nil, "\(name) reached \(cli.name)")
         }
         #expect(run.environment["LANG"] == "it_IT.UTF-8")
-        #expect(run.environment["PATH"]?.hasPrefix(fake.executable.deletingLastPathComponent().path + ":/opt/homebrew/bin") == true)
+        // Antigravity's own folder first, with the open that does nothing (see `antigravity()`).
+        let path = (run.environment["PATH"] ?? "").replacing(/^[^:]*Takku-antigravity-[^:]*\/bin:/, with: "")
+        #expect(path.hasPrefix(fake.executable.deletingLastPathComponent().path + ":/opt/homebrew/bin"))
     }
 
     @Test("where the user keeps an agent's sign-in, when they moved it, still reaches the CLI")
@@ -693,6 +696,197 @@ struct AgentCLITests {
         }
     }
 
+    // MARK: - Antigravity
+
+    static let antigravityModels = """
+        Fetching available models...
+        gemini-4-neon-high\tGemini 4 Neon (High)
+        gemini-4-neon-xhigh\tGemini 4 Neon (XHigh)
+        gemini-4-neon-medium\tGemini 4 Neon (Medium)
+        gemini-4-neon-low\tGemini 4 Neon (Low)
+        gemini-pro-orchestrator\tOrchestrator (Carbon)
+        gemini-3.8-flash-high\tGemini 3.8 Flash (High)
+        gemini-3.8-flash-low\tGemini 3.8 Flash (Low)
+        gpt-oss-120b-medium\tGPT-OSS 120B (Medium)
+        """
+
+    static let antigravityReply = """
+        {"event":"init","conversation_id":"17adfcdc","init":{"model":"gemini-3.8-flash","cwd":"/tmp/work","agent":"takku","tools":["manage_task","run_command"],"permission_mode":"strict"}}
+        {"event":"step_update","step_update":{"conversation_id":"17adfcdc","step_index":0,"state":"DONE","step_type":"user_input"}}
+        {"event":"step_update","step_update":{"conversation_id":"17adfcdc","step_index":1,"state":"ACTIVE","step_type":"tool","tool_name":"run_command","tool_info":{"name":"run_command","parameters":{"CommandLine":"date"}}}}
+        {"event":"step_update","step_update":{"conversation_id":"17adfcdc","step_index":1,"state":"DONE","step_type":"tool","tool_name":"run_command"}}
+        {"event":"step_update","step_update":{"conversation_id":"17adfcdc","step_index":2,"state":"ACTIVE","step_type":"agent_response","text_delta":"Il rilascio"}}
+        {"event":"result","result":{"conversation_id":"17adfcdc","status":"SUCCESS","response":"Il rilascio è venerdì.\\n","duration_seconds":3.01,"num_turns":1,"usage":{"input_tokens":2337,"output_tokens":193,"thinking_tokens":172,"cache_read_tokens":0,"total_tokens":2530}}}
+        """
+
+    /// Antigravity, signed in, with `run` for the request; each call keeps the agent file and the
+    /// Keychains link of the home it ran with.
+    static func antigravity(run: String) throws -> FakeCLI {
+        let keep = """
+            cp "$HOME/.gemini/config/agents/takku.md" "$call/agent" 2>/dev/null
+            readlink "$HOME/Library/Keychains" > "$call/keychains"
+            ls -A "$HOME" > "$call/home"
+            command -v open > "$call/open"
+            open https://accounts.google.com/o/oauth2/auth > "$call/opened" 2>&1; echo "exit $?" >> "$call/opened"
+            """
+        return try FakeCLI(.antigravity, [
+            .init(pattern: "models", script: keep + "\n" + FakeCLI.prints(antigravityModels)),
+            .init(pattern: "--input-format*", script: keep + "\n" + run),
+        ])
+    }
+
+    static func kept(_ file: String, of call: Int, in fake: FakeCLI) -> String {
+        (try? String(contentsOf: fake.folder.appending(path: "calls/\(call)/\(file)"), encoding: .utf8)) ?? ""
+    }
+
+    @Test("an Antigravity run is in an empty home that reaches only the user's Keychains, with Takku's agent: no tools, Takku's system prompt, the prompt as JSON")
+    func antigravity() async throws {
+        let fake = try Self.antigravity(run: FakeCLI.prints(Self.antigravityReply))
+        let log = SummaryLog.Recorder()
+        var profile = AgentCLI.antigravity.profile()
+        profile.model = "gemini-3.8-flash"
+
+        let reply = try await fake.runner().client(for: profile).recording(into: log, as: .single).complete(Self.meeting)
+
+        #expect(reply == "Il rilascio è venerdì.")
+        // The sign-in check, then the run.
+        #expect(fake.calls.map { $0.arguments.first } == ["models", "--input-format"])
+        let run = try #require(fake.calls.last)
+        #expect(run.value(after: "--input-format") == "stream-json")
+        #expect(run.value(after: "--output-format") == "stream-json")
+        #expect(run.value(after: "--agent") == "takku")
+        #expect(run.value(after: "--model") == "gemini-3.8-flash")
+        #expect(run.value(after: "--effort") == "low")
+        #expect(run.arguments.contains("--disable-slash-commands"))
+        #expect(run.arguments.last == "-p=")
+        let settings = try #require(run.value(after: "--settings").flatMap { try JSONSerialization.jsonObject(with: Data($0.utf8)) as? [String: Any] })
+        #expect(settings["toolPermission"] as? String == "strict")
+        #expect((settings["permissions"] as? [String: Any])?["deny"] as? [String] == [
+            "read_file(*)", "write_file(*)", "read_url(*)", "execute_url(*)", "command(*)", "mcp(*)",
+        ])
+        #expect(run.files.isEmpty)
+        let home = try #require(run.environment["HOME"])
+        #expect(home != NSHomeDirectory() && home.hasSuffix("/home"))
+        #expect(run.environment["AGY_CLI_DISABLE_AUTO_UPDATE"] == "true")
+        #expect(Self.kept("keychains", of: 1, in: fake).trimmingCharacters(in: .newlines) == NSHomeDirectory() + "/Library/Keychains")
+        #expect(Self.kept("home", of: 1, in: fake).split(separator: "\n").sorted() == [".gemini", "Library"])
+        // Signed out after the check, it would open a sign-in page in the browser: its open does nothing.
+        for call in [0, 1] {
+            #expect(Self.kept("open", of: call, in: fake).hasSuffix("/bin/open\n"))
+            #expect(!Self.kept("open", of: call, in: fake).hasPrefix("/usr/bin"))
+            #expect(Self.kept("opened", of: call, in: fake) == "exit 0\n")
+        }
+        let agent = Self.kept("agent", of: 1, in: fake)
+        #expect(agent.hasPrefix("---\nname: takku\n"))
+        #expect(agent.contains("\ntools: []\n"))
+        #expect(agent.contains("You have no tools"))
+        // One message on standard input, with no preamble: the agent's text is the system prompt.
+        let message = try #require(try JSONSerialization.jsonObject(with: Data(run.input.utf8)) as? [String: Any])
+        #expect(message["event"] as? String == "user")
+        let content = try #require((message["message"] as? [String: Any])?["content"] as? String)
+        #expect((message["message"] as? [String: Any])?["role"] as? String == "user")
+        #expect(content.hasPrefix("<instructions>\nWrite a title.\n</instructions>"))
+        #expect(content.contains("<request>\nIl rilascio slitta al 20.\n</request>"))
+        let response = try #require(await log.calls.first?.response)
+        let body = try #require(try JSONSerialization.jsonObject(with: response) as? [String: Any])
+        let agentLog = try #require(body["agent"] as? [String: Any])
+        #expect(agentLog["usage"] as? String == "2337 tokens in, 193 out")
+        #expect(agentLog["tool_calls"] as? Int == 1)
+        #expect(agentLog["model"] as? String == "gemini-3.8-flash")
+    }
+
+    @Test("Antigravity gets the reasoning level apart from the model, except when the model's name has one, and never Off", arguments: [
+        ("", ProviderProfile.ReasoningEffort?.some(.medium), "medium"),
+        ("gemini-4-neon", .high, "high"),
+        ("gemini-3.8-flash-low", .high, nil),
+        ("gemini-4-neon-xhigh", .low, nil),
+        ("gemini-4-neon", .off, nil),
+        ("gemini-4-neon", nil, nil),
+    ])
+    func antigravityReasoning(model: String, reasoning: ProviderProfile.ReasoningEffort?, effort: String?) async throws {
+        let fake = try Self.antigravity(run: FakeCLI.prints(Self.antigravityReply))
+        var profile = AgentCLI.antigravity.profile()
+        profile.model = model
+        profile.reasoning = reasoning
+
+        _ = try await fake.runner().client(for: profile).complete(Self.meeting)
+
+        let run = try #require(fake.calls.last)
+        #expect(run.value(after: "--effort") == effort)
+        #expect(run.arguments.contains("--model") == !model.isEmpty)
+    }
+
+    @Test("Antigravity lists each model once with the levels Takku offers, and leaves out its orchestrators")
+    func antigravityModels() async throws {
+        let fake = try Self.antigravity(run: "exit 1")
+
+        let models = try #require(await fake.runner().models())
+
+        #expect(models == [
+            AgentCLI.Model("gemini-4-neon", reasoning: [.low, .medium, .high]), AgentCLI.Model("gemini-4-neon-xhigh", reasoning: []),
+            AgentCLI.Model("gemini-3.8-flash", reasoning: [.low, .high]), AgentCLI.Model("gpt-oss-120b", reasoning: [.medium]),
+        ])
+        #expect(AgentCLI.antigravity.hasDefaultModel)
+        #expect(AgentCLI.antigravity.reasoningLevels(for: "", in: models) == [.low, .medium, .high])
+        #expect(AgentCLI.antigravity.reasoningLevels(for: "gemini-3.8-flash", in: models) == [.low, .high])
+        #expect(AgentCLI.antigravity.reasoningLevels(for: "gemini-3.8-flash-low", in: models) == [])
+        #expect(AgentCLI.antigravity.reasoningLevels(for: "gemini-4-neon-xhigh", in: models) == [])
+        #expect(AgentCLI.antigravity.reasoningLevels(for: "gemini-5", in: models) == [.low, .medium, .high])
+        #expect(AgentCLI.antigravity.reasoningLevels(for: "gemini-5-max", in: models) == [])
+    }
+
+    @Test("a failed Antigravity run gives the first line of its error, not the list of models after it")
+    func antigravityFailure() async throws {
+        let fake = try Self.antigravity(run: FakeCLI.prints(#"""
+            {"event":"result","result":{"conversation_id":"","status":"ERROR","response":"","error":"invalid model selection (--model \"gemini-5\" --effort \"low\"): model gemini-5 is not recognized as a known model or custom model in settings\nAvailable models:\n  Gemini 4 Neon (High)","duration_seconds":0,"num_turns":0,"usage":{"input_tokens":0,"output_tokens":0},"finished_reason":"error"}}
+            """#, exit: 1))
+        var profile = AgentCLI.antigravity.profile()
+        profile.model = "gemini-5"
+
+        await #expect(throws: AgentCLI.Failure.failed(
+            .antigravity, #"invalid model selection (--model "gemini-5" --effort "low"): model gemini-5 is not recognized as a known model or custom model in settings"#
+        )) {
+            try await fake.runner().client(for: profile).complete(Self.meeting)
+        }
+    }
+
+    @Test("signed out, Antigravity says so before any run, which would wait for a sign-in in the browser")
+    func antigravitySignedOut() async throws {
+        let fake = try FakeCLI(.antigravity, [.init(pattern: "models", script: """
+            echo 'Fetching available models...'
+            echo 'Error: Please sign in to view available models. Launch the CLI without arguments to sign in.' >&2
+            exit 1
+            """)])
+
+        #expect(await fake.runner().unavailability() == .notSignedIn(.antigravity))
+        await #expect(throws: AgentCLI.Failure.notSignedIn(.antigravity)) {
+            try await fake.runner().client(for: AgentCLI.antigravity.profile()).complete(Self.meeting)
+        }
+        #expect(fake.calls.allSatisfy { $0.arguments == ["models"] })
+        #expect(AgentCLI.Failure.notSignedIn(.antigravity).errorDescription == "Antigravity is not signed in: run agy in Terminal and sign in, then try again.")
+    }
+
+    @Test("Antigravity's model list failing for another reason (offline) is not a sign-out")
+    func antigravityOffline() async throws {
+        let fake = try FakeCLI(.antigravity, [.init(pattern: "models", script: "echo 'Error: dial tcp: lookup cloudcode-pa.googleapis.com: no such host' >&2\nexit 1")])
+
+        #expect(await fake.runner().unavailability() == nil)
+    }
+
+    @Test("an option Antigravity does not know says to update it and Takku, with its first line, not the options it lists")
+    func antigravityUnknownOption() async throws {
+        let fake = try Self.antigravity(run: """
+            echo 'flags provided but not defined: -disable-slash-commands' >&2
+            echo 'Usage of agy:' >&2
+            echo '  --add-dir                       Add a directory to the workspace (repeatable) (default [])' >&2
+            exit 2
+            """)
+
+        await #expect(throws: AgentCLI.Failure.unknownOption(.antigravity, "flags provided but not defined: -disable-slash-commands")) {
+            try await fake.runner().client(for: AgentCLI.antigravity.profile()).complete(Self.meeting)
+        }
+    }
+
     // MARK: - Sign-in
 
     @Test("a signed-out CLI says so before any run; Copilot by no one signed in its settings file", arguments: [
@@ -843,7 +1037,7 @@ struct AgentCLITests {
         #expect(AgentCLI.copilot.reasoningLevels(for: "gpt-6-luna", in: models) == ProviderProfile.ReasoningEffort.allCases)
     }
 
-    @Test("new Profiles are light on the plan: Codex Low, Claude Code and Pi Off, Copilot and OpenCode the agent's own", arguments: AgentCLI.allCases)
+    @Test("new Profiles are light on the plan: Codex and Antigravity Low, Claude Code and Pi Off, Copilot and OpenCode the agent's own", arguments: AgentCLI.allCases)
     func newProfile(cli: AgentCLI) {
         let profile = cli.profile()
 
@@ -851,7 +1045,7 @@ struct AgentCLITests {
         #expect(!profile.runsOnThisMac)
         #expect(profile.model.isEmpty)
         #expect(profile.maxContextTokens == 128_000)
-        #expect(profile.reasoning == [AgentCLI.codex: .low, .claude: .off, .pi: .off][cli])
+        #expect(profile.reasoning == [AgentCLI.codex: .low, .claude: .off, .pi: .off, .antigravity: .low][cli])
     }
 
     /// The process the fake CLI's run is, once it started.

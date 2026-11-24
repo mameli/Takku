@@ -13666,6 +13666,120 @@
           }
         }
       }
+    },
+    "Your Google plan, through Antigravity": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il tuo piano Google, tramite Antigravity"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dein Google-Abo, über Antigravity"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu plan de Google, a través de Antigravity"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre forfait Google, via Antigravity"
+          }
+        }
+      }
+    },
+    "Uses your Google plan through Antigravity, with no API key. The Transcript and your notes go to Google under your plan's terms; each run has no tools, session or settings.": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usa il tuo piano Google tramite Antigravity, senza chiave API. La Trascrizione e le tue note vanno a Google alle condizioni del tuo piano; ogni esecuzione avviene senza strumenti, sessioni o impostazioni."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nutzt deinen Google-Tarif über Antigravity, ohne API-Schlüssel. Transkript und Notizen gehen gemäß deinem Tarif an Google; jeder Lauf startet ohne Werkzeuge, Sitzung oder Einstellungen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usa tu plan de Google mediante Antigravity, sin clave API. La transcripción y tus notas se envían a Google según las condiciones de tu plan; cada ejecución se realiza sin herramientas, sesión ni ajustes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utilise votre forfait Google via Antigravity, sans clé API. La transcription et vos notes sont envoyées à Google selon les conditions de votre forfait ; chaque exécution se fait sans outils, session ni réglages."
+          }
+        }
+      }
+    },
+    "Antigravity is not installed: install it with %@ in Terminal, then run agy and sign in.": {
+      "extractionState": "manual",
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antigravity non è installato: installalo con %@ nel Terminale, poi avvia agy e accedi."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antigravity ist nicht installiert: Installiere es mit %@ im Terminal, starte dann agy und melde dich an."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antigravity no está instalado: instálalo con %@ en Terminal, luego abre agy e inicia sesión."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antigravity n’est pas installé : installez-le avec %@ dans Terminal, puis lancez agy et connectez-vous."
+          }
+        }
+      }
+    },
+    "Antigravity is not signed in: run agy in Terminal and sign in, then try again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antigravity non ha l'accesso: avvia agy nel Terminale e accedi, poi riprova."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antigravity ist nicht angemeldet: Starte agy im Terminal, melde dich an und versuche es dann erneut."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antigravity no tiene la sesión iniciada: abre agy en Terminal e inicia sesión, luego vuelve a intentarlo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antigravity n’est pas connecté : lancez agy dans Terminal et connectez-vous, puis réessayez."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

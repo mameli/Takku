@@ -22,6 +22,11 @@ extension AgentCLI {
                 String(localized: "Pi is not installed: install it with \(AgentCLI.pi.installCommand) in Terminal, then run pi and sign in with /login.")
             case .notSignedIn(.pi):
                 String(localized: "Pi is not signed in to this model's provider: run pi in Terminal and sign in with /login, then try again.")
+            // Antigravity signs in when started with no arguments.
+            case .notInstalled(.antigravity):
+                String(localized: "Antigravity is not installed: install it with \(AgentCLI.antigravity.installCommand) in Terminal, then run agy and sign in.")
+            case .notSignedIn(.antigravity):
+                String(localized: "Antigravity is not signed in: run agy in Terminal and sign in, then try again.")
             case .notInstalled(let cli):
                 String(localized: "\(cli.name) is not installed: install it with \(cli.installCommand) in Terminal, then sign in with \(cli.signInCommand).")
             case .notSignedIn(let cli):
@@ -82,7 +87,7 @@ extension AgentCLI {
             guard let check = cli.signInCheckArguments,
                   let result = try? await runAside(executable, check, timeout: .seconds(30)), result.ending == .exited
             else { return nil }
-            return cli.isSignedIn(status: result.status, output: result.output) ? nil : .notSignedIn(cli)
+            return cli.isSignedIn(status: result.status, output: result.output, errors: result.errors) ? nil : .notSignedIn(cli)
         }
 
         /// The CLI's version as it prints it (`2.2.5`), `nil` if it is not installed or prints none.
@@ -116,6 +121,8 @@ extension AgentCLI {
             guard !model.hasPrefix("-") else { throw Failure.invalidModel(cli, model) }
             let (instructions, prompt) = try AppleIntelligence.conversation(fromRequestBody: request.httpBody ?? Data())
             let input = cli.input(instructions: instructions, prompt: prompt)
+            // Signed out, Antigravity would wait a minute for a sign-in in the browser.
+            if cli == .antigravity, let failure = await unavailability() { throw failure }
             Place.removeLeftovers()
             let place = try Place(cli, environment: environment)
             defer { place.remove() }
@@ -125,7 +132,7 @@ extension AgentCLI {
             log("LLM request through \(cli.name), model \(model.isEmpty ? "default" : model), \(input.utf8.count) bytes")
             let result = try await run(
                 executable, cli.arguments(model: model, reasoning: reasoning, folder: place.folder),
-                in: place, input: Data(input.utf8), timeout: timeout
+                in: place, input: cli.standardInput(input), timeout: timeout
             )
             let outcome = cli.outcome(ofEvents: result.output)
             // Also after a timeout or *Stop processing*: the session holds part of the Meeting.
@@ -212,6 +219,7 @@ extension AgentCLI {
             var environment = self.environment.filter { !AgentCLI.isRemoved($0.key) }.merging(cli.environment(scratch: place.scratch)) { $1 }
             // An npm install is a Node script: Node must be on the PATH a Mac app does not have.
             environment["PATH"] = executable.deletingLastPathComponent().path + ":" + Hook.path(adding: environment["PATH"])
+            if let commands = cli.commandsFolder(scratch: place.scratch) { environment["PATH"] = commands.path + ":" + (environment["PATH"] ?? "") }
             process.environment = environment
             process.standardInput = try FileHandle(forReadingFrom: inputFile)
             process.standardOutput = try FileHandle(forWritingTo: outputFile)
