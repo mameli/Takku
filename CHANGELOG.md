@@ -4,7 +4,7 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
-## Unreleased
+## 1.21.0 (2026-11-24)
 
 - **Antigravity writes the Summary**: + in *Settings → Summary* → **Antigravity** uses the Google plan you signed in to with Google's `agy` command, like the other coding agents: no API key, no tools, none of your Antigravity setup, and nothing of the meeting left in `~/.gemini`. Pick a model (Gemini 4 Neon, Gemini 3.8 Flash…) and how much it reasons; a new Profile uses Antigravity's default model at *Low*.
 - **Agent models open ready**: a coding agent's Model menu remembers the last list read from its CLI and refreshes it in the background while checking the CLI in parallel, showing a spinner only the first time.
