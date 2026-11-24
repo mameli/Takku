@@ -4,6 +4,10 @@ What changes in each version of Takku, newest first. **Before you update** lists
 
 Takku was called Steno up to 0.2.1.
 
+## 1.21.1 (2026-11-24)
+
+- **Clean summaries without stray backticks**: some models (such as Antigravity's Gemini) wrap the transcript timestamps they cite in backticks (`` `[12:34]` ``), which left empty `` `` `` pairs at the end of bullets when Takku stripped the times. Takku now removes backtick-wrapped timestamps too, keeping normal inline code untouched.
+
 ## 1.21.0 (2026-11-24)
 
 - **Antigravity writes the Summary**: + in *Settings → Summary* → **Antigravity** uses the Google plan you signed in to with Google's `agy` command, like the other coding agents: no API key, no tools, none of your Antigravity setup, and nothing of the meeting left in `~/.gemini`. Pick a model (Gemini 4 Neon, Gemini 3.8 Flash…) and how much it reasons; a new Profile uses Antigravity's default model at *Low*.
