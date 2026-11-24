@@ -7,6 +7,7 @@ Takku was called Steno up to 0.2.1.
 ## Unreleased
 
 - **Antigravity writes the Summary**: + in *Settings → Summary* → **Antigravity** uses the Google plan you signed in to with Google's `agy` command, like the other coding agents: no API key, no tools, none of your Antigravity setup, and nothing of the meeting left in `~/.gemini`. Pick a model (Gemini 4 Neon, Gemini 3.8 Flash…) and how much it reasons; a new Profile uses Antigravity's default model at *Low*.
+- **Whole videos imported**: some MP4 files, such as videos merged by yt-dlp, were imported only in part (the first 2 or 3 minutes of a 19-minute video) with no error, because macOS's audio file reader saw only their start. Takku now notices when that reader sees less than the file's audio track and reads the whole track another way.
 - **FluidAudio 0.18.4**: Parakeet keeps the full stop at the end of a stretch that ends in a pause, a model download that left a broken file is downloaded again instead of failing to load, and speaker recognition uses less memory on long meetings.
 
 ## 1.20.1 (2026-11-13)
